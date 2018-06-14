@@ -16,18 +16,6 @@ body {
     background-color: #f5f5f5;
 }
 
-
-/* Custom page CSS
--------------------------------------------------- */
-/* Not required for template or sticky footer method. */
-
-.container {
-    width: auto;
-    max-width: 680px;
-    padding: 0 15px;
-}
-
-
 .github-corner:hover .octo-arm {
     animation: octocat-wave 560ms ease-in-out
 }

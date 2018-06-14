@@ -1,5 +1,7 @@
 version: 1.0.{build}
 image: Visual Studio 2017
+install:
+  - npm install -g gulp
 build_script:
 - cmd: PowerShell -Version 2.0 .\build.ps1 -Target CI
 test: off

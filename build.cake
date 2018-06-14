@@ -1,5 +1,3 @@
-#addin Cake.Curl
-
 var target = Argument("target", "Default");
 
 var buildConfiguration = "Release";

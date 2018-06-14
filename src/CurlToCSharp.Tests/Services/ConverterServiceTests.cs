@@ -23,7 +23,8 @@ namespace CurlToCSharp.Tests.Services
                                   {
                                       HttpMethod = HttpMethod.Post.ToString().ToUpper(),
                                       Url = new Uri("https://google.com"),
-                                      PayloadCollection = { "{\"status\": \"resolved\"}" }
+                                      PayloadCollection = { "{\"status\": \"resolved\"}" },
+                                      UserPasswordPair = "user:pass"
                                   };
             curlOptions.Headers.TryAdd(HeaderNames.ContentType, new StringValues("application/json"));
             curlOptions.Headers.TryAdd(HeaderNames.Authorization, new StringValues("Bearer b7d03a6947b217efb6f3ec3bd3504582"));

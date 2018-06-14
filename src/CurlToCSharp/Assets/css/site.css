@@ -16,6 +16,10 @@ body {
     background-color: #f5f5f5;
 }
 
+.pre-alert {
+    white-space: pre-wrap;
+}
+
 .github-corner:hover .octo-arm {
     animation: octocat-wave 560ms ease-in-out
 }

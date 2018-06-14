@@ -11,3 +11,9 @@ deploy:
   username: CurlToCSharp
   password:
     secure: anNXyv5QGtXmsPV21/COiAolYBhLYF8Pi3yWd/qIRd4=
+cache:
+  - packages
+  - node_modules
+  - '%APPDATA%\npm-cache'
+  - '%USERPROFILE%\.nuget\packages
+  - tools

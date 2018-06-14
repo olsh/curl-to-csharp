@@ -22,5 +22,7 @@ namespace CurlToCSharp.Models
         public ICollection<string> PayloadCollection { get; }
 
         public Uri Url { get; set; }
+
+        public string UserPasswordPair { get; set; }
     }
 }

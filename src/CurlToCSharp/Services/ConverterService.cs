@@ -18,6 +18,8 @@ namespace CurlToCSharp.Services
 
         private const string HttpClientVariableName = "httpClient";
 
+        private const string Base64AuthorizationVariableName = "base64authorization";
+
         public ConvertResult<string> ToCsharp(CurlOptions curlOptions)
         {
             var requestUsing = CreateRequestUsing(curlOptions);
@@ -29,6 +31,12 @@ namespace CurlToCSharp.Services
 
                 var statements = CreateHeaderAssignmentStatements(curlOptions);
                 innerBlock = innerBlock.AddStatements(statements.ToArray());
+            }
+
+            if (!string.IsNullOrEmpty(curlOptions.UserPasswordPair))
+            {
+                var basicAuthorizationStatements = CreateBasicAuthorizationStatements(curlOptions);
+                innerBlock = innerBlock.AddStatements(basicAuthorizationStatements.ToArray());
             }
 
             var sendStatement = CreateSendStatement();
@@ -43,7 +51,7 @@ namespace CurlToCSharp.Services
             return new ConvertResult<string>(csharp);
         }
 
-        private static ExpressionStatementSyntax CreateContentAssignmentExpression(CurlOptions curlOptions)
+        private ExpressionStatementSyntax CreateContentAssignmentExpression(CurlOptions curlOptions)
         {
             var stringContentCreation = SyntaxFactory.ObjectCreationExpression(SyntaxFactory.IdentifierName("StringContent"));
 
@@ -83,21 +91,12 @@ namespace CurlToCSharp.Services
             return SyntaxFactory.ExpressionStatement(assignmentExpressionSyntax);
         }
 
-        private static IEnumerable<ExpressionStatementSyntax> CreateHeaderAssignmentStatements(CurlOptions options)
+        private IEnumerable<StatementSyntax> CreateHeaderAssignmentStatements(CurlOptions options)
         {
             if (!options.Headers.Any())
             {
                 return Enumerable.Empty<ExpressionStatementSyntax>();
             }
-
-            var headerAccess = SyntaxFactory.MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                SyntaxFactory.IdentifierName(RequestVariableName),
-                SyntaxFactory.IdentifierName("Headers"));
-            var headerAddExpression = SyntaxFactory.MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                headerAccess,
-                SyntaxFactory.IdentifierName("TryAddWithoutValidation"));
 
             var statements = new LinkedList<ExpressionStatementSyntax>();
             foreach (var header in options.Headers)
@@ -107,27 +106,94 @@ namespace CurlToCSharp.Services
                     continue;
                 }
 
-                var separatedSyntaxList = new SeparatedSyntaxList<ArgumentSyntax>();
-                separatedSyntaxList = separatedSyntaxList.Add(
-                    SyntaxFactory.Argument(
-                        SyntaxFactory.LiteralExpression(
-                            SyntaxKind.StringLiteralExpression,
-                            SyntaxFactory.Literal(header.Key))));
+                var tryAddHeaderStatement = CreateTryAddHeaderStatement(
+                    CreateStringLiteralArgument(header.Key),
+                    CreateStringLiteralArgument(header.Value));
 
-                separatedSyntaxList = separatedSyntaxList.Add(
-                    SyntaxFactory.Argument(
-                        SyntaxFactory.LiteralExpression(
-                            SyntaxKind.StringLiteralExpression,
-                            SyntaxFactory.Literal(header.Value))));
-
-                var invocationExpressionSyntax = SyntaxFactory.InvocationExpression(
-                    headerAddExpression,
-                    SyntaxFactory.ArgumentList(separatedSyntaxList));
-
-                statements.AddLast(SyntaxFactory.ExpressionStatement(invocationExpressionSyntax));
+                statements.AddLast(tryAddHeaderStatement);
             }
 
             return statements;
+        }
+
+        private IEnumerable<StatementSyntax> CreateBasicAuthorizationStatements(CurlOptions options)
+        {
+            var authorizationEncodingStatement = CreateBasicAuthorizationEncodingStatement(options);
+            var stringStartToken = SyntaxFactory.Token(SyntaxKind.InterpolatedStringStartToken);
+
+            var interpolatedStringContentSyntaxs = new SyntaxList<InterpolatedStringContentSyntax>()
+                .Add(SyntaxFactory.InterpolatedStringText(SyntaxFactory.Token(SyntaxTriviaList.Empty, SyntaxKind.InterpolatedStringTextToken, "Basic ", null, SyntaxTriviaList.Empty)))
+                .Add(SyntaxFactory.Interpolation(SyntaxFactory.IdentifierName(Base64AuthorizationVariableName)));
+
+            var interpolatedStringArgument = SyntaxFactory.Argument(SyntaxFactory.InterpolatedStringExpression(stringStartToken, interpolatedStringContentSyntaxs));
+            var tryAddHeaderStatement = CreateTryAddHeaderStatement(CreateStringLiteralArgument("Authorization"), interpolatedStringArgument);
+
+            return new StatementSyntax[] { authorizationEncodingStatement, tryAddHeaderStatement };
+        }
+
+        private LocalDeclarationStatementSyntax CreateBasicAuthorizationEncodingStatement(CurlOptions options)
+        {
+            var asciiGetBytesAccess = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    SyntaxFactory.IdentifierName("Encoding"),
+                    SyntaxFactory.IdentifierName("ASCII")),
+                SyntaxFactory.IdentifierName("GetBytes"));
+
+            var asciiGetBytesArguments = new SeparatedSyntaxList<ArgumentSyntax>();
+            asciiGetBytesArguments = asciiGetBytesArguments.Add(
+                SyntaxFactory.Argument(
+                    SyntaxFactory.LiteralExpression(
+                        SyntaxKind.StringLiteralExpression,
+                        SyntaxFactory.Literal(options.UserPasswordPair))));
+
+            var asciiGetBytesInvocation = SyntaxFactory.InvocationExpression(
+                asciiGetBytesAccess,
+                SyntaxFactory.ArgumentList(asciiGetBytesArguments));
+
+            var convertToBase64Access = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName("Convert"),
+                SyntaxFactory.IdentifierName("ToBase64String"));
+
+            var convertToBase64AccessArguments = new SeparatedSyntaxList<ArgumentSyntax>();
+            convertToBase64AccessArguments =
+                convertToBase64AccessArguments.Add(SyntaxFactory.Argument(asciiGetBytesInvocation));
+
+            var convertToBase64Invocation = SyntaxFactory.InvocationExpression(
+                convertToBase64Access,
+                SyntaxFactory.ArgumentList(convertToBase64AccessArguments));
+
+            var declarationSyntax = SyntaxFactory.VariableDeclaration(SyntaxFactory.IdentifierName("var"))
+                .AddVariables(
+                    SyntaxFactory.VariableDeclarator(
+                        SyntaxFactory.Identifier(Base64AuthorizationVariableName),
+                        null,
+                        SyntaxFactory.EqualsValueClause(convertToBase64Invocation)));
+
+            return SyntaxFactory.LocalDeclarationStatement(declarationSyntax);
+        }
+
+        private ExpressionStatementSyntax CreateTryAddHeaderStatement(ArgumentSyntax keyArgumentSyntax, ArgumentSyntax valueArgumentSyntax)
+        {
+            var headerAccess = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.IdentifierName(RequestVariableName),
+                SyntaxFactory.IdentifierName("Headers"));
+            var headerAddExpression = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                headerAccess,
+                SyntaxFactory.IdentifierName("TryAddWithoutValidation"));
+
+            var separatedSyntaxList = new SeparatedSyntaxList<ArgumentSyntax>();
+            separatedSyntaxList = separatedSyntaxList.Add(keyArgumentSyntax);
+            separatedSyntaxList = separatedSyntaxList.Add(valueArgumentSyntax);
+
+            return SyntaxFactory.ExpressionStatement(
+                SyntaxFactory.InvocationExpression(
+                    headerAddExpression,
+                    SyntaxFactory.ArgumentList(separatedSyntaxList)));
         }
 
         private UsingStatementSyntax CreateHttpClientUsing()
@@ -187,7 +253,7 @@ namespace CurlToCSharp.Services
 
         private LocalDeclarationStatementSyntax CreateSendStatement()
         {
-            var assignmentExpressionSyntax = SyntaxFactory.MemberAccessExpression(
+            var sendAsyncAccessSyntax = SyntaxFactory.MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
                 SyntaxFactory.IdentifierName(HttpClientVariableName),
                 SyntaxFactory.IdentifierName("SendAsync"));
@@ -196,7 +262,7 @@ namespace CurlToCSharp.Services
             separatedSyntaxList = separatedSyntaxList.Add(SyntaxFactory.Argument(SyntaxFactory.IdentifierName(RequestVariableName)));
 
             var invocationExpressionSyntax = SyntaxFactory.InvocationExpression(
-                assignmentExpressionSyntax,
+                sendAsyncAccessSyntax,
                 SyntaxFactory.ArgumentList(separatedSyntaxList));
 
             var awaitExpression = SyntaxFactory.AwaitExpression(invocationExpressionSyntax);
@@ -209,6 +275,14 @@ namespace CurlToCSharp.Services
                         SyntaxFactory.EqualsValueClause(awaitExpression)));
 
             return SyntaxFactory.LocalDeclarationStatement(declarationSyntax);
+        }
+
+        private ArgumentSyntax CreateStringLiteralArgument(string argumentName)
+        {
+            return SyntaxFactory.Argument(
+                SyntaxFactory.LiteralExpression(
+                    SyntaxKind.StringLiteralExpression,
+                    SyntaxFactory.Literal(argumentName)));
         }
     }
 }

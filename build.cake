@@ -1,3 +1,6 @@
+#tool nuget:?package=MSBuild.SonarQube.Runner.Tool
+#addin nuget:?package=Cake.Sonar
+
 var target = Argument("target", "Default");
 
 var buildConfiguration = "Release";
@@ -53,11 +56,36 @@ Task("CreateArtifact")
     BuildSystem.AppVeyor.UploadArtifact(tempPublishArchive);
 });
 
+Task("SonarBegin")
+  .Does(() => {
+     SonarBegin(new SonarBeginSettings {
+        Url = "https://sonarcloud.io",
+        Login = EnvironmentVariable("sonar:apikey"),
+        Key = "curl-to-csharp",
+        Name = "curl to C#",
+        ArgumentCustomization = args => args
+			.Append($"/o:olsh-github")
+     });
+  });
+
+Task("SonarEnd")
+  .Does(() => {
+     SonarEnd(new SonarEndSettings {
+        Login = EnvironmentVariable("sonar:apikey")
+     });
+  });
+
 Task("Default")
     .IsDependentOn("Test");
 
+Task("Sonar")
+  .IsDependentOn("SonarBegin")
+  .IsDependentOn("Build")
+  .IsDependentOn("Test")
+  .IsDependentOn("SonarEnd");
+
 Task("CI")
-    .IsDependentOn("Test")
+    .IsDependentOn("Sonar")
     .IsDependentOn("CreateArtifact");
 
 RunTarget(target);

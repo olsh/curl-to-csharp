@@ -114,7 +114,12 @@ namespace CurlToCSharp.Services
                         {
                             // Add error
                         }
+
                         break;
+                    case "-u":
+                    case "--user":
+                        convertResult.Data.UserPasswordPair = ReadValue(ref commandLine);
+                    break;
                     default:
                         convertResult.Warnings.Add($"Parameter \"{par}\" is not supported yet");
                         break;

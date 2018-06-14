@@ -83,6 +83,7 @@ namespace CurlToCSharp.Tests.Services
             var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
 
             Assert.Equal(new Uri("http://crossbrowsertesting.com/api/v3/livetests/"), parseResult.Data.Url);
+            Assert.Equal("username:password", parseResult.Data.UserPasswordPair);
         }
 
         [Fact]

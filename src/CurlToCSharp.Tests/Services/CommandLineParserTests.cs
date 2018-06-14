@@ -70,8 +70,17 @@ namespace CurlToCSharp.Tests.Services
 
             var parseResult = service.Parse(new Span<char>(@"curl -unknown ""demo"" -X POST -d @file1.txt -d @file2.txt https://example.com/upload".ToCharArray()));
 
-            Assert.Equal(HttpMethod.Post, parseResult.Data.HttpMethod);
             Assert.Equal(new Uri("https://example.com/upload"), parseResult.Data.Url);
+        }
+
+        [Fact]
+        public void ParseSettings_UnknownParameterWithUrlAtEnd2_UrlParsed()
+        {
+            var service = new CommandLineParser();
+
+            var parseResult = service.Parse(new Span<char>(@"curl --user username:password -X POST -d ""browser=Win7x64-C1|Chrome32|1024x768&url=http://www.google.com"" http://crossbrowsertesting.com/api/v3/livetests/".ToCharArray()));
+
+            Assert.Equal(new Uri("http://crossbrowsertesting.com/api/v3/livetests/"), parseResult.Data.Url);
         }
     }
 }

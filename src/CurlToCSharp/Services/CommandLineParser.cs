@@ -64,7 +64,8 @@ namespace CurlToCSharp.Services
             {
                 parseState.IsCurlCommand = true;
             }
-            else if (parseResult.Data.Url == null && Uri.TryCreate(valueString, UriKind.Absolute, out var url))
+            else if (parseResult.Data.Url == null && Uri.TryCreate(valueString, UriKind.Absolute, out var url)
+                                                  && !string.IsNullOrEmpty(url.Host))
             {
                 parseResult.Data.Url = url;
             }

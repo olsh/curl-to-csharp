@@ -328,3 +328,11 @@ ASALocalRun/
 
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
+
+# temp publish folders
+publish/
+publish.zip
+
+# Cake
+tools/*
+!tools/packages.config

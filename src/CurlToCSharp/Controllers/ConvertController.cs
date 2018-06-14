@@ -22,7 +22,7 @@ namespace CurlToCSharp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] ConvertModel model)
+        public IActionResult Post([FromBody] ConvertModel model)
         {
             if (!ModelState.IsValid)
             {

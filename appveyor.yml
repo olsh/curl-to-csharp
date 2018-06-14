@@ -1,0 +1,11 @@
+version: 1.0.{build}
+image: Visual Studio 2017
+build_script:
+- cmd: PowerShell -Version 2.0 .\build.ps1 -Target CI
+test: off
+deploy:
+- provider: AzureAppServiceZipDeploy
+  website: curltocsharp
+  username: CurlToCSharp
+  password:
+    secure: anNXyv5QGtXmsPV21/COiAolYBhLYF8Pi3yWd/qIRd4=

@@ -2,13 +2,24 @@
 
 namespace CurlToCSharp.Models
 {
-    public class ParseResult<T>
+    public class ConvertResult<T>
+        where T : class
     {
-        public ParseResult(T data)
+        public ConvertResult(T data)
+            : this(data, null, null)
+        {
+        }
+
+        public ConvertResult(ICollection<string> errors)
+            : this(null, errors, null)
+        {
+        }
+
+        public ConvertResult(T data, ICollection<string> errors, ICollection<string> warnings)
         {
             Data = data;
-            Errors = new HashSet<string>();
-            Warnings = new HashSet<string>();
+            Errors = errors ?? new HashSet<string>();
+            Warnings = warnings ?? new HashSet<string>();
         }
 
         public T Data { get; }
@@ -18,5 +29,18 @@ namespace CurlToCSharp.Models
         public bool Success => Errors.Count == 0;
 
         public ICollection<string> Warnings { get; }
+
+        public void AddWarnings(ICollection<string> warnings)
+        {
+            AddToCollection(warnings, Warnings);
+        }
+
+        private void AddToCollection(ICollection<string> newElements, ICollection<string> collection)
+        {
+            foreach (var newElement in newElements)
+            {
+                collection.Add(newElement);
+            }
+        }
     }
 }

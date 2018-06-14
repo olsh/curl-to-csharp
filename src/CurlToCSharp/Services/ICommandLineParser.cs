@@ -6,6 +6,6 @@ namespace CurlToCSharp.Services
 {
     public interface ICommandLineParser
     {
-        ParseResult<CurlOptions> Parse(Span<char> commandLine);
+        ConvertResult<CurlOptions> Parse(Span<char> commandLine);
     }
 }

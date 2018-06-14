@@ -16,7 +16,7 @@ namespace CurlToCSharp.Services
 
         private const char Space = ' ';
 
-        public ParseResult<CurlOptions> Parse(Span<char> commandLine)
+        public ConvertResult<CurlOptions> Parse(Span<char> commandLine)
         {
             if (commandLine.IsEmpty)
             {
@@ -25,7 +25,7 @@ namespace CurlToCSharp.Services
 
             Trim(ref commandLine);
 
-            var parseResult = new ParseResult<CurlOptions>(new CurlOptions());
+            var parseResult = new ConvertResult<CurlOptions>(new CurlOptions());
             var parseState = new ParseState();
             while (!commandLine.IsEmpty)
             {
@@ -49,7 +49,7 @@ namespace CurlToCSharp.Services
 
             if (parseResult.Data.HttpMethod == null)
             {
-                parseResult.Data.HttpMethod = HttpMethod.Get;
+                parseResult.Data.HttpMethod = HttpMethod.Get.ToString().ToUpper();
             }
 
             PostParsing(parseResult, parseState);
@@ -57,17 +57,17 @@ namespace CurlToCSharp.Services
             return parseResult;
         }
 
-        private static void EvaluateValue(ParseResult<CurlOptions> parseResult, ParseState parseState, Span<char> value)
+        private static void EvaluateValue(ConvertResult<CurlOptions> convertResult, ParseState parseState, Span<char> value)
         {
             var valueString = value.ToString();
             if (string.Equals(valueString, "curl", StringComparison.InvariantCultureIgnoreCase))
             {
                 parseState.IsCurlCommand = true;
             }
-            else if (parseResult.Data.Url == null && Uri.TryCreate(valueString, UriKind.Absolute, out var url)
+            else if (convertResult.Data.Url == null && Uri.TryCreate(valueString, UriKind.Absolute, out var url)
                                                   && !string.IsNullOrEmpty(url.Host))
             {
-                parseResult.Data.Url = url;
+                convertResult.Data.Url = url;
             }
             else
             {
@@ -75,7 +75,7 @@ namespace CurlToCSharp.Services
             }
         }
 
-        private void EvaluateParameter(Span<char> parameter, ref Span<char> commandLine, ParseResult<CurlOptions> parseResult)
+        private void EvaluateParameter(Span<char> parameter, ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
         {
             string ReadValue(ref Span<char> span)
             {
@@ -96,30 +96,27 @@ namespace CurlToCSharp.Services
             {
                     case "-X":
                     case "--request":
-                        val = ReadValue(ref commandLine);
-                        if (Enum.TryParse(val, true, out HttpMethod method))
-                        {
-                            parseResult.Data.HttpMethod = method;
-                        }
-
+                        convertResult.Data.HttpMethod = ReadValue(ref commandLine);
                         break;
                     case "-d":
                     case "--data":
-                        parseResult.Data.Payload = ReadValue(ref commandLine);
-                        if (parseResult.Data.HttpMethod == null)
+                        convertResult.Data.PayloadCollection.Add(ReadValue(ref commandLine));
+                        if (convertResult.Data.HttpMethod == null)
                         {
-                            parseResult.Data.HttpMethod = HttpMethod.Post;
+                            convertResult.Data.HttpMethod = HttpMethod.Post.ToString().ToUpper();
                         }
 
                         break;
                     case "-H":
                     case "--header":
                         val = ReadValue(ref commandLine);
-                        if (!parseResult.Data.Headers.TryAdd(val.Split(":")[0].Trim(),  new StringValues(val.Split(":")[1].Trim())))
+                        if (!convertResult.Data.Headers.TryAdd(val.Split(":")[0].Trim(),  new StringValues(val.Split(":")[1].Trim())))
                         {
                             // Add error
                         }
-
+                        break;
+                    default:
+                        convertResult.Warnings.Add($"Parameter \"{par}\" is not supported yet");
                         break;
             }
         }
@@ -226,7 +223,7 @@ namespace CurlToCSharp.Services
             return commandLine.IndexOf('-') == 0;
         }
 
-        private void PostParsing(ParseResult<CurlOptions> result, ParseState state)
+        private void PostParsing(ConvertResult<CurlOptions> result, ParseState state)
         {
             if (result.Data.Url == null
                 && !string.IsNullOrWhiteSpace(state.LastUnknownValue)
@@ -237,7 +234,7 @@ namespace CurlToCSharp.Services
 
             if (!state.IsCurlCommand)
             {
-                result.Errors.Add("Not a curl command");
+                result.Errors.Add("Invalid curl command");
             }
 
             if (result.Data.Url == null)

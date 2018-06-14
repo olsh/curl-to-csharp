@@ -1,16 +1,18 @@
-﻿<div class="row">
+﻿<div class="row row mb-4">
     <div class="col-xl-12">
         <form>
             <div class="form-group">
-                <textarea placeholder="Enter curl command here" class="form-control" id="curl" rows="3"></textarea>
+                <textarea required="required" placeholder="Enter curl command here" class="form-control" id="curl" rows="3"></textarea>
             </div>
             <button id="convert-button" type="button" class="btn btn-primary">Convert</button>
         </form>
     </div>
 </div>
 
-<div class="row mt-4">
+<div class="row">
     <div class="col-xl-12">
-        <pre class="d-none" id="csharp">some text</pre>
+        <div id="errors" class="alert alert-danger collapse" role="alert"></div>
+        <div id="warnings" class="alert alert-warning collapse" role="alert"></div>
+        <pre class="collapse" id="csharp"></pre>
     </div>
 </div>

@@ -21,16 +21,16 @@ namespace CurlToCSharp.Tests.Services
             var converterService = new ConverterService();
             var curlOptions = new CurlOptions
                                   {
-                                      HttpMethod = HttpMethod.Post,
+                                      HttpMethod = HttpMethod.Post.ToString().ToUpper(),
                                       Url = new Uri("https://google.com"),
-                                      Payload = "{\"status\": \"resolved\"}"
+                                      PayloadCollection = { "{\"status\": \"resolved\"}" }
                                   };
             curlOptions.Headers.TryAdd(HeaderNames.ContentType, new StringValues("application/json"));
             curlOptions.Headers.TryAdd(HeaderNames.Authorization, new StringValues("Bearer b7d03a6947b217efb6f3ec3bd3504582"));
 
-            var csharp = converterService.ToCsharp(curlOptions);
+            var result = converterService.ToCsharp(curlOptions);
 
-            CSharpSyntaxTree.ParseText(csharp);
+            CSharpSyntaxTree.ParseText(result.Data);
         }
     }
 }

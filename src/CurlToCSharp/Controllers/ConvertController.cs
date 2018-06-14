@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Threading.Tasks;
+using System.Linq;
 
 using CurlToCSharp.Models;
 using CurlToCSharp.Services;
@@ -26,7 +26,10 @@ namespace CurlToCSharp.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(model);
+                return BadRequest(
+                    new ConvertResult<ConvertModel>(
+                        ModelState.SelectMany(r => r.Value.Errors.Select(e => e.ErrorMessage))
+                            .ToArray()));
             }
 
             var parseResult = _commandLineParser.Parse(new Span<char>(model.Curl.ToCharArray()));
@@ -36,6 +39,7 @@ namespace CurlToCSharp.Controllers
             }
 
             var csharp = _converterService.ToCsharp(parseResult.Data);
+            csharp.AddWarnings(parseResult.Warnings);
 
             return Ok(csharp);
         }

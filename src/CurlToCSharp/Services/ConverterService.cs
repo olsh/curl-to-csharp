@@ -18,7 +18,7 @@ namespace CurlToCSharp.Services
 
         private const string HttpClientVariableName = "httpClient";
 
-        public string ToCsharp(CurlOptions curlOptions)
+        public ConvertResult<string> ToCsharp(CurlOptions curlOptions)
         {
             var requestUsing = CreateRequestUsing(curlOptions);
             var innerBlock = SyntaxFactory.Block();
@@ -36,9 +36,11 @@ namespace CurlToCSharp.Services
 
             var httpClientUsing = CreateHttpClientUsing();
 
-            return httpClientUsing.WithStatement(SyntaxFactory.Block(requestUsing.WithStatement(innerBlock)))
+            var csharp = httpClientUsing.WithStatement(SyntaxFactory.Block(requestUsing.WithStatement(innerBlock)))
                 .NormalizeWhitespace()
                 .ToFullString();
+
+            return new ConvertResult<string>(csharp);
         }
 
         private static ExpressionStatementSyntax CreateContentAssignmentExpression(CurlOptions curlOptions)
@@ -148,10 +150,16 @@ namespace CurlToCSharp.Services
 
         private UsingStatementSyntax CreateRequestUsing(CurlOptions curlOptions)
         {
-            var httpMethodArgument = SyntaxFactory.Argument(SyntaxFactory.MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                SyntaxFactory.IdentifierName(nameof(HttpMethod)),
-                SyntaxFactory.IdentifierName(curlOptions.HttpMethod.ToString())));
+            var methodNameArgument = SyntaxFactory.Argument(
+                SyntaxFactory.LiteralExpression(
+                    SyntaxKind.StringLiteralExpression,
+                    SyntaxFactory.Literal(curlOptions.HttpMethod)));
+            var methodArgumentList = new SeparatedSyntaxList<ArgumentSyntax>().Add(methodNameArgument);
+            var httpMethodArgument = SyntaxFactory.Argument(
+                SyntaxFactory.ObjectCreationExpression(
+                    SyntaxFactory.IdentifierName(nameof(HttpMethod)),
+                    SyntaxFactory.ArgumentList(methodArgumentList),
+                    null));
 
             var urlArgument = SyntaxFactory.Argument(
                 SyntaxFactory.LiteralExpression(

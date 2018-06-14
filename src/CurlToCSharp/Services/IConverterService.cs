@@ -4,6 +4,6 @@ namespace CurlToCSharp.Services
 {
     public interface IConverterService
     {
-        string ToCsharp(CurlOptions curlOptions);
+        ConvertResult<string> ToCsharp(CurlOptions curlOptions);
     }
 }

@@ -15,5 +15,5 @@ cache:
   - packages
   - node_modules
   - '%APPDATA%\npm-cache'
-  - '%USERPROFILE%\.nuget\packages
+  - '%USERPROFILE%\.nuget\packages'
   - tools

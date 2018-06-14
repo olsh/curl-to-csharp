@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0",
+  "name": "curl.to.csharp",
+  "private": true,
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-clean-css": "^3.9.4",
+    "gulp-concat": "^2.6.1",
+    "gulp-sourcemaps": "^2.6.4",
+    "gulp-uglify": "^3.0.0"
+  },
+  "dependencies": {
+    "bootstrap": "^4.1.1",
+    "highlightjs": "^9.10.0",
+    "jquery": "^3.3.1",
+    "popper.js": "^1.14.3"
+  }
+}

@@ -45,11 +45,19 @@ Task("Pack")
     Zip(tempPublishDirectory, tempPublishArchive);
 });
 
+Task("CreateArtifact")
+  .IsDependentOn("Pack")
+  .WithCriteria(BuildSystem.AppVeyor.IsRunningOnAppVeyor)
+  .Does(() =>
+{
+    BuildSystem.AppVeyor.UploadArtifact(tempPublishArchive);
+});
+
 Task("Default")
     .IsDependentOn("Test");
 
 Task("CI")
     .IsDependentOn("Test")
-    .IsDependentOn("Pack");
+    .IsDependentOn("CreateArtifact");
 
 RunTarget(target);

@@ -18,6 +18,8 @@
             return;
         }
 
+        blockUi();
+
         $.ajax({
             url: 'convert',
             data : JSON.stringify({ curl: curlCommand }),
@@ -37,6 +39,9 @@
                 $('#csharp').collapse('hide');
                 $('#warnings').collapse('hide');
                 $('#errors').text(response.responseJSON.errors.join('\n')).collapse('show');
+            },
+            complete: function() {
+                unblockUi();
             }
         });
     }
@@ -48,6 +53,14 @@
         } else {
             $warnings.collapse('hide');
         }
+    }
+
+    function blockUi() {
+        $('button').attr('disabled', 'disabled');
+    }
+
+    function unblockUi() {
+        $('button').removeAttr('disabled');
     }
 
 }(window.jQuery));

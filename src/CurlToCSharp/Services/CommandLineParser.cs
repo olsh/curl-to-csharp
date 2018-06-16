@@ -27,8 +27,6 @@ namespace CurlToCSharp.Services
                 throw new ArgumentException("The command line is empty.", nameof(commandLine));
             }
 
-            Trim(ref commandLine);
-
             var parseResult = new ConvertResult<CurlOptions>(new CurlOptions());
             var parseState = new ParseState();
             while (!commandLine.IsEmpty)
@@ -78,17 +76,12 @@ namespace CurlToCSharp.Services
         {
             string ReadValueAsString(ref Span<char> span)
             {
-                var value = this.ReadValue(ref span);
+                var value = ReadValue(ref span);
 
                 return value.ToString();
             }
 
             var par = parameter.ToString();
-
-            if (string.IsNullOrWhiteSpace(par))
-            {
-                return;
-            }
 
             Trim(ref commandLine);
             if (commandLine.IsEmpty)
@@ -113,10 +106,27 @@ namespace CurlToCSharp.Services
                     case "-u":
                     case "--user":
                         convertResult.Data.UserPasswordPair = ReadValueAsString(ref commandLine);
+                        break;
+                    case "--url":
+                        var val = ReadValueAsString(ref commandLine);
+                        EvaluateUrlValue(convertResult, val);
                     break;
                     default:
-                        convertResult.Warnings.Add($"Parameter \"{par}\" is not supported yet");
+                        convertResult.Warnings.Add($"Parameter \"{par}\" is not supported");
                         break;
+            }
+        }
+
+        private void EvaluateUrlValue(ConvertResult<CurlOptions> convertResult, string val)
+        {
+            if (Uri.TryCreate(val, UriKind.Absolute, out var url)
+                || Uri.TryCreate($"http://{val}", UriKind.Absolute, out url))
+            {
+                convertResult.Data.Url = url;
+            }
+            else
+            {
+                convertResult.Warnings.Add($"Unable to parse URL \"{val}\"");
             }
         }
 

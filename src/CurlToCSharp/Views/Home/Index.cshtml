@@ -1,10 +1,32 @@
-﻿<div class="row row mb-4">
+﻿<div class="row">
+    <div class="col-xl-12 text-center">
+        <h1><a href="https://curl.haxx.se/docs/manpage.html" target="_blank">curl</a> to C# converter</h1>
+    </div>
+</div>
+
+<div class="row mb-2">
+    <div class="col-xl-12">
+        This app converts curl commands to C# code. If you found a bug or have suggestions, 
+        please <a href="https://github.com/olsh/curl-to-csharp/issues">open an issue</a> or 
+        better <a href="https://github.com/olsh/curl-to-csharp">contribute on GitHub</a>.
+    </div>
+</div>
+
+<div class="row mb-2">
+    <div id="examples" class="col-xl-12">
+        <button data-curl="curl https://github.com/" type="button" class="btn btn-secondary btn-sm">GET Example</button>
+        <button data-curl="curl https://sentry.io/api/0/projects/1/groups/?status=unresolved -d '{&quot;status&quot;: &quot;resolved&quot;}' -H 'Content-Type: application/json' -u 'username:password'" type="button" class="btn btn-secondary btn-sm">POST JSON Example</button>
+        <button data-curl="curl -H 'Authorization: Bearer b7d03a6947b217efb6f3ec3bd3504582' -X POST -d @@file1.txt -d @@file2.txt https://example.com/upload" type="button" class="btn btn-secondary btn-sm">Upload Files Example</button>
+    </div>
+</div>
+
+<div class="row row mb-4">
     <div class="col-xl-12">
         <form>
             <div class="form-group">
                 <textarea required="required" placeholder="Enter curl command here" class="form-control" id="curl" rows="3"></textarea>
             </div>
-            <button id="convert-button" type="button" class="btn btn-primary">Convert</button>
+            <button id="convert-button" type="button" class="btn btn-primary btn-lg">Convert</button>
         </form>
     </div>
 </div>

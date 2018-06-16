@@ -127,7 +127,7 @@ namespace CurlToCSharp.Services
             var contentHeader = curlOptions.Headers.GetCommaSeparatedValues(HeaderNames.ContentType);
             if (contentHeader.Any())
             {
-                arguments.AddLast(SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)));
+                arguments.AddLast(SyntaxFactory.Argument(RoslynExtensions.CreateMemberAccessExpression("Encoding", "UTF8")));
                 arguments.AddLast(RoslynExtensions.CreateStringLiteralArgument(contentHeader.First()));
             }
 

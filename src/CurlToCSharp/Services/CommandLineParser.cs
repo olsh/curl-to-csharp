@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 using CurlToCSharp.Models;
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
-using Microsoft.Extensions.Primitives;
+using Microsoft.Net.Http.Headers;
 
 namespace CurlToCSharp.Services
 {
@@ -51,11 +51,6 @@ namespace CurlToCSharp.Services
                 }
             }
 
-            if (parseResult.Data.HttpMethod == null)
-            {
-                parseResult.Data.HttpMethod = HttpMethod.Get.ToString().ToUpper();
-            }
-
             PostParsing(parseResult, parseState);
 
             return parseResult;
@@ -81,7 +76,7 @@ namespace CurlToCSharp.Services
 
         private void EvaluateParameter(Span<char> parameter, ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
         {
-            string ReadValue(ref Span<char> span)
+            string ReadValueAsString(ref Span<char> span)
             {
                 var value = this.ReadValue(ref span);
 
@@ -95,12 +90,17 @@ namespace CurlToCSharp.Services
                 return;
             }
 
-            string val;
+            Trim(ref commandLine);
+            if (commandLine.IsEmpty)
+            {
+                return;
+            }
+
             switch (par)
             {
                     case "-X":
                     case "--request":
-                        convertResult.Data.HttpMethod = ReadValue(ref commandLine);
+                        convertResult.Data.HttpMethod = ReadValueAsString(ref commandLine);
                         break;
                     case "-d":
                     case "--data":
@@ -108,16 +108,11 @@ namespace CurlToCSharp.Services
                         break;
                     case "-H":
                     case "--header":
-                        val = ReadValue(ref commandLine);
-                        if (!convertResult.Data.Headers.TryAdd(val.Split(":")[0].Trim(),  new StringValues(val.Split(":")[1].Trim())))
-                        {
-                            // Add error
-                        }
-
+                        EvaluateHeaderValue(convertResult, ref commandLine);
                         break;
                     case "-u":
                     case "--user":
-                        convertResult.Data.UserPasswordPair = ReadValue(ref commandLine);
+                        convertResult.Data.UserPasswordPair = ReadValueAsString(ref commandLine);
                     break;
                     default:
                         convertResult.Warnings.Add($"Parameter \"{par}\" is not supported yet");
@@ -125,25 +120,48 @@ namespace CurlToCSharp.Services
             }
         }
 
-        private void EvaluateDataParameter(ConvertResult<CurlOptions> convertResult, ref Span<char> commandLine)
+        private void EvaluateHeaderValue(ConvertResult<CurlOptions> convertResult, ref Span<char> commandLine)
         {
             var value = ReadValue(ref commandLine);
-            if (!value.IsEmpty)
-            {
-                if (value[0] == '@')
-                {
-                    convertResult.Data.Files.Add(value.Slice(1).ToString());
-                }
-                else
-                {
-                    convertResult.Data.PayloadCollection.Add(value.ToString());
-                }
 
-                if (convertResult.Data.HttpMethod == null)
-                {
-                    convertResult.Data.HttpMethod = HttpMethod.Post.ToString()
-                        .ToUpper();
-                }
+            var separatorIndex = value.IndexOf(':');
+            if (separatorIndex == -1)
+            {
+                convertResult.Warnings.Add($"Unable to parse header \"{value.ToString()}\"");
+                return;
+            }
+
+            var headerKey = value.Slice(0, separatorIndex).ToString().Trim();
+
+            string headerValue = string.Empty;
+            var valueStartIndex = separatorIndex + 1;
+            if (value.Length > valueStartIndex)
+            {
+                headerValue = value.Slice(valueStartIndex).ToString().Trim();
+            }
+
+            if (!convertResult.Data.Headers.TryAdd(headerKey, headerValue))
+            {
+                convertResult.Warnings.Add($"Unable to add header \"{headerKey}\": \"{headerValue}\"");
+            }
+        }
+
+        private void EvaluateDataParameter(ConvertResult<CurlOptions> convertResult, ref Span<char> commandLine)
+        {
+            var isFileEntry = commandLine[0] == '@';
+            if (isFileEntry)
+            {
+                commandLine = commandLine.Slice(1);
+            }
+
+            var value = ReadValue(ref commandLine);
+            if (isFileEntry)
+            {
+                convertResult.Data.Files.Add(value.ToString());
+            }
+            else
+            {
+                convertResult.Data.PayloadCollection.Add(value.ToString());
             }
         }
 
@@ -289,6 +307,26 @@ namespace CurlToCSharp.Services
                 && Uri.TryCreate($"http://{state.LastUnknownValue}", UriKind.Absolute, out Uri url))
             {
                 result.Data.Url = url;
+            }
+
+            var hasDataUpload = result.Data.Files.Any() || result.Data.PayloadCollection.Any();
+            if (result.Data.HttpMethod == null)
+            {
+                if (hasDataUpload)
+                {
+                    result.Data.HttpMethod = HttpMethod.Post.ToString()
+                        .ToUpper();
+                }
+                else
+                {
+                    result.Data.HttpMethod = HttpMethod.Get.ToString()
+                        .ToUpper();
+                }
+            }
+
+            if (!result.Data.Headers.GetCommaSeparatedValues(HeaderNames.ContentType).Any() && hasDataUpload)
+            {
+                result.Data.Headers.TryAdd(HeaderNames.ContentType, "application/x-www-form-urlencoded");
             }
 
             if (!state.IsCurlCommand)

@@ -105,7 +105,7 @@ namespace CurlToCSharp.Tests.Services
         {
             var service = new CommandLineParser();
 
-            var curl = @"curl -u ""demo"" -X POST -d @file1.txt -d @file2.txt https://example.com/upload";
+            var curl = @"curl -u ""demo"" -X POST -d @""file1.txt"" -d @file2.txt https://example.com/upload";
             var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
 
             Assert.Equal(2, parseResult.Data.Files.Count);
@@ -142,6 +142,17 @@ namespace CurlToCSharp.Tests.Services
             var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
 
             Assert.Equal("\"&\'&\"&\'", parseResult.Data.Payload);
+        }
+
+        [Fact]
+        public void ParseSettings_HeaderWithMultipleSeparators_CorrectlyParsed()
+        {
+            var service = new CommandLineParser();
+
+            var curl = @"curl http://fiddle.jshell.net/echo/html/ -H 'Referer: http://fiddle.jshell.net/_display/'";
+            var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
+
+            Assert.Equal("http://fiddle.jshell.net/_display/", parseResult.Data.Headers.First(h => h.Key == "Referer").Value);
         }
     }
 }

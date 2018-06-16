@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net.Http;
 
+using CurlToCSharp.Extensions;
 using CurlToCSharp.Models;
 
 using Microsoft.AspNetCore.Http;
@@ -22,16 +23,22 @@ namespace CurlToCSharp.Services
 
         public ConvertResult<string> ToCsharp(CurlOptions curlOptions)
         {
-            var requestUsing = CreateRequestUsing(curlOptions);
+            var requestUsing = CreateRequestUsingStatement(curlOptions);
             var innerBlock = SyntaxFactory.Block();
-            if (!string.IsNullOrWhiteSpace(curlOptions.Payload))
-            {
-                var assignmentExpression = CreateContentAssignmentExpression(curlOptions);
-                innerBlock = innerBlock.AddStatements(assignmentExpression);
 
-                var statements = CreateHeaderAssignmentStatements(curlOptions);
-                innerBlock = innerBlock.AddStatements(statements.ToArray());
+            if (curlOptions.Files.Any())
+            {
+                var multipartContentStatements = CreateMultipartContentStatements(curlOptions);
+                innerBlock = innerBlock.AddStatements(multipartContentStatements.ToArray());
             }
+            else if (!string.IsNullOrWhiteSpace(curlOptions.Payload))
+            {
+                var assignmentExpression = CreateStringContentAssignmentExpression(curlOptions);
+                innerBlock = innerBlock.AddStatements(assignmentExpression);
+            }
+
+            var statements = CreateHeaderAssignmentStatements(curlOptions);
+            innerBlock = innerBlock.AddStatements(statements.ToArray());
 
             if (!string.IsNullOrEmpty(curlOptions.UserPasswordPair))
             {
@@ -51,37 +58,11 @@ namespace CurlToCSharp.Services
             return new ConvertResult<string>(csharp);
         }
 
-        private ExpressionStatementSyntax CreateContentAssignmentExpression(CurlOptions curlOptions)
+        private ExpressionStatementSyntax CreateStringContentAssignmentExpression(CurlOptions curlOptions)
         {
-            var stringContentCreation = SyntaxFactory.ObjectCreationExpression(SyntaxFactory.IdentifierName("StringContent"));
+            var stringContentCreation = CreateStringContentCreation(curlOptions);
 
-            var payloadArgument = SyntaxFactory.Argument(
-                SyntaxFactory.LiteralExpression(
-                    SyntaxKind.StringLiteralExpression,
-                    SyntaxFactory.Literal(curlOptions.Payload)));
-            var argumentSyntaxs = new SeparatedSyntaxList<ArgumentSyntax>();
-            argumentSyntaxs = argumentSyntaxs.Add(payloadArgument);
-
-            var contentHeader = curlOptions.Headers.GetCommaSeparatedValues(HeaderNames.ContentType);
-            if (contentHeader.Any())
-            {
-                argumentSyntaxs = argumentSyntaxs.Add(
-                    SyntaxFactory.Argument(
-                        SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)));
-
-                argumentSyntaxs = argumentSyntaxs.Add(
-                    SyntaxFactory.Argument(
-                        SyntaxFactory.LiteralExpression(
-                            SyntaxKind.StringLiteralExpression,
-                            SyntaxFactory.Literal(contentHeader.First()))));
-            }
-
-            stringContentCreation = stringContentCreation.WithArgumentList(SyntaxFactory.ArgumentList(argumentSyntaxs));
-
-            var contentAccessExpression = SyntaxFactory.MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                SyntaxFactory.IdentifierName(RequestVariableName),
-                SyntaxFactory.IdentifierName("Content"));
+            var contentAccessExpression = RoslynExtensions.CreateMemberAccessExpression(RequestVariableName, "Content");
 
             var assignmentExpressionSyntax = SyntaxFactory.AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
@@ -89,6 +70,69 @@ namespace CurlToCSharp.Services
                 stringContentCreation);
 
             return SyntaxFactory.ExpressionStatement(assignmentExpressionSyntax);
+        }
+
+        private IEnumerable<StatementSyntax> CreateMultipartContentStatements(CurlOptions curlOptions)
+        {
+            var statements = new LinkedList<StatementSyntax>();
+
+            const string MultipartVariableName = "multipartContent";
+            const string MultipartAddMethodName = "Add";
+
+            statements.AddLast(
+                SyntaxFactory.LocalDeclarationStatement(
+                    RoslynExtensions.CreateVariableFromNewObjectExpression(
+                        MultipartVariableName,
+                        nameof(MultipartContent))));
+
+            if (!string.IsNullOrEmpty(curlOptions.Payload))
+            {
+                var stringContentCreation = CreateStringContentCreation(curlOptions);
+                var addStatement = SyntaxFactory.ExpressionStatement(
+                    RoslynExtensions.CreateInvocationExpression(
+                        MultipartVariableName,
+                        MultipartAddMethodName,
+                        SyntaxFactory.Argument(stringContentCreation)));
+                statements.AddLast(addStatement);
+            }
+
+            foreach (var file in curlOptions.Files)
+            {
+                var fileReadExpression = RoslynExtensions.CreateInvocationExpression(
+                    "File",
+                    "ReadAllBytes",
+                    RoslynExtensions.CreateStringLiteralArgument(file));
+
+                var byteArrayContentExpression = RoslynExtensions.CreateObjectCreationExpression(
+                    "ByteArrayContent",
+                    SyntaxFactory.Argument(fileReadExpression));
+
+                var addStatement = SyntaxFactory.ExpressionStatement(
+                    RoslynExtensions.CreateInvocationExpression(
+                        MultipartVariableName,
+                        MultipartAddMethodName,
+                        SyntaxFactory.Argument(byteArrayContentExpression)));
+
+                statements.AddLast(addStatement);
+            }
+
+            return statements;
+        }
+
+        private ObjectCreationExpressionSyntax CreateStringContentCreation(CurlOptions curlOptions)
+        {
+            var arguments = new LinkedList<ArgumentSyntax>();
+            arguments.AddLast(RoslynExtensions.CreateStringLiteralArgument(curlOptions.Payload));
+
+            var contentHeader = curlOptions.Headers.GetCommaSeparatedValues(HeaderNames.ContentType);
+            if (contentHeader.Any())
+            {
+                arguments.AddLast(SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression)));
+                arguments.AddLast(RoslynExtensions.CreateStringLiteralArgument(contentHeader.First()));
+            }
+
+            var stringContentCreation = RoslynExtensions.CreateObjectCreationExpression("StringContent", arguments.ToArray());
+            return stringContentCreation;
         }
 
         private IEnumerable<StatementSyntax> CreateHeaderAssignmentStatements(CurlOptions options)
@@ -107,8 +151,8 @@ namespace CurlToCSharp.Services
                 }
 
                 var tryAddHeaderStatement = CreateTryAddHeaderStatement(
-                    CreateStringLiteralArgument(header.Key),
-                    CreateStringLiteralArgument(header.Value));
+                    RoslynExtensions.CreateStringLiteralArgument(header.Key),
+                    RoslynExtensions.CreateStringLiteralArgument(header.Value));
 
                 statements.AddLast(tryAddHeaderStatement);
             }
@@ -126,163 +170,74 @@ namespace CurlToCSharp.Services
                 .Add(SyntaxFactory.Interpolation(SyntaxFactory.IdentifierName(Base64AuthorizationVariableName)));
 
             var interpolatedStringArgument = SyntaxFactory.Argument(SyntaxFactory.InterpolatedStringExpression(stringStartToken, interpolatedStringContentSyntaxs));
-            var tryAddHeaderStatement = CreateTryAddHeaderStatement(CreateStringLiteralArgument("Authorization"), interpolatedStringArgument);
+            var tryAddHeaderStatement = CreateTryAddHeaderStatement(RoslynExtensions.CreateStringLiteralArgument("Authorization"), interpolatedStringArgument);
 
             return new StatementSyntax[] { authorizationEncodingStatement, tryAddHeaderStatement };
         }
 
         private LocalDeclarationStatementSyntax CreateBasicAuthorizationEncodingStatement(CurlOptions options)
         {
-            var asciiGetBytesAccess = SyntaxFactory.MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                SyntaxFactory.MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression,
-                    SyntaxFactory.IdentifierName("Encoding"),
-                    SyntaxFactory.IdentifierName("ASCII")),
-                SyntaxFactory.IdentifierName("GetBytes"));
+            var asciiGetBytesInvocation = RoslynExtensions.CreateInvocationExpression(
+                "Encoding",
+                "ASCII",
+                "GetBytes",
+                RoslynExtensions.CreateStringLiteralArgument(options.UserPasswordPair));
 
-            var asciiGetBytesArguments = new SeparatedSyntaxList<ArgumentSyntax>();
-            asciiGetBytesArguments = asciiGetBytesArguments.Add(
-                SyntaxFactory.Argument(
-                    SyntaxFactory.LiteralExpression(
-                        SyntaxKind.StringLiteralExpression,
-                        SyntaxFactory.Literal(options.UserPasswordPair))));
+            var convertToBase64Invocation = RoslynExtensions.CreateInvocationExpression(
+                "Convert",
+                "ToBase64String",
+                SyntaxFactory.Argument(asciiGetBytesInvocation));
 
-            var asciiGetBytesInvocation = SyntaxFactory.InvocationExpression(
-                asciiGetBytesAccess,
-                SyntaxFactory.ArgumentList(asciiGetBytesArguments));
-
-            var convertToBase64Access = SyntaxFactory.MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                SyntaxFactory.IdentifierName("Convert"),
-                SyntaxFactory.IdentifierName("ToBase64String"));
-
-            var convertToBase64AccessArguments = new SeparatedSyntaxList<ArgumentSyntax>();
-            convertToBase64AccessArguments =
-                convertToBase64AccessArguments.Add(SyntaxFactory.Argument(asciiGetBytesInvocation));
-
-            var convertToBase64Invocation = SyntaxFactory.InvocationExpression(
-                convertToBase64Access,
-                SyntaxFactory.ArgumentList(convertToBase64AccessArguments));
-
-            var declarationSyntax = SyntaxFactory.VariableDeclaration(SyntaxFactory.IdentifierName("var"))
-                .AddVariables(
-                    SyntaxFactory.VariableDeclarator(
-                        SyntaxFactory.Identifier(Base64AuthorizationVariableName),
-                        null,
-                        SyntaxFactory.EqualsValueClause(convertToBase64Invocation)));
+            var declarationSyntax = RoslynExtensions.CreateVariableInitializationExpression(
+                Base64AuthorizationVariableName,
+                convertToBase64Invocation);
 
             return SyntaxFactory.LocalDeclarationStatement(declarationSyntax);
         }
 
         private ExpressionStatementSyntax CreateTryAddHeaderStatement(ArgumentSyntax keyArgumentSyntax, ArgumentSyntax valueArgumentSyntax)
         {
-            var headerAccess = SyntaxFactory.MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                SyntaxFactory.IdentifierName(RequestVariableName),
-                SyntaxFactory.IdentifierName("Headers"));
-            var headerAddExpression = SyntaxFactory.MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                headerAccess,
-                SyntaxFactory.IdentifierName("TryAddWithoutValidation"));
+            var invocationExpressionSyntax = RoslynExtensions.CreateInvocationExpression(
+                RequestVariableName,
+                "Headers",
+                "TryAddWithoutValidation",
+                keyArgumentSyntax,
+                valueArgumentSyntax);
 
-            var separatedSyntaxList = new SeparatedSyntaxList<ArgumentSyntax>();
-            separatedSyntaxList = separatedSyntaxList.Add(keyArgumentSyntax);
-            separatedSyntaxList = separatedSyntaxList.Add(valueArgumentSyntax);
-
-            return SyntaxFactory.ExpressionStatement(
-                SyntaxFactory.InvocationExpression(
-                    headerAddExpression,
-                    SyntaxFactory.ArgumentList(separatedSyntaxList)));
+            return SyntaxFactory.ExpressionStatement(invocationExpressionSyntax);
         }
 
         private UsingStatementSyntax CreateHttpClientUsing()
         {
-            var objectCreationExpressionSyntax = SyntaxFactory.ObjectCreationExpression(
-                SyntaxFactory.IdentifierName(nameof(HttpClient)),
-                SyntaxFactory.ArgumentList(),
-                null);
-
-            var variableDeclaratorSyntax = SyntaxFactory.VariableDeclarator(
-                SyntaxFactory.Identifier(HttpClientVariableName),
-                null,
-                SyntaxFactory.EqualsValueClause(objectCreationExpressionSyntax));
-
-            var variableDeclarationSyntax = SyntaxFactory.VariableDeclaration(SyntaxFactory.IdentifierName("var"))
-                .AddVariables(variableDeclaratorSyntax);
-
-            return SyntaxFactory.UsingStatement(variableDeclarationSyntax, null, SyntaxFactory.Block());
+            return RoslynExtensions.CreateUsingStatement(HttpClientVariableName, nameof(HttpClient));
         }
 
-        private UsingStatementSyntax CreateRequestUsing(CurlOptions curlOptions)
+        private UsingStatementSyntax CreateRequestUsingStatement(CurlOptions curlOptions)
         {
-            var methodNameArgument = SyntaxFactory.Argument(
-                SyntaxFactory.LiteralExpression(
-                    SyntaxKind.StringLiteralExpression,
-                    SyntaxFactory.Literal(curlOptions.HttpMethod)));
-            var methodArgumentList = new SeparatedSyntaxList<ArgumentSyntax>().Add(methodNameArgument);
-            var httpMethodArgument = SyntaxFactory.Argument(
-                SyntaxFactory.ObjectCreationExpression(
-                    SyntaxFactory.IdentifierName(nameof(HttpMethod)),
-                    SyntaxFactory.ArgumentList(methodArgumentList),
-                    null));
+            var methodNameArgument = RoslynExtensions.CreateStringLiteralArgument(curlOptions.HttpMethod);
+            var httpMethodArgument = RoslynExtensions.CreateObjectCreationExpression(nameof(HttpMethod), methodNameArgument);
 
-            var urlArgument = SyntaxFactory.Argument(
-                SyntaxFactory.LiteralExpression(
-                    SyntaxKind.StringLiteralExpression,
-                    SyntaxFactory.Literal(curlOptions.Url.ToString())));
+            var urlArgument = RoslynExtensions.CreateStringLiteralArgument(curlOptions.Url.ToString());
 
-            var separatedSyntaxList = new SeparatedSyntaxList<ArgumentSyntax>().Add(httpMethodArgument);
-            separatedSyntaxList = separatedSyntaxList.Add(urlArgument);
-
-            var objectCreationExpressionSyntax = SyntaxFactory.ObjectCreationExpression(
-                SyntaxFactory.IdentifierName(nameof(HttpRequestMessage)),
-                SyntaxFactory.ArgumentList(separatedSyntaxList),
-                null);
-
-            var variableDeclaratorSyntax = SyntaxFactory.VariableDeclarator(
-                SyntaxFactory.Identifier(RequestVariableName),
-                null,
-                SyntaxFactory.EqualsValueClause(objectCreationExpressionSyntax));
-
-            var variableDeclarationSyntax = SyntaxFactory.VariableDeclaration(SyntaxFactory.IdentifierName("var"))
-                .AddVariables(variableDeclaratorSyntax);
-
-            return SyntaxFactory.UsingStatement(variableDeclarationSyntax, null, SyntaxFactory.Block());
+            return RoslynExtensions.CreateUsingStatement(
+                RequestVariableName,
+                nameof(HttpRequestMessage),
+                SyntaxFactory.Argument(httpMethodArgument),
+                urlArgument);
         }
 
         private LocalDeclarationStatementSyntax CreateSendStatement()
         {
-            var sendAsyncAccessSyntax = SyntaxFactory.MemberAccessExpression(
-                SyntaxKind.SimpleMemberAccessExpression,
-                SyntaxFactory.IdentifierName(HttpClientVariableName),
-                SyntaxFactory.IdentifierName("SendAsync"));
-
-            var separatedSyntaxList = new SeparatedSyntaxList<ArgumentSyntax>();
-            separatedSyntaxList = separatedSyntaxList.Add(SyntaxFactory.Argument(SyntaxFactory.IdentifierName(RequestVariableName)));
-
-            var invocationExpressionSyntax = SyntaxFactory.InvocationExpression(
-                sendAsyncAccessSyntax,
-                SyntaxFactory.ArgumentList(separatedSyntaxList));
+            var invocationExpressionSyntax = RoslynExtensions.CreateInvocationExpression(
+                HttpClientVariableName,
+                "SendAsync",
+                SyntaxFactory.Argument(SyntaxFactory.IdentifierName(RequestVariableName)));
 
             var awaitExpression = SyntaxFactory.AwaitExpression(invocationExpressionSyntax);
 
-            var declarationSyntax = SyntaxFactory.VariableDeclaration(SyntaxFactory.IdentifierName("var"))
-                .AddVariables(
-                    SyntaxFactory.VariableDeclarator(
-                        SyntaxFactory.Identifier("response"),
-                        null,
-                        SyntaxFactory.EqualsValueClause(awaitExpression)));
+            var declarationSyntax = RoslynExtensions.CreateVariableInitializationExpression("response", awaitExpression);
 
             return SyntaxFactory.LocalDeclarationStatement(declarationSyntax);
-        }
-
-        private ArgumentSyntax CreateStringLiteralArgument(string argumentName)
-        {
-            return SyntaxFactory.Argument(
-                SyntaxFactory.LiteralExpression(
-                    SyntaxKind.StringLiteralExpression,
-                    SyntaxFactory.Literal(argumentName)));
         }
     }
 }

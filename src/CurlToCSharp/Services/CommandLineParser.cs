@@ -100,12 +100,7 @@ namespace CurlToCSharp.Services
                         break;
                     case "-d":
                     case "--data":
-                        convertResult.Data.PayloadCollection.Add(ReadValue(ref commandLine));
-                        if (convertResult.Data.HttpMethod == null)
-                        {
-                            convertResult.Data.HttpMethod = HttpMethod.Post.ToString().ToUpper();
-                        }
-
+                        EvaluateDataParameter(convertResult, ref commandLine);
                         break;
                     case "-H":
                     case "--header":
@@ -123,6 +118,27 @@ namespace CurlToCSharp.Services
                     default:
                         convertResult.Warnings.Add($"Parameter \"{par}\" is not supported yet");
                         break;
+            }
+        }
+
+        private void EvaluateDataParameter(ConvertResult<CurlOptions> convertResult, ref Span<char> commandLine)
+        {
+            var value = ReadValue(ref commandLine);
+            if (!value.IsEmpty)
+            {
+                if (value[0] == '@')
+                {
+                    convertResult.Data.Files.Add(value.Slice(1).ToString());
+                }
+                else
+                {
+                    convertResult.Data.PayloadCollection.Add(value.ToString());
+                    if (convertResult.Data.HttpMethod == null)
+                    {
+                        convertResult.Data.HttpMethod = HttpMethod.Post.ToString()
+                            .ToUpper();
+                    }
+                }
             }
         }
 
@@ -147,6 +163,11 @@ namespace CurlToCSharp.Services
         private Span<char> ReadValue(ref Span<char> commandLine)
         {
             Trim(ref commandLine);
+            if (commandLine.IsEmpty)
+            {
+                return commandLine;
+            }
+
             var firstChar = commandLine[0];
             int closeIndex;
             if ((firstChar == SingleQuote || firstChar == DoubleQuote) && commandLine.Length > 1)

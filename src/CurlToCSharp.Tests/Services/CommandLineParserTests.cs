@@ -87,7 +87,7 @@ namespace CurlToCSharp.Tests.Services
         }
 
         [Fact]
-        public void ParseSettings_MultipleData_Success()
+        public void ParseSettings_MultipleData_DataConcatenated()
         {
             var service = new CommandLineParser();
 
@@ -99,6 +99,28 @@ namespace CurlToCSharp.Tests.Services
             var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
 
             Assert.Equal("1&2&3", parseResult.Data.Payload);
+        }
+
+        [Fact]
+        public void ParseSettings_FilesData_FilesParsed()
+        {
+            var service = new CommandLineParser();
+
+            var curl = @"curl -u ""demo"" -X POST -d @file1.txt -d @file2.txt https://example.com/upload";
+            var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
+
+            Assert.Equal(2, parseResult.Data.Files.Count);
+            Assert.Equal("file1.txt", parseResult.Data.Files.ElementAt(0));
+            Assert.Equal("file2.txt", parseResult.Data.Files.ElementAt(1));
+        }
+
+        [Fact]
+        public void ParseSettings_EmptyParameter_DoesntFail()
+        {
+            var service = new CommandLineParser();
+
+            var curl = @"curl -u";
+            service.Parse(new Span<char>(curl.ToCharArray()));
         }
     }
 }

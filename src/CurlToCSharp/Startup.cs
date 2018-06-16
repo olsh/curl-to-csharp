@@ -2,6 +2,7 @@
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,7 +22,6 @@ namespace CurlToCSharp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-            services.AddResponseCompression();
             services.RegisterServices();
         }
 
@@ -37,8 +37,16 @@ namespace CurlToCSharp
                 app.UseExceptionHandler("/Home/Error");
             }
 
-            app.UseResponseCompression();
-            app.UseStaticFiles();
+            app.UseStaticFiles(
+                new StaticFileOptions
+                    {
+                        OnPrepareResponse = ctx =>
+                            {
+                                ctx.Context.Response.Headers.Append(
+                                    "Cache-Control",
+                                    "public,max-age=31536000");
+                            }
+                    });
 
             app.UseMvc();
         }

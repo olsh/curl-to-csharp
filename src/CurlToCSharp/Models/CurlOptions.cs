@@ -11,7 +11,10 @@ namespace CurlToCSharp.Models
         {
             Headers = new HttpRequestHeaders();
             PayloadCollection = new List<string>();
+            Files = new List<string>();
         }
+
+        public ICollection<string> Files { get; }
 
         public HttpHeaders Headers { get; }
 

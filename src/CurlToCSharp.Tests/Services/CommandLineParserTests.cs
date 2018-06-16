@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Linq;
+using System.Net.Http;
 
 using CurlToCSharp.Services;
-
-using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 
 using Xunit;
 
@@ -121,6 +120,28 @@ namespace CurlToCSharp.Tests.Services
 
             var curl = @"curl -u";
             service.Parse(new Span<char>(curl.ToCharArray()));
+        }
+
+        [Fact]
+        public void ParseSettings_EscapedString_CorrectlyParsed()
+        {
+            var service = new CommandLineParser();
+
+            var curl = @"curl -d ""\""""";
+            var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
+
+            Assert.Equal("\"", parseResult.Data.Payload);
+        }
+
+        [Fact]
+        public void ParseSettings_MultipleEscapedString_CorrectlyParsed()
+        {
+            var service = new CommandLineParser();
+
+            var curl = @"curl -d ""\"""" -d '\'' -d '""' -d ""'""";
+            var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
+
+            Assert.Equal("\"&\'&\"&\'", parseResult.Data.Payload);
         }
     }
 }

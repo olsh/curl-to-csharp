@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 using CurlToCSharp.Models;
 
@@ -15,6 +17,8 @@ namespace CurlToCSharp.Services
         private const char SingleQuote = '\'';
 
         private const char Space = ' ';
+
+        private const char EscapeChar = '\\';
 
         public ConvertResult<CurlOptions> Parse(Span<char> commandLine)
         {
@@ -133,11 +137,12 @@ namespace CurlToCSharp.Services
                 else
                 {
                     convertResult.Data.PayloadCollection.Add(value.ToString());
-                    if (convertResult.Data.HttpMethod == null)
-                    {
-                        convertResult.Data.HttpMethod = HttpMethod.Post.ToString()
-                            .ToUpper();
-                    }
+                }
+
+                if (convertResult.Data.HttpMethod == null)
+                {
+                    convertResult.Data.HttpMethod = HttpMethod.Post.ToString()
+                        .ToUpper();
                 }
             }
         }
@@ -153,8 +158,6 @@ namespace CurlToCSharp.Services
             }
 
             var parameter = commandLine.Slice(0, indexOfSpace);
-            TrimQuotes(ref parameter);
-
             commandLine = commandLine.Slice(indexOfSpace);
 
             return parameter;
@@ -169,12 +172,20 @@ namespace CurlToCSharp.Services
             }
 
             var firstChar = commandLine[0];
-            int closeIndex;
-            if ((firstChar == SingleQuote || firstChar == DoubleQuote) && commandLine.Length > 1)
+            int closeIndex = 0;
+            var firstCharIsQuote = firstChar == SingleQuote || firstChar == DoubleQuote;
+            if (firstCharIsQuote && commandLine.Length > 1)
             {
                 var quote = firstChar;
                 commandLine = commandLine.Slice(1);
-                closeIndex = commandLine.IndexOf(quote) + 1;
+                for (int i = 0; i < commandLine.Length; i++)
+                {
+                    if (commandLine[i] == quote && (i == 0 || commandLine[i - 1] != EscapeChar))
+                    {
+                        closeIndex = i + 1;
+                        break;
+                    }
+                }
             }
             else
             {
@@ -191,10 +202,30 @@ namespace CurlToCSharp.Services
             }
 
             var value = commandLine.Slice(0, closeIndex);
-            TrimQuotes(ref value);
+            if (firstCharIsQuote)
+            {
+                TrimQuotes(ref value, firstChar);
+            }
+
             commandLine = commandLine.Slice(closeIndex);
 
-            return value;
+            return UnEscape(value);
+        }
+
+        private Span<char> UnEscape(Span<char> input)
+        {
+            var list = new LinkedList<char>();
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (input[i] == EscapeChar && (i == 0 || input[i - 1] == EscapeChar))
+                {
+                    continue;
+                }
+
+                list.AddLast(input[i]);
+            }
+
+            return new Span<char>(list.ToArray());
         }
 
         private void Trim(ref Span<char> input)
@@ -221,21 +252,23 @@ namespace CurlToCSharp.Services
             input = input.Slice(start, end + 1 - start);
         }
 
-        private void TrimQuotes(ref Span<char> input)
+        private void TrimQuotes(ref Span<char> input, char quote)
         {
             int start;
             for (start = 0; start < input.Length; start++)
             {
-                if (input[start] != DoubleQuote && input[start] != SingleQuote)
+                var escaped = start > 0 && input[start - 1] == EscapeChar;
+                if (input[start] != quote || escaped)
                 {
                     break;
                 }
             }
 
             int end;
-            for (end = input.Length - 1; end > 0; end--)
+            for (end = input.Length - 1; end > start; end--)
             {
-                if (input[end] != DoubleQuote && input[end] != SingleQuote)
+                var escaped = input[end - 1] == EscapeChar;
+                if (input[end] != quote || escaped)
                 {
                     break;
                 }

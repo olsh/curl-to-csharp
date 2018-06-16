@@ -16,3 +16,4 @@ cache:
   - '%APPDATA%\npm-cache'
   - '%USERPROFILE%\.nuget\packages'
   - tools
+  - '%USERPROFILE%\.sonar\cache'

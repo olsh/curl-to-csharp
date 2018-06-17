@@ -14,7 +14,11 @@ namespace CurlToCSharp.Models
             Files = new List<string>();
         }
 
+        public string CookieValue { get; set; }
+
         public ICollection<string> Files { get; }
+
+        public bool HasCookies => !string.IsNullOrWhiteSpace(CookieValue);
 
         public HttpHeaders Headers { get; }
 

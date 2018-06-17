@@ -110,7 +110,11 @@ namespace CurlToCSharp.Services
                     case "--url":
                         var val = ReadValueAsString(ref commandLine);
                         EvaluateUrlValue(convertResult, val);
-                    break;
+                        break;
+                    case "-b":
+                    case "--cookie":
+                        convertResult.Data.CookieValue = ReadValueAsString(ref commandLine);
+                        break;
                     default:
                         convertResult.Warnings.Add($"Parameter \"{par}\" is not supported");
                         break;

@@ -4,8 +4,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace CurlToCSharp.Extensions
 {
-    public class RoslynExtensions
+    public static class RoslynExtensions
     {
+        private const string NewLineString = "\n";
+
         public static InvocationExpressionSyntax CreateInvocationExpression(
             string leftPart,
             string rightPart,
@@ -84,6 +86,24 @@ namespace CurlToCSharp.Extensions
         {
             var objectCreationExpression = CreateObjectCreationExpression(newObjectName, arguments);
             return CreateVariableInitializationExpression(variableName, objectCreationExpression);
+        }
+
+        public static AssignmentExpressionSyntax CreateMemberAssignmentExpression(
+            string leftPart,
+            string rightPart,
+            ExpressionSyntax expression)
+        {
+            var contentAccessExpression = CreateMemberAccessExpression(leftPart, rightPart);
+
+            return SyntaxFactory.AssignmentExpression(
+                SyntaxKind.SimpleAssignmentExpression,
+                contentAccessExpression,
+                expression);
+        }
+
+        public static TSyntax AppendWhiteSpace<TSyntax>(this TSyntax node) where TSyntax : SyntaxNode
+        {
+            return node.WithTrailingTrivia(SyntaxFactory.Comment(NewLineString));
         }
 
         private static MemberAccessExpressionSyntax CreateMemberAccessExpression(

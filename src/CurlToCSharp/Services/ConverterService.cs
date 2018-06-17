@@ -21,10 +21,19 @@ namespace CurlToCSharp.Services
 
         private const string Base64AuthorizationVariableName = "base64authorization";
 
+        private const string HandlerVariableName = "handler";
+
         public ConvertResult<string> ToCsharp(CurlOptions curlOptions)
         {
             var requestUsing = CreateRequestUsingStatement(curlOptions);
+            var compilationUnit = SyntaxFactory.CompilationUnit();
             var innerBlock = SyntaxFactory.Block();
+
+            if (curlOptions.HasCookies)
+            {
+                var configureHandlerStatements = ConfigureHandlerStatements(curlOptions);
+                compilationUnit = compilationUnit.AddMembers(configureHandlerStatements.ToArray());
+            }
 
             if (curlOptions.Files.Any())
             {
@@ -49,9 +58,10 @@ namespace CurlToCSharp.Services
             var sendStatement = CreateSendStatement();
             innerBlock = innerBlock.AddStatements(sendStatement);
 
-            var httpClientUsing = CreateHttpClientUsing();
+            var httpClientUsing = CreateHttpClientUsing(curlOptions);
 
-            var csharp = httpClientUsing.WithStatement(SyntaxFactory.Block(requestUsing.WithStatement(innerBlock)))
+            httpClientUsing = httpClientUsing.WithStatement(SyntaxFactory.Block(requestUsing.WithStatement(innerBlock)));
+            var csharp = compilationUnit.AddMembers(SyntaxFactory.GlobalStatement(httpClientUsing))
                 .NormalizeWhitespace()
                 .ToFullString();
 
@@ -62,14 +72,11 @@ namespace CurlToCSharp.Services
         {
             var stringContentCreation = CreateStringContentCreation(curlOptions);
 
-            var contentAccessExpression = RoslynExtensions.CreateMemberAccessExpression(RequestVariableName, "Content");
-
-            var assignmentExpressionSyntax = SyntaxFactory.AssignmentExpression(
-                SyntaxKind.SimpleAssignmentExpression,
-                contentAccessExpression,
-                stringContentCreation);
-
-            return SyntaxFactory.ExpressionStatement(assignmentExpressionSyntax);
+            return SyntaxFactory.ExpressionStatement(
+                RoslynExtensions.CreateMemberAssignmentExpression(
+                    RequestVariableName,
+                    "Content",
+                    stringContentCreation));
         }
 
         private IEnumerable<StatementSyntax> CreateMultipartContentStatements(CurlOptions curlOptions)
@@ -137,7 +144,7 @@ namespace CurlToCSharp.Services
 
         private IEnumerable<StatementSyntax> CreateHeaderAssignmentStatements(CurlOptions options)
         {
-            if (!options.Headers.Any())
+            if (!options.Headers.Any() && !options.HasCookies)
             {
                 return Enumerable.Empty<ExpressionStatementSyntax>();
             }
@@ -155,6 +162,14 @@ namespace CurlToCSharp.Services
                     RoslynExtensions.CreateStringLiteralArgument(header.Value));
 
                 statements.AddLast(tryAddHeaderStatement);
+            }
+
+            if (options.HasCookies)
+            {
+                statements.AddLast(
+                    CreateTryAddHeaderStatement(
+                        RoslynExtensions.CreateStringLiteralArgument("Cookie"),
+                        RoslynExtensions.CreateStringLiteralArgument(options.CookieValue)));
             }
 
             return statements;
@@ -207,9 +222,12 @@ namespace CurlToCSharp.Services
             return SyntaxFactory.ExpressionStatement(invocationExpressionSyntax);
         }
 
-        private UsingStatementSyntax CreateHttpClientUsing()
+        private UsingStatementSyntax CreateHttpClientUsing(CurlOptions curlOptions)
         {
-            return RoslynExtensions.CreateUsingStatement(HttpClientVariableName, nameof(HttpClient));
+            var argumentSyntax = curlOptions.HasCookies
+                                     ? new[] { SyntaxFactory.Argument(SyntaxFactory.IdentifierName(HandlerVariableName)) }
+                                     : new ArgumentSyntax[0];
+            return RoslynExtensions.CreateUsingStatement(HttpClientVariableName, nameof(HttpClient), argumentSyntax);
         }
 
         private UsingStatementSyntax CreateRequestUsingStatement(CurlOptions curlOptions)
@@ -238,6 +256,31 @@ namespace CurlToCSharp.Services
             var declarationSyntax = RoslynExtensions.CreateVariableInitializationExpression("response", awaitExpression);
 
             return SyntaxFactory.LocalDeclarationStatement(declarationSyntax);
+        }
+
+        private IEnumerable<MemberDeclarationSyntax> ConfigureHandlerStatements(CurlOptions curlOptions)
+        {
+            var statementSyntaxs = new LinkedList<MemberDeclarationSyntax>();
+
+            var handlerInitialization = RoslynExtensions.CreateVariableInitializationExpression(
+                HandlerVariableName,
+                RoslynExtensions.CreateObjectCreationExpression(nameof(HttpClientHandler)));
+            statementSyntaxs.AddLast(
+                SyntaxFactory.GlobalStatement(SyntaxFactory.LocalDeclarationStatement(handlerInitialization)));
+
+            if (curlOptions.HasCookies)
+            {
+                var memberAssignmentExpression = RoslynExtensions.CreateMemberAssignmentExpression(
+                    HandlerVariableName,
+                    "UseCookies",
+                    SyntaxFactory.LiteralExpression(SyntaxKind.FalseLiteralExpression));
+                statementSyntaxs.AddLast(
+                    SyntaxFactory.GlobalStatement(SyntaxFactory.ExpressionStatement(memberAssignmentExpression))
+                        .WithLeadingTrivia(SyntaxFactory.Comment("// Disable cookies in handler and set them in request"))
+                        .AppendWhiteSpace());
+            }
+
+            return statementSyntaxs;
         }
     }
 }

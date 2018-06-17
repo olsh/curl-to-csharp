@@ -5,7 +5,7 @@
 </div>
 
 <div class="row mb-2">
-    <div class="col-xl-12">
+    <div class="col-xl-12 text-center">
         This app converts curl commands to C# code. If you found a bug or have suggestions, 
         please <a href="https://github.com/olsh/curl-to-csharp/issues">open an issue</a> or 
         better <a href="https://github.com/olsh/curl-to-csharp">contribute on GitHub</a>.
@@ -13,10 +13,15 @@
 </div>
 
 <div class="row mb-2">
-    <div id="examples" class="col-xl-12">
-        <button data-curl="curl https://github.com/" type="button" class="btn btn-secondary btn-sm">GET Example</button>
-        <button data-curl="curl https://sentry.io/api/0/projects/1/groups/?status=unresolved -d '{&quot;status&quot;: &quot;resolved&quot;}' -H 'Content-Type: application/json' -u 'username:password'" type="button" class="btn btn-secondary btn-sm">POST JSON Example</button>
-        <button data-curl="curl -H 'Authorization: Bearer b7d03a6947b217efb6f3ec3bd3504582' -X POST -d @@file1.txt -d @@file2.txt https://example.com/upload" type="button" class="btn btn-secondary btn-sm">Upload Files Example</button>
+    <div class="col-xl-12 text-center">
+        Check some examples below
+    </div>
+    <div id="examples" class="col-xl-12 text-center">
+        <div class="btn-group btn-group-sm" role="group" aria-label="Examples">
+            <button data-curl="curl https://github.com/" type="button" class="btn btn-secondary">GET</button>
+            <button data-curl="curl https://sentry.io/api/0/projects/1/groups/?status=unresolved -d '{&quot;status&quot;: &quot;resolved&quot;}' -H 'Content-Type: application/json' -u 'username:password' -H 'Accept: application/json' -H 'User-Agent: curl/7.60.0'" type="button" class="btn btn-secondary">POST JSON</button>
+            <button data-curl="curl -X POST -d @@file1.txt -d @@file2.txt https://example.com/upload -b SessionId=437b27169b6b4349a388038329eeb900 -H 'Referer: https://github.com/'" type="button" class="btn btn-secondary">Upload Files</button>
+        </div>
     </div>
 </div>
 

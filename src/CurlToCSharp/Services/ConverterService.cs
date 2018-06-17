@@ -282,7 +282,6 @@ namespace CurlToCSharp.Services
                     SyntaxFactory.LiteralExpression(SyntaxKind.FalseLiteralExpression));
                 statementSyntaxs.AddLast(
                     SyntaxFactory.GlobalStatement(SyntaxFactory.ExpressionStatement(memberAssignmentExpression))
-                        .WithLeadingTrivia(SyntaxFactory.Comment("// Disable cookies in the handler and set them in the request"))
                         .AppendWhiteSpace());
             }
 

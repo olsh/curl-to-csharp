@@ -28,6 +28,7 @@ Task("Test")
 {
      var settings = new DotNetCoreTestSettings
      {
+         Configuration = buildConfiguration,
          NoBuild = true
      };
 

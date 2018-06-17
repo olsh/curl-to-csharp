@@ -1,4 +1,7 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Generic;
+using System.Linq;
+
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -104,6 +107,18 @@ namespace CurlToCSharp.Extensions
         public static TSyntax AppendWhiteSpace<TSyntax>(this TSyntax node) where TSyntax : SyntaxNode
         {
             return node.WithTrailingTrivia(SyntaxFactory.Comment(NewLineString));
+        }
+
+        public static void TryAppendWhiteSpaceAtEnd<TSyntax>(this ICollection<TSyntax> statements) where TSyntax : SyntaxNode
+        {
+            if (statements.Count == 0)
+            {
+                return;
+            }
+
+            var syntax = statements.Last();
+            statements.Remove(syntax);
+            statements.Add(syntax.AppendWhiteSpace());
         }
 
         private static MemberAccessExpressionSyntax CreateMemberAccessExpression(

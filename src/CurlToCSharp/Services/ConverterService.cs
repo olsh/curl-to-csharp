@@ -42,7 +42,7 @@ namespace CurlToCSharp.Services
             }
             else if (!string.IsNullOrWhiteSpace(curlOptions.Payload))
             {
-                var assignmentExpression = CreateStringContentAssignmentExpression(curlOptions);
+                var assignmentExpression = CreateStringContentAssignmentStatement(curlOptions);
                 innerBlock = innerBlock.AddStatements(assignmentExpression);
             }
 
@@ -68,7 +68,7 @@ namespace CurlToCSharp.Services
             return new ConvertResult<string>(csharp);
         }
 
-        private ExpressionStatementSyntax CreateStringContentAssignmentExpression(CurlOptions curlOptions)
+        private ExpressionStatementSyntax CreateStringContentAssignmentStatement(CurlOptions curlOptions)
         {
             var stringContentCreation = CreateStringContentCreation(curlOptions);
 
@@ -76,7 +76,8 @@ namespace CurlToCSharp.Services
                 RoslynExtensions.CreateMemberAssignmentExpression(
                     RequestVariableName,
                     "Content",
-                    stringContentCreation));
+                    stringContentCreation))
+                .AppendWhiteSpace();
         }
 
         private IEnumerable<StatementSyntax> CreateMultipartContentStatements(CurlOptions curlOptions)
@@ -100,7 +101,7 @@ namespace CurlToCSharp.Services
                         MultipartVariableName,
                         MultipartAddMethodName,
                         SyntaxFactory.Argument(stringContentCreation)));
-                statements.AddLast(addStatement);
+                statements.AddLast(addStatement.AppendWhiteSpace());
             }
 
             foreach (var file in curlOptions.Files)
@@ -122,6 +123,8 @@ namespace CurlToCSharp.Services
 
                 statements.AddLast(addStatement);
             }
+
+            statements.TryAppendWhiteSpaceAtEnd();
 
             return statements;
         }
@@ -172,6 +175,8 @@ namespace CurlToCSharp.Services
                         RoslynExtensions.CreateStringLiteralArgument(options.CookieValue)));
             }
 
+            statements.TryAppendWhiteSpaceAtEnd();
+
             return statements;
         }
 
@@ -185,7 +190,8 @@ namespace CurlToCSharp.Services
                 .Add(SyntaxFactory.Interpolation(SyntaxFactory.IdentifierName(Base64AuthorizationVariableName)));
 
             var interpolatedStringArgument = SyntaxFactory.Argument(SyntaxFactory.InterpolatedStringExpression(stringStartToken, interpolatedStringContentSyntaxs));
-            var tryAddHeaderStatement = CreateTryAddHeaderStatement(RoslynExtensions.CreateStringLiteralArgument("Authorization"), interpolatedStringArgument);
+            var tryAddHeaderStatement = CreateTryAddHeaderStatement(RoslynExtensions.CreateStringLiteralArgument("Authorization"), interpolatedStringArgument)
+                .AppendWhiteSpace();
 
             return new StatementSyntax[] { authorizationEncodingStatement, tryAddHeaderStatement };
         }
@@ -276,7 +282,7 @@ namespace CurlToCSharp.Services
                     SyntaxFactory.LiteralExpression(SyntaxKind.FalseLiteralExpression));
                 statementSyntaxs.AddLast(
                     SyntaxFactory.GlobalStatement(SyntaxFactory.ExpressionStatement(memberAssignmentExpression))
-                        .WithLeadingTrivia(SyntaxFactory.Comment("// Disable cookies in handler and set them in request"))
+                        .WithLeadingTrivia(SyntaxFactory.Comment("// Disable cookies in the handler and set them in the request"))
                         .AppendWhiteSpace());
             }
 

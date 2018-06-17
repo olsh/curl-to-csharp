@@ -28,7 +28,7 @@ Task("Test")
 {
      var settings = new DotNetCoreTestSettings
      {
-         Configuration = buildConfiguration
+         NoBuild = true
      };
 
      DotNetCoreTest(testProjectFile, settings);
@@ -37,10 +37,10 @@ Task("Test")
 Task("Pack")
   .Does(() =>
 {
-	var settings = new DotNetCorePublishSettings
+    var settings = new DotNetCorePublishSettings
     {
         Configuration = buildConfiguration,
-		OutputDirectory = tempPublishDirectory
+        OutputDirectory = tempPublishDirectory
     };
 
     DotNetCorePublish(projectFile, settings);
@@ -64,7 +64,8 @@ Task("SonarBegin")
         Key = "curl-to-csharp",
         Name = "curl to C#",
         ArgumentCustomization = args => args
-			.Append($"/o:olsh-github")
+            .Append($"/o:olsh-github"),
+        Version = "1.0.0.0"
      });
   });
 

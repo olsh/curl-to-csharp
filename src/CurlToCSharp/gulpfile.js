@@ -18,10 +18,10 @@ const appScripts = [
 ];
 
 const vendorScripts = [
-    'node_modules/jquery/dist/jquery.min.js',
-    'node_modules/popper.js/dist/umd/popper.min.js',
-    'node_modules/bootstrap/dist/js/bootstrap.min.js',
-    'node_modules/highlightjs/highlight.pack.min.js'
+    'node_modules/jquery/dist/jquery.js',
+    'node_modules/popper.js/dist/umd/popper.js',
+    'node_modules/bootstrap/dist/js/bootstrap.js',
+    'node_modules/highlightjs/highlight.pack.js'
 ];
 
 gulp.task('default', ['build-vendor', 'build-app']);
@@ -41,7 +41,10 @@ gulp.task('build-vendor-css', () => {
 
 gulp.task('build-vendor-js', () => {
     return gulp.src(vendorScripts)
+        .pipe(sourcemaps.init())
         .pipe(concat('vendor.min.js'))
+        .pipe(uglify())
+        .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('wwwroot/js/'));
 });
 

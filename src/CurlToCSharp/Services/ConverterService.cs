@@ -24,6 +24,8 @@ namespace CurlToCSharp.Services
 
         private const string HandlerVariableName = "handler";
 
+        private const string RequestContentPropertyName = "Content";
+
         public ConvertResult<string> ToCsharp(CurlOptions curlOptions)
         {
             var requestUsing = CreateRequestUsingStatement(curlOptions);
@@ -92,7 +94,7 @@ namespace CurlToCSharp.Services
             return SyntaxFactory.ExpressionStatement(
                 RoslynExtensions.CreateMemberAssignmentExpression(
                     RequestVariableName,
-                    "Content",
+                    RequestContentPropertyName,
                     stringContentCreation))
                 .AppendWhiteSpace();
         }
@@ -140,6 +142,12 @@ namespace CurlToCSharp.Services
 
                 statements.AddLast(addStatement);
             }
+
+            statements.AddLast(SyntaxFactory.ExpressionStatement(
+                RoslynExtensions.CreateMemberAssignmentExpression(
+                    RequestVariableName,
+                    RequestContentPropertyName,
+                    SyntaxFactory.IdentifierName(MultipartVariableName))));
 
             statements.TryAppendWhiteSpaceAtEnd();
 

@@ -1,4 +1,4 @@
-﻿(function($) {
+﻿(function($, hljs) {
 
     $('#convert-button').on('click',
         function() {
@@ -63,4 +63,4 @@
         $('button').removeAttr('disabled');
     }
 
-}(window.jQuery));
+}(window.jQuery, window.hljs));

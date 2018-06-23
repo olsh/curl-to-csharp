@@ -97,7 +97,11 @@ namespace CurlToCSharp.Services
                         break;
                     case "-d":
                     case "--data":
-                        EvaluateDataParameter(convertResult, ref commandLine);
+                    case "--data-binary":
+                        EvaluateDataParameter(convertResult, ref commandLine, true);
+                        break;
+                    case "--data-raw":
+                        EvaluateDataParameter(convertResult, ref commandLine, false);
                         break;
                     case "-H":
                     case "--header":
@@ -160,9 +164,9 @@ namespace CurlToCSharp.Services
             }
         }
 
-        private void EvaluateDataParameter(ConvertResult<CurlOptions> convertResult, ref Span<char> commandLine)
+        private void EvaluateDataParameter(ConvertResult<CurlOptions> convertResult, ref Span<char> commandLine, bool parseFiles)
         {
-            var isFileEntry = commandLine[0] == '@';
+            var isFileEntry = parseFiles && commandLine[0] == '@';
             if (isFileEntry)
             {
                 commandLine = commandLine.Slice(1);

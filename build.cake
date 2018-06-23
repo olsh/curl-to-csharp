@@ -1,6 +1,8 @@
 #tool nuget:?package=MSBuild.SonarQube.Runner.Tool
 #addin nuget:?package=Cake.Sonar
 
+#addin "Cake.Yarn"
+
 var target = Argument("target", "Default");
 
 var buildConfiguration = "Release";
@@ -10,6 +12,12 @@ var projectFile = string.Format("./src/{0}/{0}.csproj", projectName);
 var testProjectFile = string.Format("./src/{0}/{0}.csproj", testProjectName);
 var tempPublishDirectory = "./publish";
 var tempPublishArchive = "publish.zip";
+
+Task("Yarn")
+    .Does(() =>
+    {
+        Yarn.Add(settings => settings.Package("gulp").Globally());
+    });
 
 Task("Build")
   .Does(() =>
@@ -36,6 +44,7 @@ Task("Test")
 });
 
 Task("Pack")
+  .IsDependentOn("Yarn")
   .Does(() =>
 {
     var settings = new DotNetCorePublishSettings

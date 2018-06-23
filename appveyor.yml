@@ -1,7 +1,5 @@
 version: 1.0.{build}
 image: Visual Studio 2017
-install:
-  - npm install -g gulp
 build_script:
 - cmd: PowerShell -Version 2.0 .\build.ps1 -Target CI
 test: off
@@ -12,8 +10,7 @@ deploy:
   password:
     secure: anNXyv5QGtXmsPV21/COiAolYBhLYF8Pi3yWd/qIRd4=
 cache:
-  - 'src\CurlToCSharp\node_modules\'
-  - '%APPDATA%\npm-cache'
-  - '%USERPROFILE%\.nuget\packages'
-  - tools
+  - 'src\CurlToCSharp\node_modules\' -> src\CurlToCSharp\package.json
+  - '%LOCALAPPDATA%\Yarn\cache' -> src\CurlToCSharp\package.json
+  - '%USERPROFILE%\.nuget\packages' -> src\**\*.csproj
   - '%USERPROFILE%\.sonar\cache'

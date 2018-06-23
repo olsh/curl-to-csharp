@@ -11,6 +11,6 @@ deploy:
     secure: anNXyv5QGtXmsPV21/COiAolYBhLYF8Pi3yWd/qIRd4=
 cache:
   - '%USERPROFILE%\.sonar\cache'
-  - 'src\CurlToCSharp\node_modules\ -> **\package.json'
-  - '%LOCALAPPDATA%\Yarn\cache -> **\package.json'
+  - 'src\CurlToCSharp\node_modules\ -> src\CurlToCSharp\package.json'
+  - '%LOCALAPPDATA%\Yarn\cache -> src\CurlToCSharp\package.json'
   - '%USERPROFILE%\.nuget\packages -> **\*.csproj'

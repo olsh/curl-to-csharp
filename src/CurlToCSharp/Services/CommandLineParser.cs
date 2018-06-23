@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 using CurlToCSharp.Models;
 
@@ -119,10 +120,33 @@ namespace CurlToCSharp.Services
                     case "--cookie":
                         convertResult.Data.CookieValue = ReadValueAsString(ref commandLine);
                         break;
+                    case "-x":
+                    case "--proxy":
+                        EvaluateProxyValue(convertResult, ref commandLine);
+                        break;
                     default:
                         convertResult.Warnings.Add($"Parameter \"{par}\" is not supported");
                         break;
             }
+        }
+
+        private void EvaluateProxyValue(ConvertResult<CurlOptions> convertResult, ref Span<char> commandLine)
+        {
+            var value = ReadValue(ref commandLine);
+            if (!Uri.TryCreate(value.ToString(), UriKind.Absolute, out Uri proxyUri))
+            {
+                convertResult.Warnings.Add("Unable to parse proxy URI");
+
+                return;
+            }
+
+            // If the port number is not specified in the proxy string, it is assumed to be 1080.
+            if (!Regex.IsMatch(proxyUri.OriginalString, @":\d+$"))
+            {
+                proxyUri = new UriBuilder(proxyUri.Scheme, proxyUri.Host, 1080).Uri;
+            }
+
+            convertResult.Data.ProxyUri = proxyUri;
         }
 
         private void EvaluateUrlValue(ConvertResult<CurlOptions> convertResult, string val)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 
@@ -29,9 +30,10 @@ namespace CurlToCSharp.Services
             var compilationUnit = SyntaxFactory.CompilationUnit();
             var innerBlock = SyntaxFactory.Block();
 
-            if (curlOptions.HasCookies)
+            var result = new ConvertResult<string>();
+            if (ShouldGenerateHandler(curlOptions))
             {
-                var configureHandlerStatements = ConfigureHandlerStatements(curlOptions);
+                var configureHandlerStatements = ConfigureHandlerStatements(curlOptions, result);
                 compilationUnit = compilationUnit.AddMembers(configureHandlerStatements.ToArray());
             }
 
@@ -61,11 +63,26 @@ namespace CurlToCSharp.Services
             var httpClientUsing = CreateHttpClientUsing(curlOptions);
 
             httpClientUsing = httpClientUsing.WithStatement(SyntaxFactory.Block(requestUsing.WithStatement(innerBlock)));
-            var csharp = compilationUnit.AddMembers(SyntaxFactory.GlobalStatement(httpClientUsing))
+            result.Data = compilationUnit.AddMembers(SyntaxFactory.GlobalStatement(httpClientUsing))
                 .NormalizeWhitespace()
                 .ToFullString();
 
-            return new ConvertResult<string>(csharp);
+            return result;
+        }
+
+        private bool IsSupportedProxy(Uri proxyUri)
+        {
+            if (Uri.UriSchemeHttp == proxyUri.Scheme || Uri.UriSchemeHttps == proxyUri.Scheme)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool ShouldGenerateHandler(CurlOptions curlOptions)
+        {
+            return curlOptions.HasCookies || (curlOptions.HasProxy && IsSupportedProxy(curlOptions.ProxyUri));
         }
 
         private ExpressionStatementSyntax CreateStringContentAssignmentStatement(CurlOptions curlOptions)
@@ -230,7 +247,7 @@ namespace CurlToCSharp.Services
 
         private UsingStatementSyntax CreateHttpClientUsing(CurlOptions curlOptions)
         {
-            var argumentSyntax = curlOptions.HasCookies
+            var argumentSyntax = ShouldGenerateHandler(curlOptions)
                                      ? new[] { SyntaxFactory.Argument(SyntaxFactory.IdentifierName(HandlerVariableName)) }
                                      : new ArgumentSyntax[0];
             return RoslynExtensions.CreateUsingStatement(HttpClientVariableName, nameof(HttpClient), argumentSyntax);
@@ -264,7 +281,9 @@ namespace CurlToCSharp.Services
             return SyntaxFactory.LocalDeclarationStatement(declarationSyntax);
         }
 
-        private IEnumerable<MemberDeclarationSyntax> ConfigureHandlerStatements(CurlOptions curlOptions)
+        private IEnumerable<MemberDeclarationSyntax> ConfigureHandlerStatements(
+            CurlOptions curlOptions,
+            ConvertResult<string> result)
         {
             var statementSyntaxs = new LinkedList<MemberDeclarationSyntax>();
 
@@ -281,9 +300,28 @@ namespace CurlToCSharp.Services
                     "UseCookies",
                     SyntaxFactory.LiteralExpression(SyntaxKind.FalseLiteralExpression));
                 statementSyntaxs.AddLast(
-                    SyntaxFactory.GlobalStatement(SyntaxFactory.ExpressionStatement(memberAssignmentExpression))
-                        .AppendWhiteSpace());
+                    SyntaxFactory.GlobalStatement(SyntaxFactory.ExpressionStatement(memberAssignmentExpression)));
             }
+
+            if (curlOptions.HasProxy)
+            {
+                if (IsSupportedProxy(curlOptions.ProxyUri))
+                {
+                    var memberAssignmentExpression = RoslynExtensions.CreateMemberAssignmentExpression(
+                        HandlerVariableName,
+                        "Proxy",
+                        RoslynExtensions.CreateObjectCreationExpression("WebProxy", RoslynExtensions.CreateStringLiteralArgument(curlOptions.ProxyUri.ToString())));
+
+                    statementSyntaxs.AddLast(
+                        SyntaxFactory.GlobalStatement(SyntaxFactory.ExpressionStatement(memberAssignmentExpression)));
+                }
+                else
+                {
+                    result.Warnings.Add($"Proxy scheme \"{curlOptions.ProxyUri.Scheme}\" is not supported");
+                }
+            }
+
+            statementSyntaxs.TryAppendWhiteSpaceAtEnd();
 
             return statementSyntaxs;
         }

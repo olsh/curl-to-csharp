@@ -20,6 +20,8 @@ namespace CurlToCSharp.Models
 
         public bool HasCookies => !string.IsNullOrWhiteSpace(CookieValue);
 
+        public bool HasProxy => ProxyUri != null;
+
         public HttpHeaders Headers { get; }
 
         public string HttpMethod { get; set; }
@@ -27,6 +29,8 @@ namespace CurlToCSharp.Models
         public string Payload => string.Join("&", PayloadCollection);
 
         public ICollection<string> PayloadCollection { get; }
+
+        public Uri ProxyUri { get; set; }
 
         public Uri Url { get; set; }
 

@@ -1,28 +1,33 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace CurlToCSharp.Models
 {
     public class ConvertResult<T>
         where T : class
     {
+        public ConvertResult() : this(default(T))
+        {
+        }
+
         public ConvertResult(T data)
-            : this(data, null, null)
+            : this(data, new HashSet<string>(), new HashSet<string>())
         {
         }
 
         public ConvertResult(ICollection<string> errors)
-            : this(null, errors, null)
+            : this(default(T), errors, new HashSet<string>())
         {
         }
 
         public ConvertResult(T data, ICollection<string> errors, ICollection<string> warnings)
         {
             Data = data;
-            Errors = errors ?? new HashSet<string>();
-            Warnings = warnings ?? new HashSet<string>();
+            Errors = errors ?? throw new ArgumentNullException(nameof(errors));
+            Warnings = warnings ?? throw new ArgumentNullException(nameof(warnings));
         }
 
-        public T Data { get; }
+        public T Data { get; set; }
 
         public ICollection<string> Errors { get; }
 

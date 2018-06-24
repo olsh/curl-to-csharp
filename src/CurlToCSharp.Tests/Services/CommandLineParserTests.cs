@@ -154,5 +154,23 @@ namespace CurlToCSharp.Tests.Services
 
             Assert.Equal("http://fiddle.jshell.net/_display/", parseResult.Data.Headers.First(h => h.Key == "Referer").Value);
         }
+
+        [Fact]
+        public void ParseSettings_NewLines_CorrectlyParsed()
+        {
+            var service = new CommandLineParser();
+
+            var curl = @"curl \
+https://test.zendesk.com/api/v2/tickets.json \
+-d '\\some_data' \
+-v -u {email_address}:{password} -X \ 
+POST";
+
+            var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
+
+            Assert.Equal(HttpMethod.Post.ToString().ToUpper(), parseResult.Data.HttpMethod);
+            Assert.Equal("\\some_data", parseResult.Data.Payload);
+            Assert.Equal("https://test.zendesk.com/api/v2/tickets.json", parseResult.Data.Url.ToString());
+        }
     }
 }

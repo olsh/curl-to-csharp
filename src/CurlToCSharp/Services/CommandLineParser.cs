@@ -277,7 +277,7 @@ namespace CurlToCSharp.Services
             var list = new LinkedList<char>();
             for (int i = 0; i < input.Length; i++)
             {
-                if (input[i] == EscapeChar && (i == 0 || input[i - 1] == EscapeChar))
+                if (input[i] == EscapeChar && (i == 0 || input[i - 1] != EscapeChar))
                 {
                     continue;
                 }
@@ -290,11 +290,10 @@ namespace CurlToCSharp.Services
 
         private void Trim(ref Span<char> input)
         {
-            char space = ' ';
             int start;
             for (start = 0; start < input.Length; start++)
             {
-                if (input[start] != space)
+                if (!char.IsWhiteSpace(input[start]) && input[start] != EscapeChar)
                 {
                     break;
                 }
@@ -303,7 +302,7 @@ namespace CurlToCSharp.Services
             int end;
             for (end = input.Length - 1; end > 0; end--)
             {
-                if (input[end] != space)
+                if (!char.IsWhiteSpace(input[start]))
                 {
                     break;
                 }

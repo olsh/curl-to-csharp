@@ -36,9 +36,14 @@
                 });
             },
             error: function(response) {
+                var errors = response.responseJSON && response.responseJSON.errors || [];
+
                 $('#csharp').collapse('hide');
                 $('#warnings').collapse('hide');
-                $('#errors').text(response.responseJSON.errors.join('\n')).collapse('show');
+
+                if (errors.length > 0) {
+                    $('#errors').text(errors.join('\n')).collapse('show');
+                }
             },
             complete: function() {
                 unblockUi();

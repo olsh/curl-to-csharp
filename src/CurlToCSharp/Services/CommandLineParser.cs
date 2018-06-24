@@ -182,7 +182,7 @@ namespace CurlToCSharp.Services
                 headerValue = value.Slice(valueStartIndex).ToString().Trim();
             }
 
-            if (!convertResult.Data.Headers.TryAdd(headerKey, headerValue))
+            if (string.IsNullOrEmpty(headerValue) || !convertResult.Data.Headers.TryAdd(headerKey, headerValue))
             {
                 convertResult.Warnings.Add($"Unable to add header \"{headerKey}\": \"{headerValue}\"");
             }

@@ -4,6 +4,8 @@ using System.Net.Http;
 
 using CurlToCSharp.Services;
 
+using Microsoft.Net.Http.Headers;
+
 using Xunit;
 
 namespace CurlToCSharp.Tests.Services
@@ -171,6 +173,19 @@ POST";
             Assert.Equal(HttpMethod.Post.ToString().ToUpper(), parseResult.Data.HttpMethod);
             Assert.Equal("\\some_data", parseResult.Data.Payload);
             Assert.Equal("https://test.zendesk.com/api/v2/tickets.json", parseResult.Data.Url.ToString());
+        }
+
+        [Fact]
+        public void ParseSettings_EmptyHeaderValue_DoNotAddHeader()
+        {
+            var service = new CommandLineParser();
+
+            var parseResult = service.Parse(new Span<char>(
+                @"$ curl https://sentry.io/api/0/projects/1/groups/ \
+                    -d '{""status"": ""resolved""}' \
+                    -H 'Content-Length:'".ToCharArray()));
+
+            Assert.Empty(parseResult.Data.Headers.Where(h => h.Key == HeaderNames.ContentLength));
         }
     }
 }

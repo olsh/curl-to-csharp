@@ -28,9 +28,7 @@ namespace CurlToCSharp.Services
 
         public ConvertResult<string> ToCsharp(CurlOptions curlOptions)
         {
-            var requestUsing = CreateRequestUsingStatement(curlOptions);
             var compilationUnit = SyntaxFactory.CompilationUnit();
-            var innerBlock = SyntaxFactory.Block();
 
             var result = new ConvertResult<string>();
             if (ShouldGenerateHandler(curlOptions))
@@ -39,32 +37,10 @@ namespace CurlToCSharp.Services
                 compilationUnit = compilationUnit.AddMembers(configureHandlerStatements.ToArray());
             }
 
-            if (curlOptions.Files.Any())
-            {
-                var multipartContentStatements = CreateMultipartContentStatements(curlOptions);
-                innerBlock = innerBlock.AddStatements(multipartContentStatements.ToArray());
-            }
-            else if (!string.IsNullOrWhiteSpace(curlOptions.Payload))
-            {
-                var assignmentExpression = CreateStringContentAssignmentStatement(curlOptions);
-                innerBlock = innerBlock.AddStatements(assignmentExpression);
-            }
-
-            var statements = CreateHeaderAssignmentStatements(curlOptions);
-            innerBlock = innerBlock.AddStatements(statements.ToArray());
-
-            if (!string.IsNullOrEmpty(curlOptions.UserPasswordPair))
-            {
-                var basicAuthorizationStatements = CreateBasicAuthorizationStatements(curlOptions);
-                innerBlock = innerBlock.AddStatements(basicAuthorizationStatements.ToArray());
-            }
-
-            var sendStatement = CreateSendStatement();
-            innerBlock = innerBlock.AddStatements(sendStatement);
-
             var httpClientUsing = CreateHttpClientUsing(curlOptions);
+            var requestUsingStatements = CreateRequestUsingStatements(curlOptions);
 
-            httpClientUsing = httpClientUsing.WithStatement(SyntaxFactory.Block(requestUsing.WithStatement(innerBlock)));
+            httpClientUsing = httpClientUsing.WithStatement(SyntaxFactory.Block(requestUsingStatements));
             result.Data = compilationUnit.AddMembers(SyntaxFactory.GlobalStatement(httpClientUsing))
                 .NormalizeWhitespace()
                 .ToFullString();
@@ -87,6 +63,14 @@ namespace CurlToCSharp.Services
             return curlOptions.HasCookies || (curlOptions.HasProxy && IsSupportedProxy(curlOptions.ProxyUri));
         }
 
+        /// <summary>
+        /// Generates the string content assignment statement.
+        /// </summary>
+        /// <param name="curlOptions">The curl options.</param>
+        /// <returns><see cref="EmptyStatementSyntax"/> statement.</returns>
+        /// <remarks>
+        /// request.Content = new StringContent("{\"status\": \"resolved\"}", Encoding.UTF8, "application/json");
+        /// </remarks>
         private ExpressionStatementSyntax CreateStringContentAssignmentStatement(CurlOptions curlOptions)
         {
             var stringContentCreation = CreateStringContentCreation(curlOptions);
@@ -99,6 +83,17 @@ namespace CurlToCSharp.Services
                 .AppendWhiteSpace();
         }
 
+        /// <summary>
+        /// Generates the multipart content statements.
+        /// </summary>
+        /// <param name="curlOptions">The curl options.</param>
+        /// <returns>Collection of <see cref="StatementSyntax"/>.</returns>
+        /// <remarks>
+        /// var multipartContent = new MultipartContent();
+        /// multipartContent.Add(new StringContent("test", Encoding.UTF8, "application/x-www-form-urlencoded"));
+        /// multipartContent.Add(new ByteArrayContent(File.ReadAllBytes("file1.txt")));
+        /// request.Content = multipartContent;
+        /// </remarks>
         private IEnumerable<StatementSyntax> CreateMultipartContentStatements(CurlOptions curlOptions)
         {
             var statements = new LinkedList<StatementSyntax>();
@@ -123,16 +118,9 @@ namespace CurlToCSharp.Services
                 statements.AddLast(addStatement.AppendWhiteSpace());
             }
 
-            foreach (var file in curlOptions.Files)
+            foreach (var file in curlOptions.DataFiles)
             {
-                var fileReadExpression = RoslynExtensions.CreateInvocationExpression(
-                    "File",
-                    "ReadAllBytes",
-                    RoslynExtensions.CreateStringLiteralArgument(file));
-
-                var byteArrayContentExpression = RoslynExtensions.CreateObjectCreationExpression(
-                    "ByteArrayContent",
-                    SyntaxFactory.Argument(fileReadExpression));
+                var byteArrayContentExpression = CreateNewByteArrayContentExpression(file);
 
                 var addStatement = SyntaxFactory.ExpressionStatement(
                     RoslynExtensions.CreateInvocationExpression(
@@ -154,6 +142,35 @@ namespace CurlToCSharp.Services
             return statements;
         }
 
+        /// <summary>
+        /// Generates the new byte array content expression.
+        /// </summary>
+        /// <param name="fileName">The file name.</param>
+        /// <returns><see cref="ObjectCreationExpressionSyntax"/> expression.</returns>
+        /// <remarks>
+        /// new ByteArrayContent(File.ReadAllBytes("file1.txt"))
+        /// </remarks>
+        private ObjectCreationExpressionSyntax CreateNewByteArrayContentExpression(string fileName)
+        {
+            var fileReadExpression = RoslynExtensions.CreateInvocationExpression(
+                "File",
+                "ReadAllBytes",
+                RoslynExtensions.CreateStringLiteralArgument(fileName));
+
+            var byteArrayContentExpression = RoslynExtensions.CreateObjectCreationExpression(
+                "ByteArrayContent",
+                SyntaxFactory.Argument(fileReadExpression));
+            return byteArrayContentExpression;
+        }
+
+        /// <summary>
+        /// Generates the string content creation expression.
+        /// </summary>
+        /// <param name="curlOptions">The curl options.</param>
+        /// <returns><see cref="ObjectCreationExpressionSyntax"/> expression.</returns>
+        /// <remarks>
+        /// new StringContent("{\"status\": \"resolved\"}", Encoding.UTF8, "application/json")
+        /// </remarks>
         private ObjectCreationExpressionSyntax CreateStringContentCreation(CurlOptions curlOptions)
         {
             var arguments = new LinkedList<ArgumentSyntax>();
@@ -170,6 +187,15 @@ namespace CurlToCSharp.Services
             return stringContentCreation;
         }
 
+        /// <summary>
+        /// Generates the header assignment statements.
+        /// </summary>
+        /// <param name="options">The options.</param>
+        /// <returns>Collection of <see cref="StatementSyntax"/></returns>
+        /// <remarks>
+        /// request.Headers.TryAddWithoutValidation("Accept", "application/json");
+        /// request.Headers.TryAddWithoutValidation("User-Agent", "curl/7.60.0");
+        /// </remarks>
         private IEnumerable<StatementSyntax> CreateHeaderAssignmentStatements(CurlOptions options)
         {
             if (!options.Headers.Any() && !options.HasCookies)
@@ -205,6 +231,15 @@ namespace CurlToCSharp.Services
             return statements;
         }
 
+        /// <summary>
+        /// Generates the basic authorization statements.
+        /// </summary>
+        /// <param name="options">The options.</param>
+        /// <returns>Collection of <see cref="StatementSyntax"/>.</returns>
+        /// <remarks>
+        /// var base64authorization = Convert.ToBase64String(Encoding.ASCII.GetBytes("username:password"));
+        /// request.Headers.TryAddWithoutValidation("Authorization", $"Basic {base64authorization}");
+        /// </remarks>
         private IEnumerable<StatementSyntax> CreateBasicAuthorizationStatements(CurlOptions options)
         {
             var authorizationEncodingStatement = CreateBasicAuthorizationEncodingStatement(options);
@@ -221,6 +256,14 @@ namespace CurlToCSharp.Services
             return new StatementSyntax[] { authorizationEncodingStatement, tryAddHeaderStatement };
         }
 
+        /// <summary>
+        /// Generates the basic authorization encoding statement.
+        /// </summary>
+        /// <param name="options">The options.</param>
+        /// <returns><see cref="LocalDeclarationStatementSyntax"/> statement.</returns>
+        /// <remarks>
+        /// var base64authorization = Convert.ToBase64String(Encoding.ASCII.GetBytes("username:password"));
+        /// </remarks>
         private LocalDeclarationStatementSyntax CreateBasicAuthorizationEncodingStatement(CurlOptions options)
         {
             var asciiGetBytesInvocation = RoslynExtensions.CreateInvocationExpression(
@@ -241,6 +284,15 @@ namespace CurlToCSharp.Services
             return SyntaxFactory.LocalDeclarationStatement(declarationSyntax);
         }
 
+        /// <summary>
+        /// Generates the headers adding statement.
+        /// </summary>
+        /// <param name="keyArgumentSyntax">The header key argument syntax.</param>
+        /// <param name="valueArgumentSyntax">The header value argument syntax.</param>
+        /// <returns><see cref="ExpressionStatementSyntax"/> statement.</returns>
+        /// <remarks>
+        /// request.Headers.TryAddWithoutValidation("Accept", "application/json");
+        /// </remarks>
         private ExpressionStatementSyntax CreateTryAddHeaderStatement(ArgumentSyntax keyArgumentSyntax, ArgumentSyntax valueArgumentSyntax)
         {
             var invocationExpressionSyntax = RoslynExtensions.CreateInvocationExpression(
@@ -253,6 +305,16 @@ namespace CurlToCSharp.Services
             return SyntaxFactory.ExpressionStatement(invocationExpressionSyntax);
         }
 
+        /// <summary>
+        /// Generate the HttpClient using statements with empty using block.
+        /// </summary>
+        /// <param name="curlOptions">The curl options.</param>
+        /// <returns>Collection of <see cref="UsingStatementSyntax"/>.</returns>
+        /// <remarks>
+        /// using (var httpClient = new HttpClient())
+        /// {
+        /// }
+        /// </remarks>
         private UsingStatementSyntax CreateHttpClientUsing(CurlOptions curlOptions)
         {
             var argumentSyntax = ShouldGenerateHandler(curlOptions)
@@ -261,20 +323,103 @@ namespace CurlToCSharp.Services
             return RoslynExtensions.CreateUsingStatement(HttpClientVariableName, nameof(HttpClient), argumentSyntax);
         }
 
-        private UsingStatementSyntax CreateRequestUsingStatement(CurlOptions curlOptions)
+        /// <summary>
+        /// Generate the HttpRequestMessage using statements with statements inside the using blocks.
+        /// </summary>
+        /// <param name="curlOptions">The curl options.</param>
+        /// <returns>Collection of <see cref="UsingStatementSyntax"/>.</returns>
+        /// <remarks>
+        /// using (var request = new HttpRequestMessage(new HttpMethod("GET"), "https://github.com/"))
+        /// {
+        ///     var response = await httpClient.SendAsync(request);
+        /// }
+        /// </remarks>
+        private IEnumerable<UsingStatementSyntax> CreateRequestUsingStatements(CurlOptions curlOptions)
         {
+            var innerBlock = SyntaxFactory.Block();
+
             var methodNameArgument = RoslynExtensions.CreateStringLiteralArgument(curlOptions.HttpMethod);
             var httpMethodArgument = RoslynExtensions.CreateObjectCreationExpression(nameof(HttpMethod), methodNameArgument);
 
             var urlArgument = RoslynExtensions.CreateStringLiteralArgument(curlOptions.Url.ToString());
-
-            return RoslynExtensions.CreateUsingStatement(
+            var requestUsingStatement = RoslynExtensions.CreateUsingStatement(
                 RequestVariableName,
                 nameof(HttpRequestMessage),
                 SyntaxFactory.Argument(httpMethodArgument),
                 urlArgument);
+
+            var statements = CreateHeaderAssignmentStatements(curlOptions);
+            innerBlock = innerBlock.AddStatements(statements.ToArray());
+
+            if (!string.IsNullOrEmpty(curlOptions.UserPasswordPair))
+            {
+                var basicAuthorizationStatements = CreateBasicAuthorizationStatements(curlOptions);
+                innerBlock = innerBlock.AddStatements(basicAuthorizationStatements.ToArray());
+            }
+
+            var requestInnerBlocks = new LinkedList<UsingStatementSyntax>();
+            if (curlOptions.DataFiles.Any())
+            {
+                var multipartContentStatements = CreateMultipartContentStatements(curlOptions);
+                requestInnerBlocks.AddLast(
+                    requestUsingStatement.WithStatement(
+                        innerBlock.AddStatements(multipartContentStatements.ToArray())));
+            }
+            else if (!string.IsNullOrWhiteSpace(curlOptions.Payload))
+            {
+                var assignmentExpression = CreateStringContentAssignmentStatement(curlOptions);
+                requestInnerBlocks.AddLast(
+                    requestUsingStatement.WithStatement(innerBlock.AddStatements(assignmentExpression)));
+            }
+            else if (curlOptions.UploadFiles.Any())
+            {
+                foreach (var file in curlOptions.UploadFiles)
+                {
+                    // NOTE that you must use a trailing / on the last directory to really prove to
+                    // Curl that there is no file name or curl will think that your last directory name is the remote file name to use.
+                    if (!string.IsNullOrEmpty(curlOptions.Url.PathAndQuery)
+                        && curlOptions.Url.PathAndQuery.EndsWith('/'))
+                    {
+                        var objectCreationExpressionSyntaxs = requestUsingStatement.DescendantNodes()
+                            .OfType<ObjectCreationExpressionSyntax>()
+                            .First(
+                                t => t.Type is IdentifierNameSyntax identifier
+                                     && identifier.Identifier.ValueText == nameof(HttpRequestMessage));
+
+                        var s = objectCreationExpressionSyntaxs.ArgumentList.Arguments.Last();
+
+                        requestUsingStatement = requestUsingStatement.ReplaceNode(
+                            s,
+                            RoslynExtensions.CreateStringLiteralArgument(curlOptions.GetUrlForFileUpload(file).ToString()));
+                    }
+
+                    var byteArrayContentExpression = CreateNewByteArrayContentExpression(file);
+                    requestInnerBlocks.AddLast(requestUsingStatement.WithStatement(innerBlock.AddStatements(
+                        SyntaxFactory.ExpressionStatement(
+                                RoslynExtensions.CreateMemberAssignmentExpression(
+                                    RequestVariableName,
+                                    RequestContentPropertyName,
+                                    byteArrayContentExpression))
+                            .AppendWhiteSpace())));
+                }
+            }
+
+            var sendStatement = CreateSendStatement();
+            if (!requestInnerBlocks.Any())
+            {
+                return new List<UsingStatementSyntax> { requestUsingStatement.WithStatement(innerBlock.AddStatements(sendStatement)) };
+            }
+
+            return requestInnerBlocks.Select(i => i.WithStatement(((BlockSyntax)i.Statement).AddStatements(sendStatement)));
         }
 
+        /// <summary>
+        /// Generate the statements for sending a HttpRequestMessage.
+        /// </summary>
+        /// <returns><see cref="LocalDeclarationStatementSyntax"/> statement.</returns>
+        /// <remarks>
+        /// var response = await httpClient.SendAsync(request);
+        /// </remarks>
         private LocalDeclarationStatementSyntax CreateSendStatement()
         {
             var invocationExpressionSyntax = RoslynExtensions.CreateInvocationExpression(
@@ -289,6 +434,16 @@ namespace CurlToCSharp.Services
             return SyntaxFactory.LocalDeclarationStatement(declarationSyntax);
         }
 
+        /// <summary>
+        /// Generate the statements for HttpClient handler configuration.
+        /// </summary>
+        /// <param name="curlOptions">The curl options.</param>
+        /// <param name="result">The result.</param>
+        /// <returns>Collection of <see cref="MemberDeclarationSyntax" />.</returns>
+        /// <remarks>
+        /// var handler = new HttpClientHandler();
+        /// handler.UseCookies = false;
+        /// </remarks>
         private IEnumerable<MemberDeclarationSyntax> ConfigureHandlerStatements(
             CurlOptions curlOptions,
             ConvertResult<string> result)

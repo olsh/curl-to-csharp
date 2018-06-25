@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 using CurlToCSharp.Models;
 using CurlToCSharp.Services;
 
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 
@@ -16,7 +19,7 @@ namespace CurlToCSharp.Tests.Services
     public class ConverterServiceTests
     {
         [Fact]
-        public void ToCsharp_ValidCurlOptions_CanBeParsed()
+        public void ToCsharp_ValidCurlOptions_CanBeCompiled()
         {
             var converterService = new ConverterService();
             var curlOptions = new CurlOptions
@@ -31,7 +34,44 @@ namespace CurlToCSharp.Tests.Services
 
             var result = converterService.ToCsharp(curlOptions);
 
-            CSharpSyntaxTree.ParseText(result.Data);
+            var tree = WrapToClass(result.Data);
+            var diagnostics = tree.GetDiagnostics();
+
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
+        public void ToCsharp_GetRequest_ContainsSendStatement()
+        {
+            var converterService = new ConverterService();
+            var curlOptions = new CurlOptions
+                                  {
+                                      HttpMethod = HttpMethod.Get.ToString().ToUpper(),
+                                      Url = new Uri("https://google.com")
+                                  };
+
+            var result = converterService.ToCsharp(curlOptions);
+
+            var tree = CSharpSyntaxTree.ParseText(result.Data);
+            Assert.NotEmpty(tree.GetRoot()
+                .DescendantNodes()
+                .OfType<MemberAccessExpressionSyntax>()
+                .Where(ae => ae.Name.Identifier.ValueText == "SendAsync"));
+        }
+
+        private SyntaxTree WrapToClass(string code)
+        {
+            var wrapCode = $@"
+class TestClass
+{{
+    public void TestMethod()
+    {{
+        {code}
+    }}
+}}
+";
+
+            return CSharpSyntaxTree.ParseText(wrapCode);
         }
     }
 }

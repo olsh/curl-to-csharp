@@ -110,9 +110,9 @@ namespace CurlToCSharp.Tests.Services
             var curl = @"curl -u ""demo"" -X POST -d @""file1.txt"" -d @file2.txt https://example.com/upload";
             var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
 
-            Assert.Equal(2, parseResult.Data.Files.Count);
-            Assert.Equal("file1.txt", parseResult.Data.Files.ElementAt(0));
-            Assert.Equal("file2.txt", parseResult.Data.Files.ElementAt(1));
+            Assert.Equal(2, parseResult.Data.DataFiles.Count);
+            Assert.Equal("file1.txt", parseResult.Data.DataFiles.ElementAt(0));
+            Assert.Equal("file2.txt", parseResult.Data.DataFiles.ElementAt(1));
         }
 
         [Fact]
@@ -173,6 +173,49 @@ POST";
             Assert.Equal(HttpMethod.Post.ToString().ToUpper(), parseResult.Data.HttpMethod);
             Assert.Equal("\\some_data", parseResult.Data.Payload);
             Assert.Equal("https://test.zendesk.com/api/v2/tickets.json", parseResult.Data.Url.ToString());
+        }
+
+        [Fact]
+        public void ParseSettings_UploadSingleFile_CorrectlyParsed()
+        {
+            var service = new CommandLineParser();
+
+            var curl = @"curl --upload-file 'file.txt' http://www.example.com";
+
+            var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
+
+            Assert.Equal(HttpMethod.Put.ToString().ToUpper(), parseResult.Data.HttpMethod);
+            Assert.Equal(1, parseResult.Data.UploadFiles.Count);
+            Assert.Contains("file.txt", parseResult.Data.UploadFiles);
+        }
+
+        [Fact]
+        public void ParseSettings_UploadCommaSeparatedFiles_CorrectlyParsed()
+        {
+            var service = new CommandLineParser();
+
+            var curl = @"curl --upload-file ""{file1,file2}"" http://www.example.com";
+
+            var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
+
+            Assert.Equal(2, parseResult.Data.UploadFiles.Count);
+            Assert.Contains("file1", parseResult.Data.UploadFiles);
+            Assert.Contains("file2", parseResult.Data.UploadFiles);
+        }
+
+        [Fact]
+        public void ParseSettings_UploadRangeFiles_CorrectlyParsed()
+        {
+            var service = new CommandLineParser();
+
+            var curl = @"curl -T ""img[1-3].png"" http://www.example.com";
+
+            var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
+
+            Assert.Equal(3, parseResult.Data.UploadFiles.Count);
+            Assert.Contains("img1.png", parseResult.Data.UploadFiles);
+            Assert.Contains("img2.png", parseResult.Data.UploadFiles);
+            Assert.Contains("img3.png", parseResult.Data.UploadFiles);
         }
 
         [Fact]

@@ -124,6 +124,10 @@ namespace CurlToCSharp.Services
                     case "--proxy":
                         EvaluateProxyValue(convertResult, ref commandLine);
                         break;
+                    case "-T":
+                    case "--upload-file":
+                        EvaluateUploadFileParameter(convertResult, ref commandLine);
+                        break;
                     default:
                         convertResult.Warnings.Add($"Parameter \"{par}\" is not supported");
                         break;
@@ -199,11 +203,65 @@ namespace CurlToCSharp.Services
             var value = ReadValue(ref commandLine);
             if (isFileEntry)
             {
-                convertResult.Data.Files.Add(value.ToString());
+                convertResult.Data.DataFiles.Add(value.ToString());
             }
             else
             {
                 convertResult.Data.PayloadCollection.Add(value.ToString());
+            }
+        }
+
+        private void EvaluateUploadFileParameter(ConvertResult<CurlOptions> convertResult, ref Span<char> commandLine)
+        {
+            var value = ReadValue(ref commandLine);
+
+            if (value.IsEmpty)
+            {
+                return;
+            }
+
+            // Comma separated list of files
+            if (value.Length > 1 && value[0] == '{' && value[value.Length - 1] == '}')
+            {
+                var filesSpan = value.Slice(1, value.Length - 2);
+                if (filesSpan.IsEmpty)
+                {
+                    return;
+                }
+
+                foreach (var file in filesSpan.ToString()
+                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    convertResult.Data.UploadFiles.Add(file.Trim());
+                }
+            }
+            else
+            {
+                // Range of files
+                var stringValue = value.ToString();
+                var match = Regex.Match(stringValue, @"\[(?<start>\d+)-(?<end>\d+)\]");
+                if (match.Success)
+                {
+                    var start = int.Parse(match.Groups["start"].Value);
+                    var end = int.Parse(match.Groups["end"].Value);
+
+                    if (start >= end)
+                    {
+                        return;
+                    }
+
+                    var firstPart = stringValue.Substring(0, match.Index);
+                    var lastPart = stringValue.Substring(match.Index + match.Length);
+
+                    for (int i = start; i <= end; i++)
+                    {
+                        convertResult.Data.UploadFiles.Add($"{firstPart}{i}{lastPart}");
+                    }
+                }
+                else
+                {
+                    convertResult.Data.UploadFiles.Add(stringValue);
+                }
             }
         }
 
@@ -350,12 +408,25 @@ namespace CurlToCSharp.Services
                 result.Data.Url = url;
             }
 
-            var hasDataUpload = result.Data.Files.Any() || result.Data.PayloadCollection.Any();
+            var hasDataUpload = result.Data.DataFiles.Any() || result.Data.PayloadCollection.Any();
+
+            // This option overrides -F, --form and -I, --head and -T, --upload-file.
+            if (hasDataUpload)
+            {
+                result.Data.UploadFiles.Clear();
+            }
+
+            var hasFileUpload = result.Data.UploadFiles.Any();
             if (result.Data.HttpMethod == null)
             {
                 if (hasDataUpload)
                 {
                     result.Data.HttpMethod = HttpMethod.Post.ToString()
+                        .ToUpper();
+                }
+                else if (hasFileUpload)
+                {
+                    result.Data.HttpMethod = HttpMethod.Put.ToString()
                         .ToUpper();
                 }
                 else

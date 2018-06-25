@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net.Http;
 
+using CurlToCSharp.Models;
 using CurlToCSharp.Services;
 
 using Microsoft.Net.Http.Headers;
@@ -15,7 +16,7 @@ namespace CurlToCSharp.Tests.Services
         [Fact]
         public void ParseSettings_SimpleConfiguration_DefaultMethodIsGet()
         {
-            var service = new CommandLineParser();
+            var service = CreateCommandLineParser();
 
             var parseResult = service.Parse(new Span<char>(@"curl -i https://sentry.io/api/0/".ToCharArray()));
 
@@ -26,7 +27,7 @@ namespace CurlToCSharp.Tests.Services
         [Fact]
         public void ParseSettings_ValidConfiguration_Success()
         {
-            var service = new CommandLineParser();
+            var service = CreateCommandLineParser();
 
             var curl = @"curl -X POST -H ""Content-Type: application/json"" -H ""Authorization: Bearer b7d03a6947b217efb6f3ec3bd3504582"" -d '{""type"":""A"",""name"":""www"",""data"":""162.10.66.0"",""priority"":null,""port"":null,""weight"":null}' ""https://api.digitalocean.com/v2/domains/example.com/records""";
             var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
@@ -40,7 +41,7 @@ namespace CurlToCSharp.Tests.Services
         [Fact]
         public void ParseSettings_Multiline_Success()
         {
-            var service = new CommandLineParser();
+            var service = CreateCommandLineParser();
 
             var parseResult = service.Parse(new Span<char>(
                 @"$ curl -i https://sentry.io/api/0/projects/1/groups/ \
@@ -56,7 +57,7 @@ namespace CurlToCSharp.Tests.Services
         [Fact]
         public void ParseSettings_UrlWithoutHttp_UrlParsed()
         {
-            var service = new CommandLineParser();
+            var service = CreateCommandLineParser();
 
             var parseResult = service.Parse(new Span<char>(@"curl sentry.io".ToCharArray()));
 
@@ -67,7 +68,7 @@ namespace CurlToCSharp.Tests.Services
         [Fact]
         public void ParseSettings_UnknownParameterWithUrlAtEnd_UrlParsed()
         {
-            var service = new CommandLineParser();
+            var service = CreateCommandLineParser();
 
             var curl = @"curl -unknown ""demo"" -X POST -d @file1.txt -d @file2.txt https://example.com/upload";
             var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
@@ -78,7 +79,7 @@ namespace CurlToCSharp.Tests.Services
         [Fact]
         public void ParseSettings_UnknownParameterWithUrlAtEnd2_UrlParsed()
         {
-            var service = new CommandLineParser();
+            var service = CreateCommandLineParser();
 
             var curl = @"curl --user username:password -X POST -d ""browser=Win7x64-C1|Chrome32|1024x768&url=http://www.google.com"" http://crossbrowsertesting.com/api/v3/livetests/";
             var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
@@ -90,7 +91,7 @@ namespace CurlToCSharp.Tests.Services
         [Fact]
         public void ParseSettings_MultipleData_DataConcatenated()
         {
-            var service = new CommandLineParser();
+            var service = CreateCommandLineParser();
 
             var curl = @"curl -X POST https://api.easypost.com/v2/shipments \
                              -u API_KEY: \
@@ -105,7 +106,7 @@ namespace CurlToCSharp.Tests.Services
         [Fact]
         public void ParseSettings_FilesData_FilesParsed()
         {
-            var service = new CommandLineParser();
+            var service = CreateCommandLineParser();
 
             var curl = @"curl -u ""demo"" -X POST -d @""file1.txt"" -d @file2.txt https://example.com/upload";
             var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
@@ -118,7 +119,7 @@ namespace CurlToCSharp.Tests.Services
         [Fact]
         public void ParseSettings_EmptyParameter_DoesntFail()
         {
-            var service = new CommandLineParser();
+            var service = CreateCommandLineParser();
 
             var curl = @"curl -u";
             service.Parse(new Span<char>(curl.ToCharArray()));
@@ -127,7 +128,7 @@ namespace CurlToCSharp.Tests.Services
         [Fact]
         public void ParseSettings_EscapedString_CorrectlyParsed()
         {
-            var service = new CommandLineParser();
+            var service = CreateCommandLineParser();
 
             var curl = @"curl -d ""\""""";
             var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
@@ -138,7 +139,7 @@ namespace CurlToCSharp.Tests.Services
         [Fact]
         public void ParseSettings_MultipleEscapedString_CorrectlyParsed()
         {
-            var service = new CommandLineParser();
+            var service = CreateCommandLineParser();
 
             var curl = @"curl -d ""\"""" -d '\'' -d '""' -d ""'""";
             var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
@@ -149,7 +150,7 @@ namespace CurlToCSharp.Tests.Services
         [Fact]
         public void ParseSettings_HeaderWithMultipleSeparators_CorrectlyParsed()
         {
-            var service = new CommandLineParser();
+            var service = CreateCommandLineParser();
 
             var curl = @"curl http://fiddle.jshell.net/echo/html/ -H 'Referer: http://fiddle.jshell.net/_display/'";
             var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
@@ -160,7 +161,7 @@ namespace CurlToCSharp.Tests.Services
         [Fact]
         public void ParseSettings_NewLines_CorrectlyParsed()
         {
-            var service = new CommandLineParser();
+            var service = CreateCommandLineParser();
 
             var curl = @"curl \
 https://test.zendesk.com/api/v2/tickets.json \
@@ -178,7 +179,7 @@ POST";
         [Fact]
         public void ParseSettings_UploadSingleFile_CorrectlyParsed()
         {
-            var service = new CommandLineParser();
+            var service = CreateCommandLineParser();
 
             var curl = @"curl --upload-file 'file.txt' http://www.example.com";
 
@@ -192,7 +193,7 @@ POST";
         [Fact]
         public void ParseSettings_UploadCommaSeparatedFiles_CorrectlyParsed()
         {
-            var service = new CommandLineParser();
+            var service = CreateCommandLineParser();
 
             var curl = @"curl --upload-file ""{file1,file2}"" http://www.example.com";
 
@@ -206,7 +207,7 @@ POST";
         [Fact]
         public void ParseSettings_UploadRangeFiles_CorrectlyParsed()
         {
-            var service = new CommandLineParser();
+            var service = CreateCommandLineParser();
 
             var curl = @"curl -T ""img[1-3].png"" http://www.example.com";
 
@@ -221,7 +222,7 @@ POST";
         [Fact]
         public void ParseSettings_EmptyHeaderValue_DoNotAddHeader()
         {
-            var service = new CommandLineParser();
+            var service = CreateCommandLineParser();
 
             var parseResult = service.Parse(new Span<char>(
                 @"$ curl https://sentry.io/api/0/projects/1/groups/ \
@@ -229,6 +230,11 @@ POST";
                     -H 'Content-Length:'".ToCharArray()));
 
             Assert.Empty(parseResult.Data.Headers.Where(h => h.Key == HeaderNames.ContentLength));
+        }
+
+        private static CommandLineParser CreateCommandLineParser()
+        {
+            return new CommandLineParser(new ParsingOptions(10));
         }
     }
 }

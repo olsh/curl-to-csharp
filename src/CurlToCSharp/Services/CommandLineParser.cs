@@ -21,6 +21,13 @@ namespace CurlToCSharp.Services
 
         private const char EscapeChar = '\\';
 
+        private readonly ParsingOptions _parsingOptions;
+
+        public CommandLineParser(ParsingOptions parsingOptions)
+        {
+            _parsingOptions = parsingOptions;
+        }
+
         public ConvertResult<CurlOptions> Parse(Span<char> commandLine)
         {
             if (commandLine.IsEmpty)
@@ -213,6 +220,11 @@ namespace CurlToCSharp.Services
 
         private void EvaluateUploadFileParameter(ConvertResult<CurlOptions> convertResult, ref Span<char> commandLine)
         {
+            void AddFilesLimitWarning()
+            {
+                convertResult.Warnings.Add($"Only first {_parsingOptions.MaxUploadFiles} files were parsed");
+            }
+
             var value = ReadValue(ref commandLine);
 
             if (value.IsEmpty)
@@ -229,10 +241,17 @@ namespace CurlToCSharp.Services
                     return;
                 }
 
-                foreach (var file in filesSpan.ToString()
-                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                var files = filesSpan.ToString()
+                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    .ToList();
+                foreach (var file in files.Take(_parsingOptions.MaxUploadFiles))
                 {
                     convertResult.Data.UploadFiles.Add(file.Trim());
+                }
+
+                if (files.Count > _parsingOptions.MaxUploadFiles)
+                {
+                    AddFilesLimitWarning();
                 }
             }
             else
@@ -242,16 +261,25 @@ namespace CurlToCSharp.Services
                 var match = Regex.Match(stringValue, @"\[(?<start>\d+)-(?<end>\d+)\]");
                 if (match.Success)
                 {
-                    var start = int.Parse(match.Groups["start"].Value);
-                    var end = int.Parse(match.Groups["end"].Value);
+                    int.TryParse(match.Groups["start"].Value, out int start);
+                    int.TryParse(match.Groups["end"].Value, out int end);
 
                     if (start >= end)
                     {
+                        convertResult.Warnings.Add("Invalid upload files range");
+
                         return;
                     }
 
                     var firstPart = stringValue.Substring(0, match.Index);
                     var lastPart = stringValue.Substring(match.Index + match.Length);
+
+                    var totalFiles = end - start + 1;
+                    if (totalFiles > _parsingOptions.MaxUploadFiles)
+                    {
+                        AddFilesLimitWarning();
+                        end = start + _parsingOptions.MaxUploadFiles - 1;
+                    }
 
                     for (int i = start; i <= end; i++)
                     {

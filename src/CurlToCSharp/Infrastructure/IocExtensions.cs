@@ -1,6 +1,8 @@
-﻿using CurlToCSharp.Services;
+﻿using CurlToCSharp.Models;
+using CurlToCSharp.Services;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace CurlToCSharp.Infrastructure
 {
@@ -8,7 +10,7 @@ namespace CurlToCSharp.Infrastructure
     {
         public static void RegisterServices(this IServiceCollection services)
         {
-            services.AddSingleton<ICommandLineParser, CommandLineParser>();
+            services.AddSingleton<ICommandLineParser>(provider => new CommandLineParser(provider.GetService<IOptions<ApplicationOptions>>().Value.Parsing));
             services.AddSingleton<IConverterService, ConverterService>();
         }
     }

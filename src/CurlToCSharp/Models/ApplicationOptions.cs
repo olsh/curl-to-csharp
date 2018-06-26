@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace CurlToCSharp.Models
+﻿namespace CurlToCSharp.Models
 {
     public class ApplicationOptions
     {

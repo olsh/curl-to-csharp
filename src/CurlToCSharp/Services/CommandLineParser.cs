@@ -386,15 +386,15 @@ namespace CurlToCSharp.Services
             }
 
             int end;
-            for (end = input.Length - 1; end > 0; end--)
+            for (end = input.Length - 1; end > start; end--)
             {
-                if (!char.IsWhiteSpace(input[start]))
+                if (!char.IsWhiteSpace(input[end]))
                 {
                     break;
                 }
             }
 
-            input = input.Slice(start, end + 1 - start);
+            input = input.Slice(start, end - start + 1);
         }
 
         private void TrimQuotes(ref Span<char> input, char quote)

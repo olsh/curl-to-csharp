@@ -232,6 +232,17 @@ POST";
             Assert.Empty(parseResult.Data.Headers.Where(h => h.Key == HeaderNames.ContentLength));
         }
 
+        [Fact]
+        public void ParseSettings_SlashAtEnd_CorrectlyParsed()
+        {
+            var service = CreateCommandLineParser();
+
+            var parseResult = service.Parse(new Span<char>(
+                @"$ curl ya.ru    \".ToCharArray()));
+
+            Assert.NotNull(parseResult.Data.Url);
+        }
+
         private static CommandLineParser CreateCommandLineParser()
         {
             return new CommandLineParser(new ParsingOptions(10));

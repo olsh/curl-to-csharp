@@ -176,11 +176,12 @@ namespace CurlToCSharp.Services
             var arguments = new LinkedList<ArgumentSyntax>();
             arguments.AddLast(RoslynExtensions.CreateStringLiteralArgument(curlOptions.Payload));
 
-            var contentHeader = curlOptions.Headers.GetCommaSeparatedValues(HeaderNames.ContentType);
-            if (contentHeader.Any())
+            var contentHeader = curlOptions.Headers.GetCommaSeparatedValues(HeaderNames.ContentType).FirstOrDefault();
+            if (!string.IsNullOrEmpty(contentHeader))
             {
+                var contentTypeValues = contentHeader.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
                 arguments.AddLast(SyntaxFactory.Argument(RoslynExtensions.CreateMemberAccessExpression("Encoding", "UTF8")));
-                arguments.AddLast(RoslynExtensions.CreateStringLiteralArgument(contentHeader.First()));
+                arguments.AddLast(RoslynExtensions.CreateStringLiteralArgument(contentTypeValues[0].Trim()));
             }
 
             var stringContentCreation = RoslynExtensions.CreateObjectCreationExpression("StringContent", arguments.ToArray());

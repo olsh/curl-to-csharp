@@ -120,8 +120,7 @@ namespace CurlToCSharp.Services
                         convertResult.Data.UserPasswordPair = ReadValueAsString(ref commandLine);
                         break;
                     case "--url":
-                        var val = ReadValueAsString(ref commandLine);
-                        EvaluateUrlValue(convertResult, val);
+                        EvaluateUrlValue(convertResult, ref commandLine);
                         break;
                     case "-b":
                     case "--cookie":
@@ -160,16 +159,18 @@ namespace CurlToCSharp.Services
             convertResult.Data.ProxyUri = proxyUri;
         }
 
-        private void EvaluateUrlValue(ConvertResult<CurlOptions> convertResult, string val)
+        private void EvaluateUrlValue(ConvertResult<CurlOptions> convertResult, ref Span<char> commandLine)
         {
-            if (Uri.TryCreate(val, UriKind.Absolute, out var url)
-                || Uri.TryCreate($"http://{val}", UriKind.Absolute, out url))
+            var value = ReadValue(ref commandLine);
+            var stringValue = value.ToString();
+            if (Uri.TryCreate(stringValue, UriKind.Absolute, out var url)
+                || Uri.TryCreate($"http://{stringValue}", UriKind.Absolute, out url))
             {
                 convertResult.Data.Url = url;
             }
             else
             {
-                convertResult.Warnings.Add($"Unable to parse URL \"{val}\"");
+                convertResult.Warnings.Add($"Unable to parse URL \"{stringValue}\"");
             }
         }
 
@@ -295,8 +296,6 @@ namespace CurlToCSharp.Services
 
         private Span<char> ReadParameter(ref Span<char> commandLine)
         {
-            Trim(ref commandLine);
-
             var indexOfSpace = commandLine.IndexOf(Space);
             if (indexOfSpace == -1)
             {

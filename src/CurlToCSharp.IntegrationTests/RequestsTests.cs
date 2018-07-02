@@ -36,7 +36,6 @@ namespace CurlToCSharp.IntegrationTests
         [InlineData("-d \"some data\" -d \"another data\"")]
         [InlineData("-d \"some data\" -d @\"Resources\\\\text-file.txt\"")]
         [InlineData("-d \"some data\" --data-binary @\"Resources\\\\text-file.txt\"")]
-        [InlineData("-d \"some data\" --data-raw @\"Resources\\\\text-file.txt\"")]
         public void Data(string arguments)
         {
             AssertResponsesTheSame(arguments);

@@ -11,18 +11,23 @@ namespace CurlToCSharp.Models
         public CurlOptions()
         {
             Headers = new HttpRequestHeaders();
-            PayloadCollection = new List<string>();
+            Data = new List<string>();
             DataFiles = new List<string>();
+            BinaryDataFiles = new List<string>();
             UploadFiles = new List<string>();
         }
 
         public string CookieValue { get; set; }
 
+        public ICollection<string> Data { get; }
+
         public ICollection<string> DataFiles { get; }
 
-        public ICollection<string> UploadFiles { get; }
+        public int DataTotalCount => Data.Count + DataFiles.Count + BinaryDataFiles.Count;
 
         public bool HasCookies => !string.IsNullOrWhiteSpace(CookieValue);
+
+        public bool HasDataPayload => DataTotalCount > 0;
 
         public bool HasProxy => ProxyUri != null;
 
@@ -30,11 +35,11 @@ namespace CurlToCSharp.Models
 
         public string HttpMethod { get; set; }
 
-        public string Payload => string.Join("&", PayloadCollection);
-
-        public ICollection<string> PayloadCollection { get; }
-
         public Uri ProxyUri { get; set; }
+
+        public ICollection<string> BinaryDataFiles { get; }
+
+        public ICollection<string> UploadFiles { get; }
 
         public Uri Url { get; set; }
 

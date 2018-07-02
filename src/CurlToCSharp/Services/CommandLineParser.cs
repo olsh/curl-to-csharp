@@ -105,11 +105,13 @@ namespace CurlToCSharp.Services
                         break;
                     case "-d":
                     case "--data":
+                        EvaluateDataParameter(convertResult, ref commandLine, true, false);
+                        break;
                     case "--data-binary":
-                        EvaluateDataParameter(convertResult, ref commandLine, true);
+                        EvaluateDataParameter(convertResult, ref commandLine, true, true);
                         break;
                     case "--data-raw":
-                        EvaluateDataParameter(convertResult, ref commandLine, false);
+                        EvaluateDataParameter(convertResult, ref commandLine, false, false);
                         break;
                     case "-H":
                     case "--header":
@@ -200,7 +202,11 @@ namespace CurlToCSharp.Services
             }
         }
 
-        private void EvaluateDataParameter(ConvertResult<CurlOptions> convertResult, ref Span<char> commandLine, bool parseFiles)
+        private void EvaluateDataParameter(
+            ConvertResult<CurlOptions> convertResult,
+            ref Span<char> commandLine,
+            bool parseFiles,
+            bool binary)
         {
             var isFileEntry = parseFiles && commandLine[0] == '@';
             if (isFileEntry)
@@ -211,11 +217,18 @@ namespace CurlToCSharp.Services
             var value = ReadValue(ref commandLine);
             if (isFileEntry)
             {
-                convertResult.Data.DataFiles.Add(value.ToString());
+                if (binary)
+                {
+                    convertResult.Data.BinaryDataFiles.Add(value.ToString());
+                }
+                else
+                {
+                    convertResult.Data.DataFiles.Add(value.ToString());
+                }
             }
             else
             {
-                convertResult.Data.PayloadCollection.Add(value.ToString());
+                convertResult.Data.Data.Add(value.ToString());
             }
         }
 
@@ -435,7 +448,7 @@ namespace CurlToCSharp.Services
                 result.Data.Url = url;
             }
 
-            var hasDataUpload = result.Data.DataFiles.Any() || result.Data.PayloadCollection.Any();
+            var hasDataUpload = result.Data.DataFiles.Any() || result.Data.Data.Any();
 
             // This option overrides -F, --form and -I, --head and -T, --upload-file.
             if (hasDataUpload)

@@ -64,78 +64,89 @@ namespace CurlToCSharp.Services
         }
 
         /// <summary>
-        /// Generates the string content assignment statement.
-        /// </summary>
-        /// <param name="curlOptions">The curl options.</param>
-        /// <returns><see cref="EmptyStatementSyntax"/> statement.</returns>
-        /// <remarks>
-        /// request.Content = new StringContent("{\"status\": \"resolved\"}", Encoding.UTF8, "application/json");
-        /// </remarks>
-        private ExpressionStatementSyntax CreateStringContentAssignmentStatement(CurlOptions curlOptions)
-        {
-            var stringContentCreation = CreateStringContentCreation(curlOptions);
-
-            return SyntaxFactory.ExpressionStatement(
-                RoslynExtensions.CreateMemberAssignmentExpression(
-                    RequestVariableName,
-                    RequestContentPropertyName,
-                    stringContentCreation))
-                .AppendWhiteSpace();
-        }
-
-        /// <summary>
-        /// Generates the multipart content statements.
+        /// Generates the string content creation statements.
         /// </summary>
         /// <param name="curlOptions">The curl options.</param>
         /// <returns>Collection of <see cref="StatementSyntax"/>.</returns>
         /// <remarks>
-        /// var multipartContent = new MultipartContent();
-        /// multipartContent.Add(new StringContent("test", Encoding.UTF8, "application/x-www-form-urlencoded"));
-        /// multipartContent.Add(new ByteArrayContent(File.ReadAllBytes("file1.txt")));
-        /// request.Content = multipartContent;
+        /// request.Content = new StringContent("{\"status\": \"resolved\"}", Encoding.UTF8, "application/json");
         /// </remarks>
-        private IEnumerable<StatementSyntax> CreateMultipartContentStatements(CurlOptions curlOptions)
+        private IEnumerable<StatementSyntax> CreateStringContentAssignmentStatement(CurlOptions curlOptions)
         {
-            var statements = new LinkedList<StatementSyntax>();
+            var expressions = new LinkedList<ExpressionSyntax>();
 
-            const string MultipartVariableName = "multipartContent";
-            const string MultipartAddMethodName = "Add";
-
-            statements.AddLast(
-                SyntaxFactory.LocalDeclarationStatement(
-                    RoslynExtensions.CreateVariableFromNewObjectExpression(
-                        MultipartVariableName,
-                        nameof(MultipartContent))));
-
-            if (!string.IsNullOrEmpty(curlOptions.Payload))
+            foreach (var data in curlOptions.Data)
             {
-                var stringContentCreation = CreateStringContentCreation(curlOptions);
-                var addStatement = SyntaxFactory.ExpressionStatement(
-                    RoslynExtensions.CreateInvocationExpression(
-                        MultipartVariableName,
-                        MultipartAddMethodName,
-                        SyntaxFactory.Argument(stringContentCreation)));
-                statements.AddLast(addStatement.AppendWhiteSpace());
+                expressions.AddLast(
+                    SyntaxFactory.LiteralExpression(
+                        SyntaxKind.StringLiteralExpression,
+                        SyntaxFactory.Literal(data)));
             }
 
             foreach (var file in curlOptions.DataFiles)
             {
-                var byteArrayContentExpression = CreateNewByteArrayContentExpression(file);
-
-                var addStatement = SyntaxFactory.ExpressionStatement(
-                    RoslynExtensions.CreateInvocationExpression(
-                        MultipartVariableName,
-                        MultipartAddMethodName,
-                        SyntaxFactory.Argument(byteArrayContentExpression)));
-
-                statements.AddLast(addStatement);
+                var readFileExpression = RoslynExtensions.CreateInvocationExpression(
+                    "File",
+                    "ReadAllText",
+                    RoslynExtensions.CreateStringLiteralArgument(file));
+                var replaceNewLines = RoslynExtensions.CreateInvocationExpression(
+                    "Regex",
+                    "Replace",
+                    SyntaxFactory.Argument(readFileExpression),
+                    RoslynExtensions.CreateStringLiteralArgument(@"(?:\r\n|\n|\r)"),
+                    SyntaxFactory.Argument(RoslynExtensions.CreateMemberAccessExpression("string", "Empty")));
+                expressions.AddLast(replaceNewLines);
             }
 
-            statements.AddLast(SyntaxFactory.ExpressionStatement(
-                RoslynExtensions.CreateMemberAssignmentExpression(
-                    RequestVariableName,
-                    RequestContentPropertyName,
-                    SyntaxFactory.IdentifierName(MultipartVariableName))));
+            foreach (var binaryFile in curlOptions.BinaryDataFiles)
+            {
+                var readFileExpression = RoslynExtensions.CreateInvocationExpression(
+                    "File",
+                    "ReadAllText",
+                    RoslynExtensions.CreateStringLiteralArgument(binaryFile));
+                expressions.AddLast(readFileExpression);
+            }
+
+            var statements = new LinkedList<StatementSyntax>();
+            ArgumentSyntax stringContentArgumentSyntax = null;
+            if (expressions.Count > 1)
+            {
+                var contentListVariableName = "contentList";
+                statements.AddLast(
+                    SyntaxFactory.LocalDeclarationStatement(
+                        RoslynExtensions.CreateVariableFromNewObjectExpression(contentListVariableName, "List<string>")));
+
+                foreach (var expression in expressions)
+                {
+                    statements.AddLast(
+                        SyntaxFactory.ExpressionStatement(
+                            RoslynExtensions.CreateInvocationExpression(
+                                contentListVariableName,
+                                "Add",
+                                SyntaxFactory.Argument(expression))));
+                }
+
+                stringContentArgumentSyntax = SyntaxFactory.Argument(
+                    RoslynExtensions.CreateInvocationExpression(
+                        "string",
+                        "Join",
+                        RoslynExtensions.CreateStringLiteralArgument("&"),
+                        SyntaxFactory.Argument(SyntaxFactory.IdentifierName(contentListVariableName))));
+            }
+            else
+            {
+                stringContentArgumentSyntax = SyntaxFactory.Argument(expressions.First.Value);
+            }
+
+            var stringContentCreation = CreateStringContentCreation(
+                stringContentArgumentSyntax,
+                curlOptions);
+            statements.AddLast(
+                SyntaxFactory.ExpressionStatement(
+                    RoslynExtensions.CreateMemberAssignmentExpression(
+                        RequestVariableName,
+                        RequestContentPropertyName,
+                        stringContentCreation)));
 
             statements.TryAppendWhiteSpaceAtEnd();
 
@@ -166,15 +177,18 @@ namespace CurlToCSharp.Services
         /// <summary>
         /// Generates the string content creation expression.
         /// </summary>
+        /// <param name="contentSyntax">The content syntax.</param>
         /// <param name="curlOptions">The curl options.</param>
-        /// <returns><see cref="ObjectCreationExpressionSyntax"/> expression.</returns>
+        /// <returns>
+        ///   <see cref="ObjectCreationExpressionSyntax" /> expression.
+        /// </returns>
         /// <remarks>
         /// new StringContent("{\"status\": \"resolved\"}", Encoding.UTF8, "application/json")
         /// </remarks>
-        private ObjectCreationExpressionSyntax CreateStringContentCreation(CurlOptions curlOptions)
+        private ObjectCreationExpressionSyntax CreateStringContentCreation(ArgumentSyntax contentSyntax, CurlOptions curlOptions)
         {
             var arguments = new LinkedList<ArgumentSyntax>();
-            arguments.AddLast(RoslynExtensions.CreateStringLiteralArgument(curlOptions.Payload));
+            arguments.AddLast(contentSyntax);
 
             var contentHeader = curlOptions.Headers.GetCommaSeparatedValues(HeaderNames.ContentType).FirstOrDefault();
             if (!string.IsNullOrEmpty(contentHeader))
@@ -359,18 +373,11 @@ namespace CurlToCSharp.Services
             }
 
             var requestInnerBlocks = new LinkedList<UsingStatementSyntax>();
-            if (curlOptions.DataFiles.Any())
-            {
-                var multipartContentStatements = CreateMultipartContentStatements(curlOptions);
-                requestInnerBlocks.AddLast(
-                    requestUsingStatement.WithStatement(
-                        innerBlock.AddStatements(multipartContentStatements.ToArray())));
-            }
-            else if (!string.IsNullOrWhiteSpace(curlOptions.Payload))
+            if (curlOptions.HasDataPayload)
             {
                 var assignmentExpression = CreateStringContentAssignmentStatement(curlOptions);
                 requestInnerBlocks.AddLast(
-                    requestUsingStatement.WithStatement(innerBlock.AddStatements(assignmentExpression)));
+                    requestUsingStatement.WithStatement(innerBlock.AddStatements(assignmentExpression.ToArray())));
             }
             else if (curlOptions.UploadFiles.Any())
             {
@@ -451,9 +458,9 @@ namespace CurlToCSharp.Services
         {
             var statementSyntaxs = new LinkedList<MemberDeclarationSyntax>();
 
-            var handlerInitialization = RoslynExtensions.CreateVariableInitializationExpression(
+            var handlerInitialization = RoslynExtensions.CreateVariableFromNewObjectExpression(
                 HandlerVariableName,
-                RoslynExtensions.CreateObjectCreationExpression(nameof(HttpClientHandler)));
+                nameof(HttpClientHandler));
             statementSyntaxs.AddLast(
                 SyntaxFactory.GlobalStatement(SyntaxFactory.LocalDeclarationStatement(handlerInitialization)));
 

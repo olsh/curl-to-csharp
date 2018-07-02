@@ -7,9 +7,11 @@ var target = Argument("target", "Default");
 
 var buildConfiguration = "Release";
 var projectName = "CurlToCSharp";
-var testProjectName = "CurlToCSharp.Tests";
+var unitTestProjectName = "CurlToCSharp.UnitTests";
+var integrationTestProjectName = "CurlToCSharp.IntegrationTests";
 var projectFile = string.Format("./src/{0}/{0}.csproj", projectName);
-var testProjectFile = string.Format("./src/{0}/{0}.csproj", testProjectName);
+var unitTestProjectFile = string.Format("./src/{0}/{0}.csproj", unitTestProjectName);
+var integrationTestProjectFile = string.Format("./src/{0}/{0}.csproj", integrationTestProjectName);
 var tempPublishDirectory = "./publish";
 var tempPublishArchive = "publish.zip";
 
@@ -30,17 +32,18 @@ Task("Build")
     DotNetCoreBuild(string.Format("./src/{0}.sln", projectName), settings);
 });
 
-Task("Test")
+Task("UnitTest")
   .IsDependentOn("Build")
   .Does(() =>
 {
-     var settings = new DotNetCoreTestSettings
-     {
-         Configuration = buildConfiguration,
-         NoBuild = true
-     };
+     RunTests(unitTestProjectFile);
+});
 
-     DotNetCoreTest(testProjectFile, settings);
+Task("IntegrationTest")
+  .IsDependentOn("Build")
+  .Does(() =>
+{
+     RunTests(integrationTestProjectFile);
 });
 
 Task("Pack")
@@ -87,7 +90,11 @@ Task("SonarEnd")
   });
 
 Task("Default")
-    .IsDependentOn("Test");
+    .IsDependentOn("Pack");
+
+Task("Test")
+  .IsDependentOn("UnitTest")
+  .IsDependentOn("IntegrationTest");
 
 Task("Sonar")
   .IsDependentOn("SonarBegin")
@@ -100,3 +107,14 @@ Task("CI")
     .IsDependentOn("CreateArtifact");
 
 RunTarget(target);
+
+void RunTests(string projectFile)
+{
+	 var settings = new DotNetCoreTestSettings
+     {
+         Configuration = buildConfiguration,
+         NoBuild = true
+     };
+
+     DotNetCoreTest(projectFile, settings);
+}

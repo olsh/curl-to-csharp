@@ -20,7 +20,7 @@
         <div class="btn-group btn-group-sm" role="group" aria-label="Examples">
             <button data-curl="curl https://github.com/" type="button" class="btn btn-secondary">GET</button>
             <button data-curl="curl https://sentry.io/api/0/projects/1/groups/?status=unresolved -d '{&quot;status&quot;: &quot;resolved&quot;}' -H 'Content-Type: application/json' -u 'username:password' -H 'Accept: application/json' -H 'User-Agent: curl/7.60.0'" type="button" class="btn btn-secondary">POST JSON</button>
-            <button data-curl="curl -X POST -d @@file1.txt -d @@file2.txt https://example.com/upload -b SessionId=437b27169b6b4349a388038329eeb900 -H 'Referer: https://github.com/'" type="button" class="btn btn-secondary">Upload Files</button>
+            <button data-curl="curl -X POST --upload-file @@file1.txt https://example.com/upload -b SessionId=437b27169b6b4349a388038329eeb900 -H 'Referer: https://github.com/'" type="button" class="btn btn-secondary">Upload Files</button>
         </div>
     </div>
 </div>

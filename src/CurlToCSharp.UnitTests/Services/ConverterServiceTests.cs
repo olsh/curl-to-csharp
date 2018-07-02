@@ -14,7 +14,7 @@ using Microsoft.Net.Http.Headers;
 
 using Xunit;
 
-namespace CurlToCSharp.Tests.Services
+namespace CurlToCSharp.UnitTests.Services
 {
     public class ConverterServiceTests
     {
@@ -26,7 +26,7 @@ namespace CurlToCSharp.Tests.Services
                                   {
                                       HttpMethod = HttpMethod.Post.ToString().ToUpper(),
                                       Url = new Uri("https://google.com"),
-                                      PayloadCollection = { "{\"status\": \"resolved\"}" },
+                                      Data = { "{\"status\": \"resolved\"}" },
                                       UserPasswordPair = "user:pass"
                                   };
             curlOptions.Headers.TryAdd(HeaderNames.ContentType, new StringValues("application/json"));
@@ -68,7 +68,7 @@ namespace CurlToCSharp.Tests.Services
                                       HttpMethod = HttpMethod.Get.ToString()
                                           .ToUpper(),
                                       Url = new Uri("https://google.com"),
-                                      PayloadCollection = { "content" }
+                                      Data = { "content" }
                                   };
             curlOptions.HttpMethod = HttpMethod.Post.ToString()
                 .ToUpper();

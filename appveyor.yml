@@ -1,5 +1,7 @@
 version: 1.0.{build}
 image: Visual Studio 2017
+install:
+  - choco install curl
 build_script:
 - cmd: PowerShell -Version 2.0 .\build.ps1 -Target CI
 test: off
@@ -14,3 +16,4 @@ cache:
   - 'src\CurlToCSharp\node_modules\ -> src\CurlToCSharp\yarn.lock'
   - '%LOCALAPPDATA%\Yarn\cache -> src\CurlToCSharp\yarn.lock'
   - '%USERPROFILE%\.nuget\packages -> **\*.csproj'
+  - 'C:\ProgramData\chocolatey\lib -> appveyor.yml'

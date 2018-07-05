@@ -20,7 +20,7 @@ Task("Yarn")
     .Does(() =>
     {
         Yarn
-		.Add(settings => settings.Package("gulp").Globally())
+        .Add(settings => settings.Package("gulp").Globally())
         .Add(settings => settings.Package("snyk").Globally());
     });
 
@@ -54,10 +54,10 @@ Task("Snyk")
   .IsDependentOn("Build")
   .Does(() =>
 {
-	var snykCommand = "snyk monitor --org=olsh";
+    var snykCommand = "snyk monitor --org=olsh";
 
-	StartProcess("powershell", $"{snykCommand} --file={solutionFile}");
-	StartProcess("powershell", $"{snykCommand} src/{projectName}/obj --project-name={projectName}");
+    StartProcess("powershell", $"{snykCommand} --file={solutionFile}");
+    StartProcess("powershell", $"{snykCommand} src/{projectName}/obj --project-name={projectName}");
 });
 
 Task("Pack")
@@ -118,13 +118,14 @@ Task("Sonar")
 
 Task("CI")
     .IsDependentOn("Sonar")
+    .IsDependentOn("Snyk")
     .IsDependentOn("CreateArtifact");
 
 RunTarget(target);
 
 void RunTests(string projectFile)
 {
-	 var settings = new DotNetCoreTestSettings
+     var settings = new DotNetCoreTestSettings
      {
          Configuration = buildConfiguration,
          NoBuild = true

@@ -21,6 +21,8 @@ namespace CurlToCSharp.Services
 
         private const char EscapeChar = '\\';
 
+        private const char FileSeparatorChar = '@';
+
         private readonly ParsingOptions _parsingOptions;
 
         public CommandLineParser(ParsingOptions parsingOptions)
@@ -136,6 +138,9 @@ namespace CurlToCSharp.Services
                     case "--upload-file":
                         EvaluateUploadFileParameter(convertResult, ref commandLine);
                         break;
+                    case "--data-urlencode":
+                        EvaluateUrlEncodeFormData(convertResult, ref commandLine);
+                        break;
                     default:
                         convertResult.Warnings.Add($"Parameter \"{par}\" is not supported");
                         break;
@@ -208,28 +213,57 @@ namespace CurlToCSharp.Services
             bool parseFiles,
             bool binary)
         {
-            var isFileEntry = parseFiles && commandLine[0] == '@';
+            var isFileEntry = parseFiles && commandLine[0] == FileSeparatorChar;
             if (isFileEntry)
             {
                 commandLine = commandLine.Slice(1);
             }
 
             var value = ReadValue(ref commandLine);
+            var contentType = DataContentType.Inline;
             if (isFileEntry)
             {
-                if (binary)
-                {
-                    convertResult.Data.BinaryDataFiles.Add(value.ToString());
-                }
-                else
-                {
-                    convertResult.Data.DataFiles.Add(value.ToString());
-                }
+                contentType = binary ? DataContentType.BinaryFile : DataContentType.EscapedFile;
             }
-            else
+
+            convertResult.Data.Data.Add(new UploadData(value.ToString(), contentType));
+        }
+
+        private void EvaluateUrlEncodeFormData(ConvertResult<CurlOptions> convertResult, ref Span<char> commandLine)
+        {
+            void AddKeyValue(Span<char> span, int splitIndex, DataContentType contentType)
             {
-                convertResult.Data.Data.Add(value.ToString());
+                var dataKey = span.Slice(0, splitIndex)
+                    .ToString();
+                var dataValue = span.Slice(splitIndex + 1)
+                    .ToString();
+                convertResult.Data.Data.Add(new UploadData(dataKey, dataValue, contentType, true));
             }
+
+            var value = ReadValue(ref commandLine);
+            if (value.IsEmpty)
+            {
+                return;
+            }
+
+            var formSeparatorChar = '=';
+            var indexOfForm = value.IndexOf(formSeparatorChar);
+            if (indexOfForm != -1)
+            {
+                AddKeyValue(value, indexOfForm, DataContentType.Inline);
+
+                return;
+            }
+
+            var indexOfFile = value.IndexOf(FileSeparatorChar);
+            if (indexOfFile != -1)
+            {
+                AddKeyValue(value, indexOfFile, DataContentType.BinaryFile);
+
+                return;
+            }
+
+            convertResult.Data.Data.Add(new UploadData(value.ToString(), true));
         }
 
         private void EvaluateUploadFileParameter(ConvertResult<CurlOptions> convertResult, ref Span<char> commandLine)
@@ -448,10 +482,8 @@ namespace CurlToCSharp.Services
                 result.Data.Url = url;
             }
 
-            var hasDataUpload = result.Data.DataFiles.Any() || result.Data.Data.Any();
-
             // This option overrides -F, --form and -I, --head and -T, --upload-file.
-            if (hasDataUpload)
+            if (result.Data.HasDataPayload)
             {
                 result.Data.UploadFiles.Clear();
             }
@@ -459,7 +491,7 @@ namespace CurlToCSharp.Services
             var hasFileUpload = result.Data.UploadFiles.Any();
             if (result.Data.HttpMethod == null)
             {
-                if (hasDataUpload)
+                if (result.Data.HasDataPayload)
                 {
                     result.Data.HttpMethod = HttpMethod.Post.ToString()
                         .ToUpper();
@@ -476,7 +508,8 @@ namespace CurlToCSharp.Services
                 }
             }
 
-            if (!result.Data.Headers.GetCommaSeparatedValues(HeaderNames.ContentType).Any() && hasDataUpload)
+            if (!result.Data.Headers.GetCommaSeparatedValues(HeaderNames.ContentType)
+                    .Any() && result.Data.HasDataPayload)
             {
                 result.Data.Headers.TryAdd(HeaderNames.ContentType, "application/x-www-form-urlencoded");
             }
@@ -493,3 +526,4 @@ namespace CurlToCSharp.Services
         }
     }
 }
+

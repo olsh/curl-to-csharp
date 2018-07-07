@@ -121,6 +121,19 @@ namespace CurlToCSharp.Extensions
             statements.Add(syntax.AppendWhiteSpace());
         }
 
+        public static InterpolatedStringExpressionSyntax CreateInterpolatedStringExpression(
+            string prependString,
+            ExpressionSyntax expression)
+        {
+            var stringStartToken = SyntaxFactory.Token(SyntaxKind.InterpolatedStringStartToken);
+
+            var interpolatedStringContentSyntaxs = new SyntaxList<InterpolatedStringContentSyntax>()
+                .Add(SyntaxFactory.InterpolatedStringText(SyntaxFactory.Token(SyntaxTriviaList.Empty, SyntaxKind.InterpolatedStringTextToken, prependString, null, SyntaxTriviaList.Empty)))
+                .Add(SyntaxFactory.Interpolation(expression));
+
+            return SyntaxFactory.InterpolatedStringExpression(stringStartToken, interpolatedStringContentSyntaxs);
+        }
+
         private static MemberAccessExpressionSyntax CreateMemberAccessExpression(
             ExpressionSyntax leftPart,
             string rightPart)

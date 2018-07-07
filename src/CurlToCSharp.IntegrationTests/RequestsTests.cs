@@ -33,26 +33,28 @@ namespace CurlToCSharp.IntegrationTests
 
         [Theory]
         [InlineData("-d \"some data\"")]
-        [InlineData("-d \"some data\" -d \"another data\"")]
-        [InlineData("-d \"some data\" -d @\"Resources\\\\text-file.txt\"")]
-        [InlineData("-d \"some data\" --data-binary @\"Resources\\\\text-file.txt\"")]
+        [InlineData("-d \"form=a b\" -d \"another data\"")]
+        [InlineData("-d \"some data\" -d @\"Resources\\\\text-file.txt\" -d \"a b\"")]
+        [InlineData("--data-binary @\"Resources\\\\text-file.txt\"")]
+        [InlineData("--data-urlencode \"a=b c\"")]
+        [InlineData("--data-urlencode \"a@Resources\\\\text-file.txt\"")]
         public void Data(string arguments)
         {
-            AssertResponsesTheSame(arguments);
+            AssertResponsesEquals(arguments);
         }
 
         [Theory]
         [InlineData("-T \"Resources\\\\text-file.txt\"")]
         public void UploadFile(string arguments)
         {
-            AssertResponsesTheSame(arguments);
+            AssertResponsesEquals(arguments);
         }
 
         [Theory]
         [InlineData("")]
         public void Get(string arguments)
         {
-            AssertResponsesTheSame(arguments);
+            AssertResponsesEquals(arguments);
         }
 
         public void Dispose()
@@ -60,7 +62,7 @@ namespace CurlToCSharp.IntegrationTests
             _webHost?.Dispose();
         }
 
-        private static void AssertResponsesTheSame(string arguments)
+        private static void AssertResponsesEquals(string arguments)
         {
             var curlArguments = $"{new Uri(new Uri(TestServerHost), "echo")} {arguments}";
 
@@ -88,13 +90,14 @@ namespace CurlToCSharp.IntegrationTests
 
         private static string ExecuteCsharpRequest(string curlArguments)
         {
-            var commandLineParser = new CommandLineParser(new ParsingOptions(4000));
+            var commandLineParser = new CommandLineParser(new ParsingOptions(int.MaxValue));
             var converterService = new ConverterService();
             var parserResult = commandLineParser.Parse(new Span<char>($"curl {curlArguments}".ToCharArray()));
             var csharp = converterService.ToCsharp(parserResult.Data);
 
             var scriptOptions = ScriptOptions.Default.AddReferences(typeof(HttpClient).Assembly)
                 .WithImports(
+                    "System",
                     "System.Net.Http",
                     "System.Net",
                     "System.Text",

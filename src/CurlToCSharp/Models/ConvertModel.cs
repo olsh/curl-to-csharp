@@ -5,7 +5,7 @@ namespace CurlToCSharp.Models
     public class ConvertModel
     {
         [Required]
-        [MaxLength(4000)]
+        [MaxLength(10000)]
         public string Curl { get; set; }
     }
 }

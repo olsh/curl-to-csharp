@@ -26,7 +26,7 @@ namespace CurlToCSharp.UnitTests.Services
                                   {
                                       HttpMethod = HttpMethod.Post.ToString().ToUpper(),
                                       Url = new Uri("https://google.com"),
-                                      Data = { "{\"status\": \"resolved\"}" },
+                                      Data = { new UploadData("{\"status\": \"resolved\"}") },
                                       UserPasswordPair = "user:pass"
                                   };
             curlOptions.Headers.TryAdd(HeaderNames.ContentType, new StringValues("application/json"));
@@ -68,7 +68,7 @@ namespace CurlToCSharp.UnitTests.Services
                                       HttpMethod = HttpMethod.Get.ToString()
                                           .ToUpper(),
                                       Url = new Uri("https://google.com"),
-                                      Data = { "content" }
+                                      Data = { new UploadData("content") }
                                   };
             curlOptions.HttpMethod = HttpMethod.Post.ToString()
                 .ToUpper();

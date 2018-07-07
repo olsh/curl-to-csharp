@@ -77,38 +77,61 @@ namespace CurlToCSharp.Services
 
             foreach (var data in curlOptions.Data)
             {
+                if (data.IsUrlEncoded)
+                {
+                    ExpressionSyntax dataExpression;
+                    if (data.IsFile)
+                    {
+                        dataExpression = CreateFileReadAllTextExpression(data.Content);
+                    }
+                    else
+                    {
+                        dataExpression = SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(data.Content));
+                    }
+
+                    dataExpression = RoslynExtensions.CreateInvocationExpression("Uri", "EscapeDataString", SyntaxFactory.Argument(dataExpression));
+
+                    if (data.HasName)
+                    {
+                        dataExpression =
+                            RoslynExtensions.CreateInterpolatedStringExpression($"{data.Name}=", dataExpression);
+                    }
+
+                    expressions.AddLast(dataExpression);
+
+                    continue;
+                }
+
+                if (data.ContentType == DataContentType.BinaryFile)
+                {
+                    var readFileExpression = CreateFileReadAllTextExpression(data.Content);
+                    expressions.AddLast(readFileExpression);
+
+                    continue;
+                }
+
+                if (data.ContentType == DataContentType.EscapedFile)
+                {
+                    var readFileExpression = CreateFileReadAllTextExpression(data.Content);
+                    var replaceNewLines = RoslynExtensions.CreateInvocationExpression(
+                        "Regex",
+                        "Replace",
+                        SyntaxFactory.Argument(readFileExpression),
+                        RoslynExtensions.CreateStringLiteralArgument(@"(?:\r\n|\n|\r)"),
+                        SyntaxFactory.Argument(RoslynExtensions.CreateMemberAccessExpression("string", "Empty")));
+                    expressions.AddLast(replaceNewLines);
+
+                    continue;
+                }
+
                 expressions.AddLast(
                     SyntaxFactory.LiteralExpression(
                         SyntaxKind.StringLiteralExpression,
-                        SyntaxFactory.Literal(data)));
-            }
-
-            foreach (var file in curlOptions.DataFiles)
-            {
-                var readFileExpression = RoslynExtensions.CreateInvocationExpression(
-                    "File",
-                    "ReadAllText",
-                    RoslynExtensions.CreateStringLiteralArgument(file));
-                var replaceNewLines = RoslynExtensions.CreateInvocationExpression(
-                    "Regex",
-                    "Replace",
-                    SyntaxFactory.Argument(readFileExpression),
-                    RoslynExtensions.CreateStringLiteralArgument(@"(?:\r\n|\n|\r)"),
-                    SyntaxFactory.Argument(RoslynExtensions.CreateMemberAccessExpression("string", "Empty")));
-                expressions.AddLast(replaceNewLines);
-            }
-
-            foreach (var binaryFile in curlOptions.BinaryDataFiles)
-            {
-                var readFileExpression = RoslynExtensions.CreateInvocationExpression(
-                    "File",
-                    "ReadAllText",
-                    RoslynExtensions.CreateStringLiteralArgument(binaryFile));
-                expressions.AddLast(readFileExpression);
+                        SyntaxFactory.Literal(data.Content)));
             }
 
             var statements = new LinkedList<StatementSyntax>();
-            ArgumentSyntax stringContentArgumentSyntax = null;
+            ArgumentSyntax stringContentArgumentSyntax;
             if (expressions.Count > 1)
             {
                 var contentListVariableName = "contentList";
@@ -151,6 +174,24 @@ namespace CurlToCSharp.Services
             statements.TryAppendWhiteSpaceAtEnd();
 
             return statements;
+        }
+
+        /// <summary>
+        /// Generates the file read all text expression.
+        /// </summary>
+        /// <param name="fileName">Name of the file.</param>
+        /// <returns>
+        ///   <see cref="InvocationExpressionSyntax" /> expression.
+        /// </returns>
+        /// <remarks>
+        /// File.ReadAllText("file.txt")
+        /// </remarks>
+        private InvocationExpressionSyntax CreateFileReadAllTextExpression(string fileName)
+        {
+            return RoslynExtensions.CreateInvocationExpression(
+                "File",
+                "ReadAllText",
+                RoslynExtensions.CreateStringLiteralArgument(fileName));
         }
 
         /// <summary>
@@ -258,14 +299,11 @@ namespace CurlToCSharp.Services
         private IEnumerable<StatementSyntax> CreateBasicAuthorizationStatements(CurlOptions options)
         {
             var authorizationEncodingStatement = CreateBasicAuthorizationEncodingStatement(options);
-            var stringStartToken = SyntaxFactory.Token(SyntaxKind.InterpolatedStringStartToken);
 
-            var interpolatedStringContentSyntaxs = new SyntaxList<InterpolatedStringContentSyntax>()
-                .Add(SyntaxFactory.InterpolatedStringText(SyntaxFactory.Token(SyntaxTriviaList.Empty, SyntaxKind.InterpolatedStringTextToken, "Basic ", null, SyntaxTriviaList.Empty)))
-                .Add(SyntaxFactory.Interpolation(SyntaxFactory.IdentifierName(Base64AuthorizationVariableName)));
-
-            var interpolatedStringArgument = SyntaxFactory.Argument(SyntaxFactory.InterpolatedStringExpression(stringStartToken, interpolatedStringContentSyntaxs));
-            var tryAddHeaderStatement = CreateTryAddHeaderStatement(RoslynExtensions.CreateStringLiteralArgument("Authorization"), interpolatedStringArgument)
+            var interpolatedStringExpression = RoslynExtensions.CreateInterpolatedStringExpression("Basic ", SyntaxFactory.IdentifierName(Base64AuthorizationVariableName));
+            var tryAddHeaderStatement = CreateTryAddHeaderStatement(
+                    RoslynExtensions.CreateStringLiteralArgument("Authorization"),
+                    SyntaxFactory.Argument(interpolatedStringExpression))
                 .AppendWhiteSpace();
 
             return new StatementSyntax[] { authorizationEncodingStatement, tryAddHeaderStatement };

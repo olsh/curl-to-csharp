@@ -10,7 +10,11 @@ namespace CurlToCSharp.Infrastructure
     {
         public static void RegisterServices(this IServiceCollection services)
         {
-            services.AddSingleton<ICommandLineParser>(provider => new CommandLineParser(provider.GetService<IOptions<ApplicationOptions>>().Value.Parsing));
+            services.AddSingleton(
+                provider => provider.GetService<IOptions<ApplicationOptions>>()
+                    .Value.Parsing);
+
+            services.AddSingleton<ICommandLineParser, CommandLineParser>();
             services.AddSingleton<IConverterService, ConverterService>();
         }
     }

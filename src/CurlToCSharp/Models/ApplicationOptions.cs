@@ -1,4 +1,6 @@
-﻿namespace CurlToCSharp.Models
+﻿using CurlToCSharp.Models.Parsing;
+
+namespace CurlToCSharp.Models
 {
     public class ApplicationOptions
     {

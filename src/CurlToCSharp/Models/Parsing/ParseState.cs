@@ -1,4 +1,4 @@
-﻿namespace CurlToCSharp.Models
+﻿namespace CurlToCSharp.Models.Parsing
 {
     public class ParseState
     {

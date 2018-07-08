@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-using CurlToCSharp.Models;
+using CurlToCSharp.Models.Parsing;
 using CurlToCSharp.Services;
 
 using Microsoft.AspNetCore;

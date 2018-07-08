@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net.Http;
 
 using CurlToCSharp.Models;
+using CurlToCSharp.Models.Parsing;
 using CurlToCSharp.Services;
 
 using Microsoft.Net.Http.Headers;

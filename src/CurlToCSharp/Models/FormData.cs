@@ -33,7 +33,7 @@
 
         public bool HasName => !string.IsNullOrWhiteSpace(Name);
 
-        public bool IsUrlEncoded { get; set; }
+        public bool IsUrlEncoded { get; }
 
         public string Name { get; }
     }

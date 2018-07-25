@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 
@@ -75,7 +76,7 @@ namespace CurlToCSharp.Services
         {
             var expressions = new LinkedList<ExpressionSyntax>();
 
-            foreach (var data in curlOptions.Data)
+            foreach (var data in curlOptions.UploadData)
             {
                 if (data.IsUrlEncoded)
                 {
@@ -102,7 +103,7 @@ namespace CurlToCSharp.Services
                     continue;
                 }
 
-                if (data.ContentType == DataContentType.BinaryFile)
+                if (data.Type == UploadDataType.BinaryFile)
                 {
                     var readFileExpression = CreateFileReadAllTextExpression(data.Content);
                     expressions.AddLast(readFileExpression);
@@ -110,7 +111,7 @@ namespace CurlToCSharp.Services
                     continue;
                 }
 
-                if (data.ContentType == DataContentType.EscapedFile)
+                if (data.Type == UploadDataType.InlineFile)
                 {
                     var readFileExpression = CreateFileReadAllTextExpression(data.Content);
                     var replaceNewLines = RoslynExtensions.CreateInvocationExpression(
@@ -176,6 +177,90 @@ namespace CurlToCSharp.Services
             return statements;
         }
 
+                /// <summary>
+        /// Generates the multipart content statements.
+        /// </summary>
+        /// <param name="curlOptions">The curl options.</param>
+        /// <returns>Collection of <see cref="StatementSyntax"/>.</returns>
+        /// <remarks>
+        /// var multipartContent = new MultipartFormDataContent();
+        /// multipartContent.Add(new StringContent("John"), "name");
+        /// multipartContent.Add(new ByteArrayContent(File.ReadAllBytes("D:\\text.txt")), "shoesize", Path.GetFileName("D:\\text.txt"));
+        /// request.Content = multipartContent;
+        /// </remarks>
+        private IEnumerable<StatementSyntax> CreateMultipartContentStatements(CurlOptions curlOptions)
+        {
+            var statements = new LinkedList<StatementSyntax>();
+
+            const string MultipartVariableName = "multipartContent";
+            const string MultipartAddMethodName = "Add";
+
+            statements.AddLast(
+                SyntaxFactory.LocalDeclarationStatement(
+                    RoslynExtensions.CreateVariableFromNewObjectExpression(
+                        MultipartVariableName,
+                        nameof(MultipartFormDataContent))));
+
+            foreach (var data in curlOptions.FormData)
+            {
+                StatementSyntax addStatement;
+                if (data.Type == UploadDataType.Inline)
+                {
+                    var contentExpression = RoslynExtensions.CreateObjectCreationExpression(
+                        nameof(StringContent),
+                        RoslynExtensions.CreateStringLiteralArgument(data.Content));
+
+                    addStatement = SyntaxFactory.ExpressionStatement(
+                        RoslynExtensions.CreateInvocationExpression(
+                            MultipartVariableName,
+                            MultipartAddMethodName,
+                            SyntaxFactory.Argument(contentExpression),
+                            RoslynExtensions.CreateStringLiteralArgument(data.Name)));
+                }
+                else if (data.Type == UploadDataType.BinaryFile)
+                {
+                    var contentExpression = CreateNewByteArrayContentExpression(data.Content);
+                    var getFileNameSyntax = RoslynExtensions.CreateInvocationExpression(
+                        nameof(Path),
+                        nameof(Path.GetFileName),
+                        RoslynExtensions.CreateStringLiteralArgument(data.Content));
+
+                    addStatement = SyntaxFactory.ExpressionStatement(
+                        RoslynExtensions.CreateInvocationExpression(
+                            MultipartVariableName,
+                            MultipartAddMethodName,
+                            SyntaxFactory.Argument(contentExpression),
+                            RoslynExtensions.CreateStringLiteralArgument(data.Name),
+                            SyntaxFactory.Argument(getFileNameSyntax)));
+                }
+                else
+                {
+                    var contentExpression = RoslynExtensions.CreateObjectCreationExpression(
+                        nameof(StringContent),
+                        SyntaxFactory.Argument(CreateFileReadAllTextExpression(data.Content)));
+
+                    addStatement = SyntaxFactory.ExpressionStatement(
+                        RoslynExtensions.CreateInvocationExpression(
+                            MultipartVariableName,
+                            MultipartAddMethodName,
+                            SyntaxFactory.Argument(contentExpression),
+                            RoslynExtensions.CreateStringLiteralArgument(data.Name)));
+                }
+
+                statements.AddLast(addStatement);
+            }
+
+            statements.AddLast(SyntaxFactory.ExpressionStatement(
+                RoslynExtensions.CreateMemberAssignmentExpression(
+                    RequestVariableName,
+                    RequestContentPropertyName,
+                    SyntaxFactory.IdentifierName(MultipartVariableName))));
+
+            statements.TryAppendWhiteSpaceAtEnd();
+
+            return statements;
+        }
+
         /// <summary>
         /// Generates the file read all text expression.
         /// </summary>
@@ -184,7 +269,7 @@ namespace CurlToCSharp.Services
         ///   <see cref="InvocationExpressionSyntax" /> expression.
         /// </returns>
         /// <remarks>
-        /// File.ReadAllText("file.txt")
+        /// File.ReadAllText("file name.txt")
         /// </remarks>
         private InvocationExpressionSyntax CreateFileReadAllTextExpression(string fileName)
         {
@@ -417,7 +502,13 @@ namespace CurlToCSharp.Services
                 requestInnerBlocks.AddLast(
                     requestUsingStatement.WithStatement(innerBlock.AddStatements(assignmentExpression.ToArray())));
             }
-            else if (curlOptions.UploadFiles.Any())
+            else if (curlOptions.HasFormPayload)
+            {
+                var multipartContentStatements = CreateMultipartContentStatements(curlOptions);
+                requestInnerBlocks.AddLast(
+                    requestUsingStatement.WithStatement(innerBlock.AddStatements(multipartContentStatements.ToArray())));
+            }
+            else if (curlOptions.HasFilePayload)
             {
                 foreach (var file in curlOptions.UploadFiles)
                 {

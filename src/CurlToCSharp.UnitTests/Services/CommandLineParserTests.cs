@@ -33,7 +33,7 @@ namespace CurlToCSharp.UnitTests.Services
             var curl = @"curl -X POST -H ""Content-Type: application/json"" -H ""Authorization: Bearer b7d03a6947b217efb6f3ec3bd3504582"" -d '{""type"":""A"",""name"":""www"",""data"":""162.10.66.0"",""priority"":null,""port"":null,""weight"":null}' ""https://api.digitalocean.com/v2/domains/example.com/records""";
             var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
 
-            Assert.Equal(@"{""type"":""A"",""name"":""www"",""data"":""162.10.66.0"",""priority"":null,""port"":null,""weight"":null}", parseResult.Data.Data.First().Content);
+            Assert.Equal(@"{""type"":""A"",""name"":""www"",""data"":""162.10.66.0"",""priority"":null,""port"":null,""weight"":null}", parseResult.Data.UploadData.First().Content);
             Assert.Equal(HttpMethod.Post.ToString().ToUpper(), parseResult.Data.HttpMethod);
             Assert.Equal(new Uri("https://api.digitalocean.com/v2/domains/example.com/records"), parseResult.Data.Url);
             Assert.Equal("Bearer b7d03a6947b217efb6f3ec3bd3504582", parseResult.Data.Headers.First(g => g.Key == "Authorization").Value);
@@ -49,7 +49,7 @@ namespace CurlToCSharp.UnitTests.Services
                     -d '{""status"": ""resolved""}' \
                     -H 'Content-Type: application/json'".ToCharArray()));
 
-            Assert.Equal(@"{""status"": ""resolved""}", parseResult.Data.Data.First().Content);
+            Assert.Equal(@"{""status"": ""resolved""}", parseResult.Data.UploadData.First().Content);
             Assert.Equal(HttpMethod.Post.ToString().ToUpper(), parseResult.Data.HttpMethod);
             Assert.Equal(new Uri("https://sentry.io/api/0/projects/1/groups/"), parseResult.Data.Url);
             Assert.Equal("application/json", parseResult.Data.Headers.First(g => g.Key == "Content-Type").Value);
@@ -101,7 +101,7 @@ namespace CurlToCSharp.UnitTests.Services
                              -d '3'";
             var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
 
-            Assert.Equal(new[] { "1", "2", "3" }, parseResult.Data.Data.Select(d => d.Content));
+            Assert.Equal(new[] { "1", "2", "3" }, parseResult.Data.UploadData.Select(d => d.Content));
         }
 
         [Fact]
@@ -112,9 +112,9 @@ namespace CurlToCSharp.UnitTests.Services
             var curl = @"curl -u ""demo"" -X POST -d @""file1.txt"" -d @file2.txt https://example.com/upload";
             var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
 
-            Assert.Equal(2, parseResult.Data.Data.Count);
-            Assert.Equal("file1.txt", parseResult.Data.Data.ElementAt(0).Content);
-            Assert.Equal("file2.txt", parseResult.Data.Data.ElementAt(1).Content);
+            Assert.Equal(2, parseResult.Data.UploadData.Count);
+            Assert.Equal("file1.txt", parseResult.Data.UploadData.ElementAt(0).Content);
+            Assert.Equal("file2.txt", parseResult.Data.UploadData.ElementAt(1).Content);
         }
 
         [Fact]
@@ -134,7 +134,7 @@ namespace CurlToCSharp.UnitTests.Services
             var curl = @"curl -d ""\"""" -d '\'' -d '""' -d ""'""";
             var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
 
-            Assert.Equal(new[] { "\"", "\'", "\"", "\'" }, parseResult.Data.Data.Select(d => d.Content));
+            Assert.Equal(new[] { "\"", "\'", "\"", "\'" }, parseResult.Data.UploadData.Select(d => d.Content));
         }
 
         [Fact]
@@ -162,7 +162,7 @@ POST";
             var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
 
             Assert.Equal(HttpMethod.Post.ToString().ToUpper(), parseResult.Data.HttpMethod);
-            Assert.Equal("\\some_data", parseResult.Data.Data.First().Content);
+            Assert.Equal("\\some_data", parseResult.Data.UploadData.First().Content);
             Assert.Equal("https://test.zendesk.com/api/v2/tickets.json", parseResult.Data.Url.ToString());
         }
 
@@ -247,17 +247,17 @@ POST";
 --data-urlencode ""a@b""
 ".ToCharArray()));
 
-            Assert.Equal("b", parseResult.Data.Data.ElementAt(0).Content);
-            Assert.Equal("b", parseResult.Data.Data.ElementAt(1).Content);
+            Assert.Equal("b", parseResult.Data.UploadData.ElementAt(0).Content);
+            Assert.Equal("b", parseResult.Data.UploadData.ElementAt(1).Content);
 
-            Assert.Equal("a", parseResult.Data.Data.ElementAt(2).Name);
-            Assert.Equal("b", parseResult.Data.Data.ElementAt(2).Content);
+            Assert.Equal("a", parseResult.Data.UploadData.ElementAt(2).Name);
+            Assert.Equal("b", parseResult.Data.UploadData.ElementAt(2).Content);
 
-            Assert.Equal("b", parseResult.Data.Data.ElementAt(3).Content);
+            Assert.Equal("b", parseResult.Data.UploadData.ElementAt(3).Content);
 
-            Assert.Equal("a", parseResult.Data.Data.ElementAt(4).Name);
-            Assert.Equal("b", parseResult.Data.Data.ElementAt(4).Content);
-            Assert.Equal(DataContentType.BinaryFile, parseResult.Data.Data.ElementAt(4).ContentType);
+            Assert.Equal("a", parseResult.Data.UploadData.ElementAt(4).Name);
+            Assert.Equal("b", parseResult.Data.UploadData.ElementAt(4).Content);
+            Assert.Equal(UploadDataType.BinaryFile, parseResult.Data.UploadData.ElementAt(4).Type);
         }
 
 

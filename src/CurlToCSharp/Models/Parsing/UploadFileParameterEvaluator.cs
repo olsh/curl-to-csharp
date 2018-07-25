@@ -62,14 +62,8 @@ namespace CurlToCSharp.Models.Parsing
                 var match = Regex.Match(stringValue, @"\[(?<start>\d+)-(?<end>\d+)\]");
                 if (match.Success)
                 {
-                    int.TryParse(
-                        match.Groups["start"]
-                            .Value,
-                        out var start);
-                    int.TryParse(
-                        match.Groups["end"]
-                            .Value,
-                        out var end);
+                    int.TryParse(match.Groups["start"].Value, out var start);
+                    int.TryParse(match.Groups["end"].Value, out var end);
 
                     if (start >= end)
                     {

@@ -19,7 +19,8 @@ namespace CurlToCSharp.Models.Parsing
                            new UploadFileParameterEvaluator(parsingOptions),
                            new UrlParameterEvaluator(),
                            new ProxyParameterEvaluator(),
-                           new HeadParameterEvaluator()
+                           new HeadParameterEvaluator(),
+                           new FormParameterEvaluator()
                        };
         }
     }

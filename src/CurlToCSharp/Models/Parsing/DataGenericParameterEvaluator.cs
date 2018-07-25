@@ -19,13 +19,13 @@ namespace CurlToCSharp.Models.Parsing
             }
 
             var value = commandLine.ReadValue();
-            var contentType = DataContentType.Inline;
+            var contentType = UploadDataType.Inline;
             if (isFileEntry)
             {
-                contentType = binary ? DataContentType.BinaryFile : DataContentType.EscapedFile;
+                contentType = binary ? UploadDataType.BinaryFile : UploadDataType.InlineFile;
             }
 
-            convertResult.Data.Data.Add(new UploadData(value.ToString(), contentType));
+            convertResult.Data.UploadData.Add(new UploadData(value.ToString(), contentType));
         }
     }
 }

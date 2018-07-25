@@ -1,10 +1,10 @@
 ﻿namespace CurlToCSharp.Models
 {
-    public enum DataContentType
+    public enum UploadDataType
     {
         Inline,
 
-        EscapedFile,
+        InlineFile,
 
         BinaryFile
     }

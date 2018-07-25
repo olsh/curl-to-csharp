@@ -108,9 +108,14 @@ namespace CurlToCSharp.Services
             if (result.Data.HasDataPayload)
             {
                 result.Data.UploadFiles.Clear();
+                result.Data.FormData.Clear();
             }
 
-            var hasFileUpload = result.Data.UploadFiles.Any();
+            if (result.Data.HasFormPayload)
+            {
+                result.Data.UploadFiles.Clear();
+            }
+
             if (result.Data.HttpMethod == null)
             {
                 if (result.Data.HasDataPayload)
@@ -118,7 +123,12 @@ namespace CurlToCSharp.Services
                     result.Data.HttpMethod = HttpMethod.Post.ToString()
                         .ToUpper();
                 }
-                else if (hasFileUpload)
+                else if (result.Data.HasFormPayload)
+                {
+                    result.Data.HttpMethod = HttpMethod.Post.ToString()
+                        .ToUpper();
+                }
+                else if (result.Data.HasFilePayload)
                 {
                     result.Data.HttpMethod = HttpMethod.Put.ToString()
                         .ToUpper();

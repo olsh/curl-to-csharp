@@ -9,6 +9,8 @@ namespace CurlToCSharp.Models.Parsing
     {
         protected const char FileSeparatorChar = '@';
 
+        protected const char FormSeparatorChar = '=';
+
         protected abstract HashSet<string> Keys { get; }
 
         protected virtual bool CanBeEmpty => false;

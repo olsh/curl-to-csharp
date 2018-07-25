@@ -5,7 +5,7 @@ using CurlToCSharp.Extensions;
 
 namespace CurlToCSharp.Models.Parsing
 {
-    public class DataUrlEncodeParameterEvaluator : DataGenericParameterEvaluator
+    public class DataUrlEncodeParameterEvaluator : ParameterEvaluator
     {
         public DataUrlEncodeParameterEvaluator()
         {
@@ -16,26 +16,21 @@ namespace CurlToCSharp.Models.Parsing
 
         protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
         {
-            void AddKeyValue(Span<char> span, int splitIndex, DataContentType contentType)
+            void AddKeyValue(Span<char> span, int splitIndex, UploadDataType contentType)
             {
                 var dataKey = span.Slice(0, splitIndex)
                     .ToString();
                 var dataValue = span.Slice(splitIndex + 1)
                     .ToString();
-                convertResult.Data.Data.Add(new UploadData(dataKey, dataValue, contentType, true));
+                convertResult.Data.UploadData.Add(new UploadData(dataKey, dataValue, contentType, true));
             }
 
             var value = commandLine.ReadValue();
-            if (value.IsEmpty)
-            {
-                return;
-            }
 
-            var formSeparatorChar = '=';
-            var indexOfForm = value.IndexOf(formSeparatorChar);
+            var indexOfForm = value.IndexOf(FormSeparatorChar);
             if (indexOfForm != -1)
             {
-                AddKeyValue(value, indexOfForm, DataContentType.Inline);
+                AddKeyValue(value, indexOfForm, UploadDataType.Inline);
 
                 return;
             }
@@ -43,12 +38,12 @@ namespace CurlToCSharp.Models.Parsing
             var indexOfFile = value.IndexOf(FileSeparatorChar);
             if (indexOfFile != -1)
             {
-                AddKeyValue(value, indexOfFile, DataContentType.BinaryFile);
+                AddKeyValue(value, indexOfFile, UploadDataType.BinaryFile);
 
                 return;
             }
 
-            convertResult.Data.Data.Add(new UploadData(value.ToString(), true));
+            convertResult.Data.UploadData.Add(new UploadData(value.ToString(), true));
         }
     }
 }

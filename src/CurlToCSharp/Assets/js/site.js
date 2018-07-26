@@ -1,4 +1,4 @@
-﻿(function($, hljs) {
+﻿(function($, Prism) {
 
     $('#convert-button').on('click',
         function() {
@@ -26,19 +26,17 @@
             contentType : 'application/json',
             type : 'POST',
             success: function (response) {
-                $('#csharp').text(response.data).collapse('show');
+                $('#csharp').text(response.data).parent().collapse('show');
                 $('#errors').collapse('hide');
 
                 showWarningsIfNeeded(response.warnings);
 
-                $('pre').each(function (i, block) {
-                    hljs.highlightBlock(block);
-                });
+                Prism.highlightAll();
             },
             error: function(response) {
                 var errors = response.responseJSON && response.responseJSON.errors || [];
 
-                $('#csharp').collapse('hide');
+                $('#csharp').parent().collapse('hide');
                 $('#warnings').collapse('hide');
 
                 if (errors.length > 0) {
@@ -68,4 +66,4 @@
         $('button').removeAttr('disabled');
     }
 
-}(window.jQuery, window.hljs));
+}(window.jQuery, window.Prism));

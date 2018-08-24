@@ -18,4 +18,4 @@ cache:
   - '%LOCALAPPDATA%\Yarn\cache -> src\CurlToCSharp\yarn.lock'
   - '%USERPROFILE%\.nuget\packages -> **\*.csproj'
   - 'C:\ProgramData\chocolatey\lib -> appveyor.yml'
-  - 'src\tools -> build.cake'
+  - 'tools -> build.cake'

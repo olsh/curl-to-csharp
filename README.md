@@ -14,4 +14,10 @@ You can grab latest binaries [here](https://ci.appveyor.com/project/olsh/curl-to
 
 ## Build
 
-Run `build.ps1` on Windows or `build.sh` on Linux and OS X.
+1. Install cake
+
+`dotnet tool install -g Cake.Tool --version 0.30.0`
+
+2. Run build
+
+`dotnet cake build.cake`

@@ -51,5 +51,19 @@ namespace CurlToCSharp.UnitTests.Models.Parsing
             Assert.Equal("hugefile.txt", convertResult.Data.FormData.First().Content);
             Assert.Equal(UploadDataType.InlineFile, convertResult.Data.FormData.First().Type);
         }
+
+        [Fact]
+        public void Evaluate_EmptyValue_Success()
+        {
+            var evaluator = new FormParameterEvaluator();
+            var span = new Span<char>("empty=".ToCharArray());
+            var convertResult = new ConvertResult<CurlOptions> { Data = new CurlOptions() };
+
+            evaluator.Evaluate(ref span, convertResult);
+
+            Assert.Equal("empty", convertResult.Data.FormData.First().Name);
+            Assert.Equal(string.Empty, convertResult.Data.FormData.First().Content);
+            Assert.Equal(UploadDataType.Inline, convertResult.Data.FormData.First().Type);
+        }
     }
 }

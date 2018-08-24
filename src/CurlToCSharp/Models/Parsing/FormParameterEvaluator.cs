@@ -24,19 +24,22 @@ namespace CurlToCSharp.Models.Parsing
                 return;
             }
 
-            var firstCharOfValue = value[0];
-            if (firstCharOfValue == '<')
+            if (value.Length > 0)
             {
-                convertResult.Data.FormData.Add(new FormData(key.ToString(), value.Slice(1).ToString(), UploadDataType.InlineFile));
+                var firstCharOfValue = value[0];
+                if (firstCharOfValue == '<')
+                {
+                    convertResult.Data.FormData.Add(new FormData(key.ToString(), value.Slice(1).ToString(), UploadDataType.InlineFile));
 
-                return;
-            }
+                    return;
+                }
 
-            if (firstCharOfValue == '@')
-            {
-                convertResult.Data.FormData.Add(new FormData(key.ToString(), value.Slice(1).ToString(), UploadDataType.BinaryFile));
+                if (firstCharOfValue == '@')
+                {
+                    convertResult.Data.FormData.Add(new FormData(key.ToString(), value.Slice(1).ToString(), UploadDataType.BinaryFile));
 
-                return;
+                    return;
+                }
             }
 
             convertResult.Data.FormData.Add(new FormData(key.ToString(), value.ToString(), UploadDataType.Inline));

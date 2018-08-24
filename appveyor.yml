@@ -4,7 +4,7 @@ install:
   - choco install curl
   - dotnet tool install -g Cake.Tool --version 0.30.0 
 build_script:
-- cmd: dotnet cake -Target CI
+- cmd: dotnet cake -Target=CI
 test: off
 deploy:
 - provider: AzureAppServiceZipDeploy

@@ -20,8 +20,7 @@ Task("Yarn")
     .Does(() =>
     {
         Yarn
-        .Add(settings => settings.Package("gulp").Globally())
-        .Add(settings => settings.Package("snyk").Globally());
+        .Add(settings => settings.Package("gulp").Globally());
     });
 
 Task("Build")
@@ -47,17 +46,6 @@ Task("IntegrationTest")
   .Does(() =>
 {
      RunTests(integrationTestProjectFile);
-});
-
-Task("Snyk")
-  .IsDependentOn("Yarn")
-  .IsDependentOn("Build")
-  .Does(() =>
-{
-    var snykCommand = "snyk monitor --org=olsh";
-
-    StartProcess("powershell", $"{snykCommand} --file={solutionFile}");
-    StartProcess("powershell", $"{snykCommand} src/{projectName}/obj --project-name={projectName}");
 });
 
 Task("Pack")
@@ -118,7 +106,6 @@ Task("Sonar")
 
 Task("CI")
     .IsDependentOn("Sonar")
-    .IsDependentOn("Snyk")
     .IsDependentOn("CreateArtifact");
 
 RunTarget(target);

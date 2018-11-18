@@ -20,7 +20,9 @@ namespace CurlToCSharp.Models.Parsing
                            new UrlParameterEvaluator(),
                            new ProxyParameterEvaluator(),
                            new HeadParameterEvaluator(),
-                           new FormParameterEvaluator()
+                           new FormParameterEvaluator(),
+                           new CertificateTypeEvaluator(),
+                           new CertificateEvaluator()
                        };
         }
     }

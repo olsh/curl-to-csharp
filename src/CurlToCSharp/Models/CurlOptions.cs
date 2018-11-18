@@ -14,7 +14,14 @@ namespace CurlToCSharp.Models
             UploadData = new List<UploadData>();
             FormData = new List<FormData>();
             UploadFiles = new List<string>();
+            CertificateType = CertificateType.Pem;
         }
+
+        public string CertificateFileName { get; set; }
+
+        public string CertificatePassword { get; set; }
+
+        public CertificateType CertificateType { get; set; }
 
         public string CookieValue { get; set; }
 
@@ -29,6 +36,10 @@ namespace CurlToCSharp.Models
         public bool HasFormPayload => FormData.Count > 0;
 
         public bool HasProxy => ProxyUri != null;
+
+        public bool HasCertificate => !string.IsNullOrEmpty(CertificateFileName);
+
+        public bool HasCertificatePassword => !string.IsNullOrEmpty(CertificatePassword);
 
         public HttpHeaders Headers { get; }
 

@@ -32,9 +32,11 @@ namespace CurlToCSharp.Services
             var compilationUnit = SyntaxFactory.CompilationUnit();
 
             var result = new ConvertResult<string>();
+
+            AddWarningsIfAny(curlOptions, result);
             if (ShouldGenerateHandler(curlOptions))
             {
-                var configureHandlerStatements = ConfigureHandlerStatements(curlOptions, result);
+                var configureHandlerStatements = ConfigureHandlerStatements(curlOptions);
                 compilationUnit = compilationUnit.AddMembers(configureHandlerStatements.ToArray());
             }
 
@@ -49,6 +51,19 @@ namespace CurlToCSharp.Services
             return result;
         }
 
+        private void AddWarningsIfAny(CurlOptions curlOptions, ConvertResult<string> result)
+        {
+            if (curlOptions.HasProxy && !IsSupportedProxy(curlOptions.ProxyUri))
+            {
+                result.Warnings.Add($"Proxy scheme \"{curlOptions.ProxyUri.Scheme}\" is not supported");
+            }
+
+            if (curlOptions.HasCertificate && !IsSupportedCertificate(curlOptions.CertificateType))
+            {
+                result.Warnings.Add($"Certificate type \"{curlOptions.CertificateType.ToString()}\" is not supported");
+            }
+        }
+
         private bool IsSupportedProxy(Uri proxyUri)
         {
             if (Uri.UriSchemeHttp == proxyUri.Scheme || Uri.UriSchemeHttps == proxyUri.Scheme)
@@ -59,9 +74,16 @@ namespace CurlToCSharp.Services
             return false;
         }
 
+        private bool IsSupportedCertificate(CertificateType certificateType)
+        {
+            return certificateType == CertificateType.P12;
+        }
+
         private bool ShouldGenerateHandler(CurlOptions curlOptions)
         {
-            return curlOptions.HasCookies || (curlOptions.HasProxy && IsSupportedProxy(curlOptions.ProxyUri));
+            return curlOptions.HasCookies
+                   || (curlOptions.HasProxy && IsSupportedProxy(curlOptions.ProxyUri))
+                   || (curlOptions.HasCertificate && IsSupportedCertificate(curlOptions.CertificateType));
         }
 
         /// <summary>
@@ -575,15 +597,12 @@ namespace CurlToCSharp.Services
         /// Generate the statements for HttpClient handler configuration.
         /// </summary>
         /// <param name="curlOptions">The curl options.</param>
-        /// <param name="result">The result.</param>
         /// <returns>Collection of <see cref="MemberDeclarationSyntax" />.</returns>
         /// <remarks>
         /// var handler = new HttpClientHandler();
         /// handler.UseCookies = false;
         /// </remarks>
-        private IEnumerable<MemberDeclarationSyntax> ConfigureHandlerStatements(
-            CurlOptions curlOptions,
-            ConvertResult<string> result)
+        private IEnumerable<MemberDeclarationSyntax> ConfigureHandlerStatements(CurlOptions curlOptions)
         {
             var statementSyntaxs = new LinkedList<MemberDeclarationSyntax>();
 
@@ -603,22 +622,44 @@ namespace CurlToCSharp.Services
                     SyntaxFactory.GlobalStatement(SyntaxFactory.ExpressionStatement(memberAssignmentExpression)));
             }
 
-            if (curlOptions.HasProxy)
+            if (curlOptions.HasProxy && IsSupportedProxy(curlOptions.ProxyUri))
             {
-                if (IsSupportedProxy(curlOptions.ProxyUri))
-                {
-                    var memberAssignmentExpression = RoslynExtensions.CreateMemberAssignmentExpression(
-                        HandlerVariableName,
-                        "Proxy",
-                        RoslynExtensions.CreateObjectCreationExpression("WebProxy", RoslynExtensions.CreateStringLiteralArgument(curlOptions.ProxyUri.ToString())));
+                var memberAssignmentExpression = RoslynExtensions.CreateMemberAssignmentExpression(
+                    HandlerVariableName,
+                    "Proxy",
+                    RoslynExtensions.CreateObjectCreationExpression("WebProxy", RoslynExtensions.CreateStringLiteralArgument(curlOptions.ProxyUri.ToString())));
 
-                    statementSyntaxs.AddLast(
-                        SyntaxFactory.GlobalStatement(SyntaxFactory.ExpressionStatement(memberAssignmentExpression)));
-                }
-                else
+                statementSyntaxs.AddLast(
+                    SyntaxFactory.GlobalStatement(SyntaxFactory.ExpressionStatement(memberAssignmentExpression)));
+            }
+
+            if (curlOptions.HasCertificate && IsSupportedCertificate(curlOptions.CertificateType))
+            {
+                var memberAssignmentExpression = RoslynExtensions.CreateMemberAssignmentExpression(
+                    HandlerVariableName,
+                    "ClientCertificateOptions",
+                    RoslynExtensions.CreateMemberAccessExpression("ClientCertificateOption", "Manual"));
+
+                statementSyntaxs.AddLast(
+                    SyntaxFactory.GlobalStatement(SyntaxFactory.ExpressionStatement(memberAssignmentExpression)));
+
+                var newCertificateArguments = new LinkedList<ArgumentSyntax>();
+                newCertificateArguments.AddLast(RoslynExtensions.CreateStringLiteralArgument(curlOptions.CertificateFileName));
+                if (curlOptions.HasCertificatePassword)
                 {
-                    result.Warnings.Add($"Proxy scheme \"{curlOptions.ProxyUri.Scheme}\" is not supported");
+                    newCertificateArguments.AddLast(RoslynExtensions.CreateStringLiteralArgument(curlOptions.CertificatePassword));
                 }
+
+                var newCertificateExpression = RoslynExtensions.CreateObjectCreationExpression(
+                    "X509Certificate2",
+                    newCertificateArguments.ToArray());
+                var certificateAssignmentExpression = RoslynExtensions.CreateInvocationExpression(
+                    HandlerVariableName,
+                    "ClientCertificates",
+                    "Add",
+                    SyntaxFactory.Argument(newCertificateExpression));
+                statementSyntaxs.AddLast(
+                    SyntaxFactory.GlobalStatement(SyntaxFactory.ExpressionStatement(certificateAssignmentExpression)));
             }
 
             statementSyntaxs.TryAppendWhiteSpaceAtEnd();

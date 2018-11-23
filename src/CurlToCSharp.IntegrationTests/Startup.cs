@@ -28,8 +28,8 @@ namespace CurlToCSharp.IntegrationTests
                                     {
                                         // Curl sends these headers by default, but this behavior is not documented
                                         // So we skip the headers for tests
-                                        if (header.Key == HeaderNames.UserAgent
-                                            || header.Key == HeaderNames.Accept)
+                                        if ((header.Key == HeaderNames.UserAgent && header.Value.ToString().StartsWith("curl"))
+                                            || (header.Key == HeaderNames.Accept && header.Value == "*/*"))
                                         {
                                             continue;
                                         }

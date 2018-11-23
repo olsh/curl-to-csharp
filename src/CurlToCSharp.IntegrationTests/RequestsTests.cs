@@ -57,6 +57,13 @@ namespace CurlToCSharp.IntegrationTests
             AssertResponsesEquals(arguments);
         }
 
+        [Theory]
+        [InlineData("-A \"Mozilla/5.0 (iPad; U; CPU OS 3_2_1 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Mobile/7B405\"")]
+        public void UserAgentHeader(string arguments)
+        {
+            AssertResponsesEquals(arguments);
+        }
+
         public void Dispose()
         {
             _webHost?.Dispose();

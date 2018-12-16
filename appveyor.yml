@@ -2,7 +2,7 @@ version: 1.0.{build}
 image: Visual Studio 2017
 install:
   - choco install curl
-  - dotnet tool install -g Cake.Tool --version 0.30.0 
+  - dotnet tool install -g Cake.Tool --version 0.31.0 
 build_script:
 - cmd: dotnet cake -Target=CI
 test: off

@@ -24,12 +24,7 @@ const vendorScripts = [
     'node_modules/prismjs/components/prism-csharp.js'
 ];
 
-gulp.task('default', ['build-vendor', 'build-app']);
-
-gulp.task('build-vendor', ['build-vendor-css', 'build-vendor-js']);
-gulp.task('build-app', ['build-css', 'build-js']);
-
-gulp.task('build-vendor-css', () => {
+const buildVendorCss = () => {
     return gulp.src(vendorStyles)
         .pipe(sourcemaps.init())
         .pipe(sourcemaps.init())
@@ -37,31 +32,40 @@ gulp.task('build-vendor-css', () => {
         .pipe(cleanCSS())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('wwwroot/css/'));
-});
+};
 
-gulp.task('build-vendor-js', () => {
+const buildVendorJs = () => {
     return gulp.src(vendorScripts)
         .pipe(sourcemaps.init())
         .pipe(concat('vendor.min.js'))
         .pipe(uglify())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('wwwroot/js/'));
-});
+};
 
-gulp.task('build-css', () => {
+const buildCss = () => {
     return gulp.src(appStyles)
         .pipe(sourcemaps.init())
         .pipe(concat('site.min.css'))
         .pipe(cleanCSS())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('wwwroot/css/'));
-});
+};
 
-gulp.task('build-js', () => {
+const buildJs = () => {
     return gulp.src(appScripts)
         .pipe(sourcemaps.init())
         .pipe(concat('site.min.js'))
         .pipe(uglify())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('wwwroot/js/'));
-});
+};
+
+const buildVendor = gulp.parallel(buildVendorCss, buildVendorJs);
+const buildApp = gulp.parallel(buildCss, buildJs);
+
+const defaultTasks = gulp.parallel(buildVendor, buildApp);
+
+exports.buildApp = buildApp;
+exports.buildVendor = buildVendor;
+exports.default = defaultTasks;

@@ -1,7 +1,7 @@
-#tool nuget:?package=MSBuild.SonarQube.Runner.Tool
-#addin nuget:?package=Cake.Sonar
+#tool nuget:?package=MSBuild.SonarQube.Runner.Tool&version=4.3.1
 
-#addin "Cake.Yarn"
+#addin nuget:?package=Cake.Sonar&version=1.1.18
+#addin nuget:?package=Cake.Yarn&version=0.4.4
 
 var target = Argument("target", "Default");
 

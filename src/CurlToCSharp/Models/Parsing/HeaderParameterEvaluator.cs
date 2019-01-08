@@ -22,12 +22,20 @@ namespace CurlToCSharp.Models.Parsing
             if (separatorIndex == -1)
             {
                 convertResult.Warnings.Add($"Unable to parse header \"{value.ToString()}\"");
+
                 return;
             }
 
             var headerKey = value.Slice(0, separatorIndex)
                 .ToString()
                 .Trim();
+
+            if (string.IsNullOrEmpty(headerKey))
+            {
+                convertResult.Warnings.Add($"Unable to parse header \"{value.ToString()}\"");
+
+                return;
+            }
 
             var headerValue = string.Empty;
             var valueStartIndex = separatorIndex + 1;

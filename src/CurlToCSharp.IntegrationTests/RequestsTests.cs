@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net.Http;
-using System.Threading.Tasks;
 
+using CurlToCSharp.IntegrationTests.Constants;
 using CurlToCSharp.Models.Parsing;
 using CurlToCSharp.Services;
 
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
 
@@ -15,22 +13,8 @@ using Xunit;
 
 namespace CurlToCSharp.IntegrationTests
 {
-    public class RequestsTests : IDisposable
+    public class RequestsTests : IClassFixture<EchoWebHostFixture>
     {
-        private const string TestServerHost = "http://localhost:4653";
-
-        private readonly IWebHost _webHost;
-
-        public RequestsTests()
-        {
-            _webHost = WebHost.CreateDefaultBuilder()
-                .UseStartup<Startup>()
-                .UseUrls(TestServerHost)
-                .Build();
-
-            Task.Run(() => _webHost.Run());
-        }
-
         [Theory]
         [InlineData("-d \"some data\"")]
         [InlineData("-d \"form=a b\" -d \"another data\"")]
@@ -64,14 +48,9 @@ namespace CurlToCSharp.IntegrationTests
             AssertResponsesEquals(arguments);
         }
 
-        public void Dispose()
-        {
-            _webHost?.Dispose();
-        }
-
         private static void AssertResponsesEquals(string arguments)
         {
-            var curlArguments = $"{new Uri(new Uri(TestServerHost), "echo")} {arguments}";
+            var curlArguments = $"{new Uri(new Uri(WebHostConstants.TestServerHost), "echo")} {arguments}";
 
             var curlResponse = ExecuteCurlRequest(curlArguments);
             var csharpResponse = ExecuteCsharpRequest(curlArguments);

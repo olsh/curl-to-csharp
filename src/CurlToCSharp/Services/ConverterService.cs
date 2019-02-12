@@ -83,7 +83,8 @@ namespace CurlToCSharp.Services
         {
             return curlOptions.HasCookies
                    || (curlOptions.HasProxy && IsSupportedProxy(curlOptions.ProxyUri))
-                   || (curlOptions.HasCertificate && IsSupportedCertificate(curlOptions.CertificateType));
+                   || ((curlOptions.HasCertificate && IsSupportedCertificate(curlOptions.CertificateType))
+                   || curlOptions.Insecure);
         }
 
         /// <summary>
@@ -660,6 +661,26 @@ namespace CurlToCSharp.Services
                     SyntaxFactory.Argument(newCertificateExpression));
                 statementSyntaxs.AddLast(
                     SyntaxFactory.GlobalStatement(SyntaxFactory.ExpressionStatement(certificateAssignmentExpression)));
+            }
+
+            if (curlOptions.Insecure)
+            {
+                var parameterListSyntax = RoslynExtensions.CreateParameterListSyntax(
+                    "requestMessage",
+                    "certificate",
+                    "chain",
+                    "policyErrors");
+                var lambdaExpression = SyntaxFactory.ParenthesizedLambdaExpression(
+                    parameterListSyntax,
+                    SyntaxFactory.LiteralExpression(SyntaxKind.TrueLiteralExpression, SyntaxFactory.Token(SyntaxKind.TrueKeyword)));
+
+                statementSyntaxs.AddLast(
+                    SyntaxFactory.GlobalStatement(
+                        SyntaxFactory.ExpressionStatement(
+                            RoslynExtensions.CreateMemberAssignmentExpression(
+                                HandlerVariableName,
+                                "ServerCertificateCustomValidationCallback",
+                                lambdaExpression))));
             }
 
             statementSyntaxs.TryAppendWhiteSpaceAtEnd();

@@ -1,7 +1,7 @@
 const gulp = require('gulp');
 const concat = require('gulp-concat');
 const sourcemaps = require('gulp-sourcemaps');
-const cleanCSS = require('gulp-clean-css');
+const cleanCss = require('gulp-clean-css');
 const uglify = require('gulp-uglify');
 
 const appStyles = [
@@ -29,7 +29,7 @@ const buildVendorCss = () => {
         .pipe(sourcemaps.init())
         .pipe(sourcemaps.init())
         .pipe(concat('vendor.min.css'))
-        .pipe(cleanCSS())
+        .pipe(cleanCss())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('wwwroot/css/'));
 };
@@ -47,7 +47,7 @@ const buildCss = () => {
     return gulp.src(appStyles)
         .pipe(sourcemaps.init())
         .pipe(concat('site.min.css'))
-        .pipe(cleanCSS())
+        .pipe(cleanCss())
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('wwwroot/css/'));
 };

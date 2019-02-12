@@ -260,7 +260,6 @@ POST";
             Assert.Equal(UploadDataType.BinaryFile, parseResult.Data.UploadData.ElementAt(4).Type);
         }
 
-
         private static CommandLineParser CreateCommandLineParser()
         {
             return new CommandLineParser(new ParsingOptions(10));

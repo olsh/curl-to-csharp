@@ -66,6 +66,14 @@ namespace CurlToCSharp.Extensions
                     SyntaxFactory.Literal(argumentName)));
         }
 
+        public static ParameterListSyntax CreateParameterListSyntax(params string[] parameters)
+        {
+            var separatedSyntaxList = new SeparatedSyntaxList<ParameterSyntax>().AddRange(
+                parameters.Select(p => SyntaxFactory.Parameter(SyntaxFactory.Identifier(p))));
+
+            return SyntaxFactory.ParameterList(separatedSyntaxList);
+        }
+
         public static VariableDeclarationSyntax CreateVariableInitializationExpression(
             string variableName,
             ExpressionSyntax expression)

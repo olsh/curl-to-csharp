@@ -1,4 +1,4 @@
-﻿(function($, Prism) {
+﻿(function($, prism) {
 
     $('#convert-button').on('click',
         function() {
@@ -31,7 +31,7 @@
 
                 showWarningsIfNeeded(response.warnings);
 
-                Prism.highlightAll();
+                prism.highlightAll();
             },
             error: function(response) {
                 var errors = response.responseJSON && response.responseJSON.errors || [];

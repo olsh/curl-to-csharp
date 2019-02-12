@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 
 using CurlToCSharp.Models;
 using CurlToCSharp.Models.Parsing;

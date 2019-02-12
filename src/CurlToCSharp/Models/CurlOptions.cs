@@ -27,6 +27,10 @@ namespace CurlToCSharp.Models
 
         public ICollection<FormData> FormData { get; }
 
+        public bool HasCertificate => !string.IsNullOrEmpty(CertificateFileName);
+
+        public bool HasCertificatePassword => !string.IsNullOrEmpty(CertificatePassword);
+
         public bool HasCookies => !string.IsNullOrWhiteSpace(CookieValue);
 
         public bool HasDataPayload => UploadData.Count > 0;
@@ -37,13 +41,11 @@ namespace CurlToCSharp.Models
 
         public bool HasProxy => ProxyUri != null;
 
-        public bool HasCertificate => !string.IsNullOrEmpty(CertificateFileName);
-
-        public bool HasCertificatePassword => !string.IsNullOrEmpty(CertificatePassword);
-
         public HttpHeaders Headers { get; }
 
         public string HttpMethod { get; set; }
+
+        public bool Insecure { get; set; }
 
         public Uri ProxyUri { get; set; }
 

@@ -625,10 +625,7 @@ namespace CurlToCSharp.Services
 
             if (curlOptions.HasProxy && IsSupportedProxy(curlOptions.ProxyUri))
             {
-                var memberAssignmentExpression = RoslynExtensions.CreateMemberAssignmentExpression(
-                    HandlerVariableName,
-                    "Proxy",
-                    RoslynExtensions.CreateObjectCreationExpression("WebProxy", RoslynExtensions.CreateStringLiteralArgument(curlOptions.ProxyUri.ToString())));
+                var memberAssignmentExpression = CreateProxyStatements(curlOptions);
 
                 statementSyntaxs.AddLast(
                     SyntaxFactory.GlobalStatement(SyntaxFactory.ExpressionStatement(memberAssignmentExpression)));
@@ -686,6 +683,56 @@ namespace CurlToCSharp.Services
             statementSyntaxs.TryAppendWhiteSpaceAtEnd();
 
             return statementSyntaxs;
+        }
+
+        /// <summary>
+        /// Generate the statements for WebProxy object configuration.
+        /// </summary>
+        /// <param name="curlOptions">The curl options.</param>
+        /// <returns>Collection of <see cref="MemberDeclarationSyntax" />.</returns>
+        /// <remarks>
+        /// handler.Proxy = new WebProxy("http://localhost:1080/") { UseDefaultCredentials = true }
+        /// </remarks>
+        private AssignmentExpressionSyntax CreateProxyStatements(CurlOptions curlOptions)
+        {
+            InitializerExpressionSyntax initializer = null;
+            if (curlOptions.UseDefaultProxyCredentials)
+            {
+                var defaultCredentialsAssignment = SyntaxFactory.AssignmentExpression(
+                    SyntaxKind.SimpleAssignmentExpression,
+                    SyntaxFactory.IdentifierName("UseDefaultCredentials"),
+                    SyntaxFactory.LiteralExpression(
+                        SyntaxKind.TrueLiteralExpression,
+                        SyntaxFactory.Token(SyntaxKind.TrueKeyword)));
+                var syntaxList = new SeparatedSyntaxList<ExpressionSyntax>();
+                syntaxList = syntaxList.Add(defaultCredentialsAssignment);
+
+                initializer = SyntaxFactory.InitializerExpression(SyntaxKind.ObjectInitializerExpression, syntaxList);
+            }
+
+            if (curlOptions.HasProxyUserName)
+            {
+                var proxyCredentialsArguments = new LinkedList<ArgumentSyntax>();
+                proxyCredentialsArguments.AddLast(RoslynExtensions.CreateStringLiteralArgument(curlOptions.ProxyUserName));
+                proxyCredentialsArguments.AddLast(RoslynExtensions.CreateStringLiteralArgument(curlOptions.ProxyPassword));
+
+                var defaultCredentialsAssignment = SyntaxFactory.AssignmentExpression(
+                    SyntaxKind.SimpleAssignmentExpression,
+                    SyntaxFactory.IdentifierName("Credentials"),
+                    RoslynExtensions.CreateObjectCreationExpression("NetworkCredential", proxyCredentialsArguments.ToArray()));
+                var syntaxList = new SeparatedSyntaxList<ExpressionSyntax>().Add(defaultCredentialsAssignment);
+                initializer = SyntaxFactory.InitializerExpression(SyntaxKind.ObjectInitializerExpression, syntaxList);
+            }
+
+            var memberAssignmentExpression = RoslynExtensions.CreateMemberAssignmentExpression(
+                HandlerVariableName,
+                "Proxy",
+                RoslynExtensions.CreateObjectCreationExpression(
+                    "WebProxy",
+                    initializer,
+                    RoslynExtensions.CreateStringLiteralArgument(curlOptions.ProxyUri.ToString())));
+
+            return memberAssignmentExpression;
         }
     }
 }

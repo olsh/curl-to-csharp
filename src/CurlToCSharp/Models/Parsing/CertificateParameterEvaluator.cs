@@ -5,9 +5,9 @@ using CurlToCSharp.Extensions;
 
 namespace CurlToCSharp.Models.Parsing
 {
-    public class CertificateEvaluator : ParameterEvaluator
+    public class CertificateParameterEvaluator : ParameterEvaluator
     {
-        public CertificateEvaluator()
+        public CertificateParameterEvaluator()
         {
             Keys = new HashSet<string> { "-E", "--cert" };
         }

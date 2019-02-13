@@ -31,6 +31,10 @@ namespace CurlToCSharp.Models
 
         public bool HasCertificatePassword => !string.IsNullOrEmpty(CertificatePassword);
 
+        public bool HasProxyPassword => !string.IsNullOrEmpty(ProxyPassword);
+
+        public bool HasProxyUserName => !string.IsNullOrEmpty(ProxyUserName);
+
         public bool HasCookies => !string.IsNullOrWhiteSpace(CookieValue);
 
         public bool HasDataPayload => UploadData.Count > 0;
@@ -56,6 +60,12 @@ namespace CurlToCSharp.Models
         public Uri Url { get; set; }
 
         public string UserPasswordPair { get; set; }
+
+        public bool UseDefaultProxyCredentials { get; set; }
+
+        public string ProxyUserName { get; set; }
+
+        public string ProxyPassword { get; set; }
 
         public Uri GetUrlForFileUpload(string fileName)
         {

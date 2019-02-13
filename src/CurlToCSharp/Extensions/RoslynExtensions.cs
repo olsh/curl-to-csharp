@@ -51,11 +51,19 @@ namespace CurlToCSharp.Extensions
             string objectName,
             params ArgumentSyntax[] arguments)
         {
+            return CreateObjectCreationExpression(objectName, null, arguments);
+        }
+
+        public static ObjectCreationExpressionSyntax CreateObjectCreationExpression(
+            string objectName,
+            InitializerExpressionSyntax initializerExpression,
+            params ArgumentSyntax[] arguments)
+        {
             var methodArgumentList = new SeparatedSyntaxList<ArgumentSyntax>().AddRange(arguments);
             return SyntaxFactory.ObjectCreationExpression(
                 SyntaxFactory.IdentifierName(objectName),
                 SyntaxFactory.ArgumentList(methodArgumentList),
-                null);
+                initializerExpression);
         }
 
         public static ArgumentSyntax CreateStringLiteralArgument(string argumentName)

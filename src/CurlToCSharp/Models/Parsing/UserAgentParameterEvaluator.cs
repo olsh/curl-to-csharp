@@ -7,9 +7,9 @@ using Microsoft.Net.Http.Headers;
 
 namespace CurlToCSharp.Models.Parsing
 {
-    public class UserAgentEvaluator : ParameterEvaluator
+    public class UserAgentParameterEvaluator : ParameterEvaluator
     {
-        public UserAgentEvaluator()
+        public UserAgentParameterEvaluator()
         {
             Keys = new HashSet<string> { "-A", "--user-agent" };
         }

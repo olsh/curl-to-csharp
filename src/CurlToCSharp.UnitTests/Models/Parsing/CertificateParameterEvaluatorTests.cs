@@ -7,12 +7,12 @@ using Xunit;
 
 namespace CurlToCSharp.UnitTests.Models.Parsing
 {
-    public class CertificateEvaluatorTests
+    public class CertificateParameterEvaluatorTests
     {
         [Fact]
         public void Evaluate_CertificateWithPassword_Success()
         {
-            var evaluator = new CertificateEvaluator();
+            var evaluator = new CertificateParameterEvaluator();
             var span = new Span<char>(@"D:\\cert.p12:123".ToCharArray());
             var convertResult = new ConvertResult<CurlOptions> { Data = new CurlOptions() };
 
@@ -25,7 +25,7 @@ namespace CurlToCSharp.UnitTests.Models.Parsing
         [Fact]
         public void Evaluate_CertificateWithoutPassword_Success()
         {
-            var evaluator = new CertificateEvaluator();
+            var evaluator = new CertificateParameterEvaluator();
             var span = new Span<char>(@"D:\\cert.p12".ToCharArray());
             var convertResult = new ConvertResult<CurlOptions> { Data = new CurlOptions() };
 

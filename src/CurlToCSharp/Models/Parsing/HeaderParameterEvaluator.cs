@@ -46,6 +46,13 @@ namespace CurlToCSharp.Models.Parsing
                     .Trim();
             }
 
+            if (string.Equals(headerKey, "Cookie"))
+            {
+                convertResult.Data.CookieValue = headerValue;
+
+                return;
+            }
+
             if (string.IsNullOrEmpty(headerValue) || !convertResult.Data.Headers.TryAdd(headerKey, headerValue))
             {
                 convertResult.Warnings.Add($"Unable to add header \"{headerKey}\": \"{headerValue}\"");

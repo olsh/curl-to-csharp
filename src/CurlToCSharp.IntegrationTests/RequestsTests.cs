@@ -28,6 +28,14 @@ namespace CurlToCSharp.IntegrationTests
         }
 
         [Theory]
+        [InlineData("-d \"some\" -G")]
+        [InlineData("-d \"form=a\" -d \"another\" -G")]
+        public void DataGet(string arguments)
+        {
+            AssertResponsesEquals(arguments);
+        }
+
+        [Theory]
         [InlineData("-T \"Resources\\\\text-file.txt\"")]
         public void UploadFile(string arguments)
         {

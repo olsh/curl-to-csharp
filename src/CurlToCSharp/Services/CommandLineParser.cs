@@ -116,6 +116,13 @@ namespace CurlToCSharp.Services
                 result.Data.UploadFiles.Clear();
             }
 
+            // If used in combination with -I, --head, the POST data will instead be appended to the URL with a HEAD request.
+            if (result.Data.ForceGet && result.Data.HttpMethod != HttpMethod.Head.ToString().ToUpper())
+            {
+                result.Data.HttpMethod = HttpMethod.Get.ToString()
+                    .ToUpper();
+            }
+
             if (result.Data.HttpMethod == null)
             {
                 if (result.Data.HasDataPayload)

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace CurlToCSharp.Models
 {
@@ -25,15 +28,13 @@ namespace CurlToCSharp.Models
 
         public string CookieValue { get; set; }
 
+        public bool ForceGet { get; set; }
+
         public ICollection<FormData> FormData { get; }
 
         public bool HasCertificate => !string.IsNullOrEmpty(CertificateFileName);
 
         public bool HasCertificatePassword => !string.IsNullOrEmpty(CertificatePassword);
-
-        public bool HasProxyPassword => !string.IsNullOrEmpty(ProxyPassword);
-
-        public bool HasProxyUserName => !string.IsNullOrEmpty(ProxyUserName);
 
         public bool HasCookies => !string.IsNullOrWhiteSpace(CookieValue);
 
@@ -45,13 +46,19 @@ namespace CurlToCSharp.Models
 
         public bool HasProxy => ProxyUri != null;
 
+        public bool HasProxyUserName => !string.IsNullOrEmpty(ProxyUserName);
+
         public HttpHeaders Headers { get; }
 
         public string HttpMethod { get; set; }
 
         public bool Insecure { get; set; }
 
+        public string ProxyPassword { get; set; }
+
         public Uri ProxyUri { get; set; }
+
+        public string ProxyUserName { get; set; }
 
         public ICollection<UploadData> UploadData { get; }
 
@@ -59,13 +66,24 @@ namespace CurlToCSharp.Models
 
         public Uri Url { get; set; }
 
-        public string UserPasswordPair { get; set; }
-
         public bool UseDefaultProxyCredentials { get; set; }
 
-        public string ProxyUserName { get; set; }
+        public string UserPasswordPair { get; set; }
 
-        public string ProxyPassword { get; set; }
+        public string GetFullUrl()
+        {
+            if (!ForceGet)
+            {
+                return Url.ToString();
+            }
+
+            var builder = new UriBuilder(Url)
+                              {
+                                  Query = string.Join("&", UploadData.Select(d => d.ToQueryStringParameter()))
+                              };
+
+            return builder.ToString();
+        }
 
         public Uri GetUrlForFileUpload(string fileName)
         {

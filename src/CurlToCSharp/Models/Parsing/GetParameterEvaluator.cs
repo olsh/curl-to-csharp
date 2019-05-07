@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
 
 namespace CurlToCSharp.Models.Parsing
 {
-    public class HeadParameterEvaluator : ParameterEvaluator
+    public class GetParameterEvaluator : ParameterEvaluator
     {
-        public HeadParameterEvaluator()
+        public GetParameterEvaluator()
         {
-            Keys = new HashSet<string> { "-I", "--head" };
+            Keys = new HashSet<string> { "-G", "--get" };
         }
 
         protected override bool CanBeEmpty => true;
@@ -17,7 +16,7 @@ namespace CurlToCSharp.Models.Parsing
 
         protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
         {
-            convertResult.Data.HttpMethod = HttpMethod.Head.ToString().ToUpper();
+            convertResult.Data.ForceGet = true;
         }
     }
 }

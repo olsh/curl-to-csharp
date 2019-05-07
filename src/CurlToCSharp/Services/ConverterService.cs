@@ -502,7 +502,7 @@ namespace CurlToCSharp.Services
             var methodNameArgument = RoslynExtensions.CreateStringLiteralArgument(curlOptions.HttpMethod);
             var httpMethodArgument = RoslynExtensions.CreateObjectCreationExpression(nameof(HttpMethod), methodNameArgument);
 
-            var urlArgument = RoslynExtensions.CreateStringLiteralArgument(curlOptions.Url.ToString());
+            var urlArgument = RoslynExtensions.CreateStringLiteralArgument(curlOptions.GetFullUrl());
             var requestUsingStatement = RoslynExtensions.CreateUsingStatement(
                 RequestVariableName,
                 nameof(HttpRequestMessage),
@@ -519,7 +519,7 @@ namespace CurlToCSharp.Services
             }
 
             var requestInnerBlocks = new LinkedList<UsingStatementSyntax>();
-            if (curlOptions.HasDataPayload)
+            if (curlOptions.HasDataPayload && !curlOptions.ForceGet)
             {
                 var assignmentExpression = CreateStringContentAssignmentStatement(curlOptions);
                 requestInnerBlocks.AddLast(

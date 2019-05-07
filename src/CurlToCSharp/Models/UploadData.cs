@@ -24,5 +24,10 @@
         }
 
         public bool IsUrlEncoded { get; }
+
+        public string ToQueryStringParameter()
+        {
+            return string.IsNullOrEmpty(Name) ? Content : $"{Name}={Content}";
+        }
     }
 }

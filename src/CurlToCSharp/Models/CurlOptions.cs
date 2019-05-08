@@ -82,7 +82,12 @@ namespace CurlToCSharp.Models
                                   Query = string.Join("&", UploadData.Select(d => d.ToQueryStringParameter()))
                               };
 
-            return builder.ToString();
+            if (builder.Uri.IsDefaultPort)
+            {
+                builder.Port = -1;
+            }
+
+            return builder.Uri.AbsoluteUri;
         }
 
         public Uri GetUrlForFileUpload(string fileName)

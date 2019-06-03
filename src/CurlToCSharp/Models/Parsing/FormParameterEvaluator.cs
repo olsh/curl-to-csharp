@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
+using CurlToCSharp.Constants;
 using CurlToCSharp.Extensions;
+
+using Microsoft.AspNetCore;
 
 namespace CurlToCSharp.Models.Parsing
 {
@@ -26,23 +30,75 @@ namespace CurlToCSharp.Models.Parsing
 
             if (value.Length > 0)
             {
+                var firstPropertySeparatorIndex = value.IndexOf(';');
+                Dictionary<string, string> additionalProperties;
+                if (firstPropertySeparatorIndex > 0)
+                {
+                    additionalProperties = GetAdditionalProperties(convertResult, value);
+                    value = value.Slice(0, firstPropertySeparatorIndex);
+                }
+                else
+                {
+                    additionalProperties = new Dictionary<string, string>();
+                }
+
+
+
                 var firstCharOfValue = value[0];
                 if (firstCharOfValue == '<')
                 {
-                    convertResult.Data.FormData.Add(new FormData(key.ToString(), value.Slice(1).ToString(), UploadDataType.InlineFile));
+                    convertResult.Data.FormData.Add(CreateFormData(key, value, UploadDataType.InlineFile, additionalProperties));
 
                     return;
                 }
 
                 if (firstCharOfValue == '@')
                 {
-                    convertResult.Data.FormData.Add(new FormData(key.ToString(), value.Slice(1).ToString(), UploadDataType.BinaryFile));
+                    convertResult.Data.FormData.Add(CreateFormData(key, value, UploadDataType.BinaryFile, additionalProperties));
 
                     return;
                 }
             }
 
             convertResult.Data.FormData.Add(new FormData(key.ToString(), value.ToString(), UploadDataType.Inline));
+        }
+
+        private static Dictionary<string, string> GetAdditionalProperties(ConvertResult<CurlOptions> convertResult, Span<char> value)
+        {
+            var stringValue = value.ToString();
+            var valueProperties = stringValue.Split(';');
+
+            Dictionary<string, string> additionalProperties = new Dictionary<string, string>();
+            for (int i = 1; i < valueProperties.Length; i++)
+            {
+                var valueProperty = valueProperties[i];
+                var keyValue = valueProperty.Split("=");
+                if (keyValue.Length != 2)
+                {
+                    convertResult.Warnings.Add($"Unable to parse part of form value \"{valueProperty}\"");
+
+                    continue;
+                }
+
+                additionalProperties.TryAdd(keyValue[0].ToLower(), TrimValue(keyValue[1]));
+            }
+
+            return additionalProperties;
+        }
+
+        private static string TrimValue(string value)
+        {
+            return value.Trim(Chars.Space, Chars.DoubleQuote, Chars.SingleQuote);
+        }
+
+        private static FormData CreateFormData(Span<char> key, Span<char> value, UploadDataType type, Dictionary<string, string> additionalProperties)
+        {
+            return new FormData(
+                key.ToString(),
+                TrimValue(value.Slice(1).ToString()),
+                type,
+                additionalProperties.GetValueOrDefault("type"),
+                additionalProperties.GetValueOrDefault("filename"));
         }
 
         private bool TrySplit(Span<char> input, char separator, out Span<char> key, out Span<char> value)

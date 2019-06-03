@@ -2,24 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using CurlToCSharp.Constants;
+
 namespace CurlToCSharp.Extensions
 {
     public static class SpanExtensions
     {
-        private const char EscapeChar = '\\';
-
-        private const char DoubleQuote = '"';
-
-        private const char SingleQuote = '\'';
-
-        private const char Space = ' ';
-
         public static Span<char> Trim(this Span<char> input)
         {
             int start;
             for (start = 0; start < input.Length; start++)
             {
-                if (!char.IsWhiteSpace(input[start]) && input[start] != EscapeChar)
+                if (!char.IsWhiteSpace(input[start]) && input[start] != Chars.Escape)
                 {
                     break;
                 }
@@ -42,7 +36,7 @@ namespace CurlToCSharp.Extensions
             var list = new LinkedList<char>();
             for (var i = 0; i < input.Length; i++)
             {
-                if (input[i] == EscapeChar && (i == 0 || input[i - 1] != EscapeChar))
+                if (input[i] == Chars.Escape && (i == 0 || input[i - 1] != Chars.Escape))
                 {
                     continue;
                 }
@@ -58,7 +52,7 @@ namespace CurlToCSharp.Extensions
             int start;
             for (start = 0; start < input.Length; start++)
             {
-                var escaped = start > 0 && input[start - 1] == EscapeChar;
+                var escaped = start > 0 && input[start - 1] == Chars.Escape;
                 if (input[start] != quote || escaped)
                 {
                     break;
@@ -68,7 +62,7 @@ namespace CurlToCSharp.Extensions
             int end;
             for (end = input.Length - 1; end > start; end--)
             {
-                var escaped = input[end - 1] == EscapeChar;
+                var escaped = input[end - 1] == Chars.Escape;
                 if (input[end] != quote || escaped)
                 {
                     break;
@@ -88,14 +82,14 @@ namespace CurlToCSharp.Extensions
 
             var firstChar = commandLine[0];
             int closeIndex = 0;
-            var firstCharIsQuote = firstChar == SingleQuote || firstChar == DoubleQuote;
+            var firstCharIsQuote = firstChar == Chars.SingleQuote || firstChar == Chars.DoubleQuote;
             if (firstCharIsQuote && commandLine.Length > 1)
             {
                 var quote = firstChar;
                 commandLine = commandLine.Slice(1);
                 for (int i = 0; i < commandLine.Length; i++)
                 {
-                    if (commandLine[i] == quote && (i == 0 || commandLine[i - 1] != EscapeChar))
+                    if (commandLine[i] == quote && (i == 0 || commandLine[i - 1] != Chars.Escape))
                     {
                         closeIndex = i + 1;
                         break;
@@ -104,7 +98,7 @@ namespace CurlToCSharp.Extensions
             }
             else
             {
-                closeIndex = commandLine.IndexOf(Space);
+                closeIndex = commandLine.IndexOf(Chars.Space);
                 if (closeIndex == -1)
                 {
                     closeIndex = commandLine.Length;
@@ -129,7 +123,7 @@ namespace CurlToCSharp.Extensions
 
         public static Span<char> ReadParameter(this ref Span<char> commandLine)
         {
-            var indexOfSpace = commandLine.IndexOf(Space);
+            var indexOfSpace = commandLine.IndexOf(Chars.Space);
             if (indexOfSpace == -1)
             {
                 indexOfSpace = commandLine.Length;

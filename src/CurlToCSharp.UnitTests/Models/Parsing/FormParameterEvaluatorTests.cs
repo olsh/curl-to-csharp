@@ -65,5 +65,21 @@ namespace CurlToCSharp.UnitTests.Models.Parsing
             Assert.Equal(string.Empty, convertResult.Data.FormData.First().Content);
             Assert.Equal(UploadDataType.Inline, convertResult.Data.FormData.First().Type);
         }
+
+        [Fact]
+        public void Evaluate_BinaryFileWithTypeAndFileName_Success()
+        {
+            var evaluator = new FormParameterEvaluator();
+            var span = new Span<char>("web=@index.html;type=text/html;filename=\"test.html\"".ToCharArray());
+            var convertResult = new ConvertResult<CurlOptions> { Data = new CurlOptions() };
+
+            evaluator.Evaluate(ref span, convertResult);
+
+            Assert.Equal("web", convertResult.Data.FormData.First().Name);
+            Assert.Equal("index.html", convertResult.Data.FormData.First().Content);
+            Assert.Equal("text/html", convertResult.Data.FormData.First().ContentType);
+            Assert.Equal("test.html", convertResult.Data.FormData.First().FileName);
+            Assert.Equal(UploadDataType.BinaryFile, convertResult.Data.FormData.First().Type);
+        }
     }
 }

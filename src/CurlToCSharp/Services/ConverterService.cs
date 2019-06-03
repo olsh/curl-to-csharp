@@ -224,6 +224,7 @@ namespace CurlToCSharp.Services
                         MultipartVariableName,
                         nameof(MultipartFormDataContent))));
 
+            int fileCounter = 1;
             foreach (var data in curlOptions.FormData)
             {
                 StatementSyntax addStatement;
@@ -242,19 +243,44 @@ namespace CurlToCSharp.Services
                 }
                 else if (data.Type == UploadDataType.BinaryFile)
                 {
+                    var getFileNameArgument = string.IsNullOrEmpty(data.FileName)
+                                                  ? SyntaxFactory.Argument(
+                                                      RoslynExtensions.CreateInvocationExpression(
+                                                          nameof(Path),
+                                                          nameof(Path.GetFileName),
+                                                          RoslynExtensions.CreateStringLiteralArgument(data.Content)))
+                                                  : RoslynExtensions.CreateStringLiteralArgument(data.FileName);
+
+                    // If the file has content type, we should add it to ByteArrayContent headers
                     var contentExpression = CreateNewByteArrayContentExpression(data.Content);
-                    var getFileNameSyntax = RoslynExtensions.CreateInvocationExpression(
-                        nameof(Path),
-                        nameof(Path.GetFileName),
-                        RoslynExtensions.CreateStringLiteralArgument(data.Content));
+                    ExpressionSyntax contentArgumentExpression;
+                    if (string.IsNullOrEmpty(data.ContentType))
+                    {
+                        contentArgumentExpression = contentExpression;
+                    }
+                    else
+                    {
+                        var byteArrayVariableName = "file" + fileCounter;
+                        var byteArrayContentInitialization = RoslynExtensions.CreateVariableInitializationExpression(byteArrayVariableName, contentExpression);
+                        statements.AddLast(SyntaxFactory.LocalDeclarationStatement(byteArrayContentInitialization));
+                        statements.AddLast(
+                            SyntaxFactory.ExpressionStatement(
+                                RoslynExtensions.CreateInvocationExpression(
+                                    byteArrayVariableName,
+                                    "Headers",
+                                    "Add",
+                                    RoslynExtensions.CreateStringLiteralArgument("Content-Type"),
+                                    RoslynExtensions.CreateStringLiteralArgument(data.ContentType))));
+                        contentArgumentExpression = SyntaxFactory.IdentifierName(byteArrayVariableName);
+                    }
 
                     addStatement = SyntaxFactory.ExpressionStatement(
                         RoslynExtensions.CreateInvocationExpression(
                             MultipartVariableName,
                             MultipartAddMethodName,
-                            SyntaxFactory.Argument(contentExpression),
+                            SyntaxFactory.Argument(contentArgumentExpression),
                             RoslynExtensions.CreateStringLiteralArgument(data.Name),
-                            SyntaxFactory.Argument(getFileNameSyntax)));
+                            getFileNameArgument));
                 }
                 else
                 {

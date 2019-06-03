@@ -2,17 +2,17 @@
 {
     public abstract class UploadContent
     {
-        public UploadContent(string content)
+        protected UploadContent(string content)
             : this(null, content, UploadDataType.Inline)
         {
         }
 
-        public UploadContent(string content, UploadDataType type)
+        protected UploadContent(string content, UploadDataType type)
             : this(null, content, type)
         {
         }
 
-        public UploadContent(string name, string content, UploadDataType type)
+        protected UploadContent(string name, string content, UploadDataType type)
         {
             Content = content;
             Type = type;

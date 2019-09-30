@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Net.Http.Headers;
 
 namespace CurlToCSharp.IntegrationTests
@@ -19,6 +20,12 @@ namespace CurlToCSharp.IntegrationTests
                         builder.Run(
                             context =>
                                 {
+                                    var syncIoFeature = context.Features.Get<IHttpBodyControlFeature>();
+                                    if (syncIoFeature != null)
+                                    {
+                                        syncIoFeature.AllowSynchronousIO = true;
+                                    }
+
                                     var request = context.Request;
                                     var response = context.Response;
 

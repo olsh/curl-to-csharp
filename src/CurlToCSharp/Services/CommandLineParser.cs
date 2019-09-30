@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
+using CurlToCSharp.Constants;
 using CurlToCSharp.Extensions;
 using CurlToCSharp.Models;
 using CurlToCSharp.Models.Parsing;
 
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using Microsoft.Net.Http.Headers;
 
@@ -37,7 +36,7 @@ namespace CurlToCSharp.Services
             var parseState = new ParseState();
             while (!commandLine.IsEmpty)
             {
-                commandLine = commandLine.Trim();
+                commandLine = commandLine.TrimCommandLine();
                 if (commandLine.IsEmpty)
                 {
                     break;
@@ -147,10 +146,9 @@ namespace CurlToCSharp.Services
                 }
             }
 
-            if (!result.Data.Headers.GetCommaSeparatedValues(HeaderNames.ContentType)
-                    .Any() && result.Data.HasDataPayload)
+            if (!result.Data.HasHeader(HeaderNames.ContentType) && result.Data.HasDataPayload)
             {
-                result.Data.Headers.TryAdd(HeaderNames.ContentType, "application/x-www-form-urlencoded");
+                result.Data.SetHeader(HeaderNames.ContentType, "application/x-www-form-urlencoded");
             }
 
             if (!state.IsCurlCommand)

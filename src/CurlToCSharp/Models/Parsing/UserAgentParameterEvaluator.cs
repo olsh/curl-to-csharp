@@ -20,10 +20,7 @@ namespace CurlToCSharp.Models.Parsing
         {
             var value = commandLine.ReadValue();
 
-            if (!convertResult.Data.Headers.TryAdd(HeaderNames.UserAgent, value.ToString()))
-            {
-                convertResult.Warnings.Add("Unable to set User-Agent header");
-            }
+            convertResult.Data.SetHeader(HeaderNames.UserAgent, value.ToString());
         }
     }
 }

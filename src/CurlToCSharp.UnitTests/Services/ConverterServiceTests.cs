@@ -29,8 +29,8 @@ namespace CurlToCSharp.UnitTests.Services
                                       UploadData = { new UploadData("{\"status\": \"resolved\"}") },
                                       UserPasswordPair = "user:pass"
                                   };
-            curlOptions.Headers.TryAdd(HeaderNames.ContentType, new StringValues("application/json"));
-            curlOptions.Headers.TryAdd(HeaderNames.Authorization, new StringValues("Bearer b7d03a6947b217efb6f3ec3bd3504582"));
+            curlOptions.SetHeader(HeaderNames.ContentType, "application/json");
+            curlOptions.SetHeader(HeaderNames.Authorization, "Bearer b7d03a6947b217efb6f3ec3bd3504582");
 
             var result = converterService.ToCsharp(curlOptions);
 
@@ -72,7 +72,7 @@ namespace CurlToCSharp.UnitTests.Services
                                   };
             curlOptions.HttpMethod = HttpMethod.Post.ToString()
                 .ToUpper();
-            curlOptions.Headers.TryAdd(HeaderNames.ContentType, new StringValues("application/json ; charset=utf-8"));
+            curlOptions.SetHeader(HeaderNames.ContentType, "application/json ; charset=utf-8");
 
             var result = converterService.ToCsharp(curlOptions);
 

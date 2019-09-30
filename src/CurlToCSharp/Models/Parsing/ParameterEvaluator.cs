@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using CurlToCSharp.Constants;
 using CurlToCSharp.Extensions;
 
 namespace CurlToCSharp.Models.Parsing
@@ -22,7 +23,7 @@ namespace CurlToCSharp.Models.Parsing
 
         public void Evaluate(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
         {
-            commandLine = commandLine.Trim();
+            commandLine = commandLine.TrimStart(Chars.Escape).Trim();
             if (!CanBeEmpty && commandLine.IsEmpty)
             {
                 return;

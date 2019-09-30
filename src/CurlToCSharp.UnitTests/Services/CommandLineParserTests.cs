@@ -36,7 +36,7 @@ namespace CurlToCSharp.UnitTests.Services
             Assert.Equal(@"{""type"":""A"",""name"":""www"",""data"":""162.10.66.0"",""priority"":null,""port"":null,""weight"":null}", parseResult.Data.UploadData.First().Content);
             Assert.Equal(HttpMethod.Post.ToString().ToUpper(), parseResult.Data.HttpMethod);
             Assert.Equal(new Uri("https://api.digitalocean.com/v2/domains/example.com/records"), parseResult.Data.Url);
-            Assert.Equal("Bearer b7d03a6947b217efb6f3ec3bd3504582", parseResult.Data.Headers.First(g => g.Key == "Authorization").Value);
+            Assert.Equal("Bearer b7d03a6947b217efb6f3ec3bd3504582", parseResult.Data.GetHeader(HeaderNames.Authorization));
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace CurlToCSharp.UnitTests.Services
             Assert.Equal(@"{""status"": ""resolved""}", parseResult.Data.UploadData.First().Content);
             Assert.Equal(HttpMethod.Post.ToString().ToUpper(), parseResult.Data.HttpMethod);
             Assert.Equal(new Uri("https://sentry.io/api/0/projects/1/groups/"), parseResult.Data.Url);
-            Assert.Equal("application/json", parseResult.Data.Headers.First(g => g.Key == "Content-Type").Value);
+            Assert.Equal("application/json", parseResult.Data.GetHeader(HeaderNames.ContentType));
         }
 
         [Fact]
@@ -145,7 +145,7 @@ namespace CurlToCSharp.UnitTests.Services
             var curl = @"curl http://fiddle.jshell.net/echo/html/ -H 'Referer: http://fiddle.jshell.net/_display/'";
             var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
 
-            Assert.Equal("http://fiddle.jshell.net/_display/", parseResult.Data.Headers.First(h => h.Key == "Referer").Value);
+            Assert.Equal("http://fiddle.jshell.net/_display/", parseResult.Data.GetHeader(HeaderNames.Referer));
         }
 
         [Fact]
@@ -219,7 +219,7 @@ POST";
                     -d '{""status"": ""resolved""}' \
                     -H 'Content-Length:'".ToCharArray()));
 
-            Assert.Empty(parseResult.Data.Headers.Where(h => h.Key == HeaderNames.ContentLength));
+            Assert.Empty(parseResult.Data.GetHeader(HeaderNames.ContentLength));
         }
 
         [Fact]

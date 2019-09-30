@@ -8,27 +8,11 @@ namespace CurlToCSharp.Extensions
 {
     public static class SpanExtensions
     {
-        public static Span<char> Trim(this Span<char> input)
+        public static Span<char> TrimCommandLine(this Span<char> input)
         {
-            int start;
-            for (start = 0; start < input.Length; start++)
-            {
-                if (!char.IsWhiteSpace(input[start]) && input[start] != Chars.Escape)
-                {
-                    break;
-                }
-            }
-
-            int end;
-            for (end = input.Length - 1; end > start; end--)
-            {
-                if (!char.IsWhiteSpace(input[end]))
-                {
-                    break;
-                }
-            }
-
-            return input.Slice(start, end - start + 1);
+            return input
+                .TrimStart(new ReadOnlySpan<char>(new[] { Chars.Escape, Chars.Space }))
+                .Trim();
         }
 
         public static Span<char> UnEscape(this Span<char> input)
@@ -74,7 +58,7 @@ namespace CurlToCSharp.Extensions
 
         public static Span<char> ReadValue(this ref Span<char> commandLine)
         {
-            commandLine = commandLine.Trim();
+            commandLine = commandLine.TrimCommandLine();
             if (commandLine.IsEmpty)
             {
                 return commandLine;

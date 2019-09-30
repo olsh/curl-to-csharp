@@ -27,8 +27,8 @@ namespace CurlToCSharp.Models.Parsing
             }
 
             var headerKey = value.Slice(0, separatorIndex)
-                .ToString()
-                .Trim();
+                .Trim()
+                .ToString();
 
             if (string.IsNullOrEmpty(headerKey))
             {
@@ -42,8 +42,8 @@ namespace CurlToCSharp.Models.Parsing
             if (value.Length > valueStartIndex)
             {
                 headerValue = value.Slice(valueStartIndex)
-                    .ToString()
-                    .Trim();
+                    .Trim()
+                    .ToString();
             }
 
             if (string.Equals(headerKey, "Cookie"))
@@ -53,10 +53,7 @@ namespace CurlToCSharp.Models.Parsing
                 return;
             }
 
-            if (string.IsNullOrEmpty(headerValue) || !convertResult.Data.Headers.TryAdd(headerKey, headerValue))
-            {
-                convertResult.Warnings.Add($"Unable to add header \"{headerKey}\": \"{headerValue}\"");
-            }
+            convertResult.Data.SetHeader(headerKey, headerValue);
         }
     }
 }

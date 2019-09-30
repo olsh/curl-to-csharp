@@ -2,18 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-
-using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
-using Microsoft.AspNetCore.WebUtilities;
 
 namespace CurlToCSharp.Models
 {
     public class CurlOptions
     {
+        private readonly IDictionary<string, string> _headers = new Dictionary<string, string>();
+
         public CurlOptions()
         {
-            Headers = new HttpRequestHeaders();
             UploadData = new List<UploadData>();
             FormData = new List<FormData>();
             UploadFiles = new List<string>();
@@ -44,11 +41,11 @@ namespace CurlToCSharp.Models
 
         public bool HasFormPayload => FormData.Count > 0;
 
+        public bool HasHeaders => _headers.Any();
+
         public bool HasProxy => ProxyUri != null;
 
         public bool HasProxyUserName => !string.IsNullOrEmpty(ProxyUserName);
-
-        public HttpHeaders Headers { get; }
 
         public string HttpMethod { get; set; }
 
@@ -70,6 +67,8 @@ namespace CurlToCSharp.Models
 
         public string UserPasswordPair { get; set; }
 
+        public IReadOnlyDictionary<string, string> Headers => (IReadOnlyDictionary<string, string>)_headers;
+
         public string GetFullUrl()
         {
             if (!ForceGet)
@@ -90,9 +89,32 @@ namespace CurlToCSharp.Models
             return builder.Uri.AbsoluteUri;
         }
 
+        public string GetHeader(string name)
+        {
+            if (_headers.TryGetValue(name, out var value))
+            {
+                return value;
+            }
+
+            return null;
+        }
+
         public Uri GetUrlForFileUpload(string fileName)
         {
             return new Uri(Url, Path.GetFileName(fileName));
+        }
+
+        public bool HasHeader(string name)
+        {
+            return _headers.ContainsKey(name);
+        }
+
+        public void SetHeader(string name, string value)
+        {
+            if (!_headers.TryAdd(name, value))
+            {
+                _headers[name] = value;
+            }
         }
     }
 }

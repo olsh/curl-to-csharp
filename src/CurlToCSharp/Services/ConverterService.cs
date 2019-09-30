@@ -365,7 +365,7 @@ namespace CurlToCSharp.Services
             var arguments = new LinkedList<ArgumentSyntax>();
             arguments.AddLast(contentSyntax);
 
-            var contentHeader = curlOptions.Headers.GetCommaSeparatedValues(HeaderNames.ContentType).FirstOrDefault();
+            var contentHeader = curlOptions.GetHeader(HeaderNames.ContentType);
             if (!string.IsNullOrEmpty(contentHeader))
             {
                 var contentTypeValues = contentHeader.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
@@ -388,7 +388,7 @@ namespace CurlToCSharp.Services
         /// </remarks>
         private IEnumerable<StatementSyntax> CreateHeaderAssignmentStatements(CurlOptions options)
         {
-            if (!options.Headers.Any() && !options.HasCookies)
+            if (!options.HasHeaders && !options.HasCookies)
             {
                 return Enumerable.Empty<ExpressionStatementSyntax>();
             }

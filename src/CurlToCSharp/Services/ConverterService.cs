@@ -186,14 +186,24 @@ namespace CurlToCSharp.Services
             }
 
             var stringContentCreation = CreateStringContentCreation(
-                stringContentArgumentSyntax,
-                curlOptions);
+                stringContentArgumentSyntax);
             statements.AddLast(
                 SyntaxFactory.ExpressionStatement(
                     RoslynExtensions.CreateMemberAssignmentExpression(
                         RequestVariableName,
                         RequestContentPropertyName,
                         stringContentCreation)));
+
+            var memberAccessExpressionSyntax = RoslynExtensions.CreateMemberAccessExpression(
+                RoslynExtensions.CreateMemberAccessExpression(
+                    RoslynExtensions.CreateMemberAccessExpression(RequestVariableName, RequestContentPropertyName),
+                    "Headers"),
+                "ContentType");
+            statements.AddLast(
+                SyntaxFactory.ExpressionStatement(
+                    RoslynExtensions.CreateMemberAssignmentExpression(
+                        memberAccessExpressionSyntax,
+                        RoslynExtensions.CreateObjectCreationExpression("MediaTypeHeaderValue", RoslynExtensions.CreateStringLiteralArgument(curlOptions.GetHeader(HeaderNames.ContentType))))));
 
             statements.TryAppendWhiteSpaceAtEnd();
 
@@ -353,27 +363,19 @@ namespace CurlToCSharp.Services
         /// Generates the string content creation expression.
         /// </summary>
         /// <param name="contentSyntax">The content syntax.</param>
-        /// <param name="curlOptions">The curl options.</param>
         /// <returns>
         ///   <see cref="ObjectCreationExpressionSyntax" /> expression.
         /// </returns>
         /// <remarks>
         /// new StringContent("{\"status\": \"resolved\"}", Encoding.UTF8, "application/json")
         /// </remarks>
-        private ObjectCreationExpressionSyntax CreateStringContentCreation(ArgumentSyntax contentSyntax, CurlOptions curlOptions)
+        private ObjectCreationExpressionSyntax CreateStringContentCreation(ArgumentSyntax contentSyntax)
         {
             var arguments = new LinkedList<ArgumentSyntax>();
             arguments.AddLast(contentSyntax);
 
-            var contentHeader = curlOptions.GetHeader(HeaderNames.ContentType);
-            if (!string.IsNullOrEmpty(contentHeader))
-            {
-                var contentTypeValues = contentHeader.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                arguments.AddLast(SyntaxFactory.Argument(RoslynExtensions.CreateMemberAccessExpression("Encoding", "UTF8")));
-                arguments.AddLast(RoslynExtensions.CreateStringLiteralArgument(contentTypeValues[0].Trim()));
-            }
-
             var stringContentCreation = RoslynExtensions.CreateObjectCreationExpression("StringContent", arguments.ToArray());
+
             return stringContentCreation;
         }
 

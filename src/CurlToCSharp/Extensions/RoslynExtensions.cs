@@ -120,6 +120,16 @@ namespace CurlToCSharp.Extensions
                 expression);
         }
 
+        public static AssignmentExpressionSyntax CreateMemberAssignmentExpression(
+            MemberAccessExpressionSyntax memberAccessExpressionSyntax,
+            ExpressionSyntax expression)
+        {
+            return SyntaxFactory.AssignmentExpression(
+                SyntaxKind.SimpleAssignmentExpression,
+                memberAccessExpressionSyntax,
+                expression);
+        }
+
         public static TSyntax AppendWhiteSpace<TSyntax>(this TSyntax node) where TSyntax : SyntaxNode
         {
             return node.WithTrailingTrivia(SyntaxFactory.Comment(NewLineString));
@@ -150,7 +160,7 @@ namespace CurlToCSharp.Extensions
             return SyntaxFactory.InterpolatedStringExpression(stringStartToken, interpolatedStringContentSyntaxs);
         }
 
-        private static MemberAccessExpressionSyntax CreateMemberAccessExpression(
+        public static MemberAccessExpressionSyntax CreateMemberAccessExpression(
             ExpressionSyntax leftPart,
             string rightPart)
         {

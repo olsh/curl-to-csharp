@@ -41,9 +41,8 @@ namespace CurlToCSharp.IntegrationTests
                                             continue;
                                         }
 
-                                        // HttpClient adds charset=utf-8 by default
                                         // Skip these headers for now
-                                        if (header.Key == HeaderNames.ContentType || header.Key == HeaderNames.Expect)
+                                        if (header.Key == HeaderNames.Expect)
                                         {
                                             continue;
                                         }

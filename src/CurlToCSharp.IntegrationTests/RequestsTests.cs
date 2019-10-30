@@ -93,6 +93,7 @@ namespace CurlToCSharp.IntegrationTests
                 .WithImports(
                     "System",
                     "System.Net.Http",
+                    "System.Net.Http.Headers",
                     "System.Net",
                     "System.Text",
                     "System.IO",

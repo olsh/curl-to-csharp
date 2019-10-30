@@ -59,33 +59,6 @@ namespace CurlToCSharp.UnitTests.Services
                 .Where(ae => ae.Name.Identifier.ValueText == "SendAsync"));
         }
 
-        [Fact]
-        public void ToCsharp_ContentTypeWithEncoding_StringContentProperlyInitialized()
-        {
-            var converterService = new ConverterService();
-            var curlOptions = new CurlOptions
-                                  {
-                                      HttpMethod = HttpMethod.Get.ToString()
-                                          .ToUpper(),
-                                      Url = new Uri("https://google.com"),
-                                      UploadData = { new UploadData("content") }
-                                  };
-            curlOptions.HttpMethod = HttpMethod.Post.ToString()
-                .ToUpper();
-            curlOptions.SetHeader(HeaderNames.ContentType, "application/json ; charset=utf-8");
-
-            var result = converterService.ToCsharp(curlOptions);
-
-            var tree = CSharpSyntaxTree.ParseText(result.Data);
-            var stringContentConstructor = tree
-                .GetRoot()
-                .DescendantNodes()
-                .OfType<ConstructorDeclarationSyntax>()
-                .First(oc => oc.Identifier.ValueText == "StringContent");
-
-            Assert.Equal("\"application/json\"", stringContentConstructor.ParameterList.Parameters[2].Identifier.TrailingTrivia.ToString());
-        }
-
         private SyntaxTree WrapToClass(string code)
         {
             var wrapCode = $@"

@@ -30,6 +30,11 @@ namespace CurlToCSharp.Extensions
             return CreateInvocationExpression(memberAccessExpression, thirdPart, arguments);
         }
 
+        public static MemberAccessExpressionSyntax CreateMemberAccessExpression(string leftPart, string rightPart)
+        {
+            return CreateMemberAccessExpression(SyntaxFactory.IdentifierName(leftPart), rightPart);
+        }
+
         public static InvocationExpressionSyntax CreateInvocationExpression(
             ExpressionSyntax leftPart,
             string rightPart,
@@ -40,11 +45,6 @@ namespace CurlToCSharp.Extensions
             separatedSyntaxList = separatedSyntaxList.AddRange(argument);
 
             return SyntaxFactory.InvocationExpression(expression, SyntaxFactory.ArgumentList(separatedSyntaxList));
-        }
-
-        public static MemberAccessExpressionSyntax CreateMemberAccessExpression(string leftPart, string rightPart)
-        {
-            return CreateMemberAccessExpression(SyntaxFactory.IdentifierName(leftPart), rightPart);
         }
 
         public static ObjectCreationExpressionSyntax CreateObjectCreationExpression(

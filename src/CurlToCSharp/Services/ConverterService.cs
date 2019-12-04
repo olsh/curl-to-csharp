@@ -7,7 +7,6 @@ using System.Net.Http;
 using CurlToCSharp.Extensions;
 using CurlToCSharp.Models;
 
-using Microsoft.AspNetCore.Http;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;

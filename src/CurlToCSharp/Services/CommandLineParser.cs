@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using CurlToCSharp.Constants;
 using CurlToCSharp.Extensions;
 using CurlToCSharp.Models;
 using CurlToCSharp.Models.Parsing;

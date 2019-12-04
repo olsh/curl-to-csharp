@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 using CurlToCSharp.IntegrationTests.Constants;
 using CurlToCSharp.Models.Parsing;
@@ -22,51 +23,53 @@ namespace CurlToCSharp.IntegrationTests
         [InlineData("--data-binary @\"Resources\\\\text-file.txt\"")]
         [InlineData("--data-urlencode \"a=b c\"")]
         [InlineData("--data-urlencode \"a@Resources\\\\text-file.txt\"")]
-        public void Data(string arguments)
+        public async Task Data(string arguments)
         {
-            AssertResponsesEquals(arguments);
+            await AssertResponsesEqualsAsync(arguments);
         }
 
         [Theory]
         [InlineData("-d \"some\" -G")]
         [InlineData("-d \"form=a\" -d \"another\" -G")]
-        public void DataGet(string arguments)
+        public async Task DataGet(string arguments)
         {
-            AssertResponsesEquals(arguments);
+            await AssertResponsesEqualsAsync(arguments);
         }
 
         [Theory]
         [InlineData("-T \"Resources\\\\text-file.txt\"")]
-        public void UploadFile(string arguments)
+        public async Task UploadFile(string arguments)
         {
-            AssertResponsesEquals(arguments);
+            await AssertResponsesEqualsAsync(arguments);
         }
 
         [Theory]
         [InlineData("")]
-        public void Get(string arguments)
+        public async Task Get(string arguments)
         {
-            AssertResponsesEquals(arguments);
+            await AssertResponsesEqualsAsync(arguments);
         }
 
         [Theory]
         [InlineData("-A \"Mozilla/5.0 (iPad; U; CPU OS 3_2_1 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) Mobile/7B405\"")]
-        public void UserAgentHeader(string arguments)
+        public async Task UserAgentHeader(string arguments)
         {
-            AssertResponsesEquals(arguments);
+            await AssertResponsesEqualsAsync(arguments);
         }
 
-        private static void AssertResponsesEquals(string arguments)
+        private static async Task AssertResponsesEqualsAsync(string arguments)
         {
             var curlArguments = $"{new Uri(new Uri(WebHostConstants.TestServerHost), "echo")} {arguments}";
 
-            var curlResponse = ExecuteCurlRequest(curlArguments);
-            var csharpResponse = ExecuteCsharpRequest(curlArguments);
+            var curlResponse = ExecuteCurlRequestAsync(curlArguments);
+            var csharpTask = ExecuteCsharpRequestAsync(curlArguments);
 
-            Assert.Equal(curlResponse, csharpResponse);
+            await Task.WhenAll(csharpTask, curlResponse).ConfigureAwait(false);
+
+            Assert.Equal(await curlResponse.ConfigureAwait(false), await csharpTask.ConfigureAwait(false));
         }
 
-        private static string ExecuteCurlRequest(string curlArguments)
+        private static Task<string> ExecuteCurlRequestAsync(string curlArguments)
         {
             var process = Process.Start(
                 new ProcessStartInfo
@@ -78,11 +81,12 @@ namespace CurlToCSharp.IntegrationTests
                         RedirectStandardOutput = true
                     });
 
-            var readToEnd = process.StandardOutput.ReadToEnd();
-            return readToEnd;
+            Debug.Assert(process != null, nameof(process) + " != null");
+
+            return process.StandardOutput.ReadToEndAsync();
         }
 
-        private static string ExecuteCsharpRequest(string curlArguments)
+        private static async Task<string> ExecuteCsharpRequestAsync(string curlArguments)
         {
             var commandLineParser = new CommandLineParser(new ParsingOptions(int.MaxValue));
             var converterService = new ConverterService();
@@ -100,13 +104,11 @@ namespace CurlToCSharp.IntegrationTests
                     "System.Collections.Generic",
                     "System.Text.RegularExpressions");
 
-            var result = CSharpScript.EvaluateAsync<HttpResponseMessage>(
-                    csharp.Data.Replace("var response = ", "return "),
-                    scriptOptions)
-                .Result;
+            var result = await CSharpScript.EvaluateAsync<HttpResponseMessage>(
+                             csharp.Data.Replace("var response = ", "return "),
+                             scriptOptions).ConfigureAwait(false);
 
-            return result.Content.ReadAsStringAsync()
-                .Result;
+            return await result.Content.ReadAsStringAsync().ConfigureAwait(false);
         }
     }
 }

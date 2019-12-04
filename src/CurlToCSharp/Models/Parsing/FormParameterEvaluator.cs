@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 using CurlToCSharp.Constants;
 using CurlToCSharp.Extensions;
-
-using Microsoft.AspNetCore;
 
 namespace CurlToCSharp.Models.Parsing
 {
@@ -41,8 +38,6 @@ namespace CurlToCSharp.Models.Parsing
                 {
                     additionalProperties = new Dictionary<string, string>();
                 }
-
-
 
                 var firstCharOfValue = value[0];
                 if (firstCharOfValue == '<')

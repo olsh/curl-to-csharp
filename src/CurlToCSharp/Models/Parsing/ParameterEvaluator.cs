@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 
 using CurlToCSharp.Constants;
-using CurlToCSharp.Extensions;
 
 namespace CurlToCSharp.Models.Parsing
 {

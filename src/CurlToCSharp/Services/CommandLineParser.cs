@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
+using CurlToCSharp.Constants;
 using CurlToCSharp.Extensions;
 using CurlToCSharp.Models;
 using CurlToCSharp.Models.Parsing;
@@ -90,7 +91,7 @@ namespace CurlToCSharp.Services
                 }
             }
 
-            convertResult.Warnings.Add($"Parameter \"{par}\" is not supported");
+            convertResult.Warnings.Add(Messages.GetParameterIsNotSupported(par));
         }
 
         private void PostParsing(ConvertResult<CurlOptions> result, ParseState state)
@@ -147,17 +148,17 @@ namespace CurlToCSharp.Services
 
             if (!result.Data.HasHeader(HeaderNames.ContentType) && result.Data.HasDataPayload)
             {
-                result.Data.SetHeader(HeaderNames.ContentType, "application/x-www-form-urlencoded");
+                result.Data.SetHeader(HeaderNames.ContentType, HeaderValues.ContentTypeWwwForm);
             }
 
             if (!state.IsCurlCommand)
             {
-                result.Errors.Add("Invalid curl command");
+                result.Errors.Add(Messages.InvalidCurlCommand);
             }
 
             if (result.Data.Url == null)
             {
-                result.Errors.Add("Unable to parse URL");
+                result.Errors.Add(Messages.UnableParseUrl);
             }
         }
     }

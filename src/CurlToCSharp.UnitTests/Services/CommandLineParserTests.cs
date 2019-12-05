@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Net.Http;
 
+using CurlToCSharp.Constants;
 using CurlToCSharp.Models;
 using CurlToCSharp.Models.Parsing;
 using CurlToCSharp.Services;
@@ -23,6 +24,7 @@ namespace CurlToCSharp.UnitTests.Services
 
             Assert.Equal(HttpMethod.Get.ToString().ToUpper(), parseResult.Data.HttpMethod);
             Assert.Equal(new Uri("https://sentry.io/api/0/"), parseResult.Data.Url);
+            Assert.Empty(parseResult.Errors);
         }
 
         [Fact]
@@ -258,6 +260,42 @@ POST";
             Assert.Equal("a", parseResult.Data.UploadData.ElementAt(4).Name);
             Assert.Equal("b", parseResult.Data.UploadData.ElementAt(4).Content);
             Assert.Equal(UploadDataType.BinaryFile, parseResult.Data.UploadData.ElementAt(4).Type);
+            Assert.Equal(HeaderValues.ContentTypeWwwForm, parseResult.Data.GetHeader(HeaderNames.ContentType));
+        }
+
+        [Fact]
+        public void ParseSettings_InvalidCurlCommand_ErrorReported()
+        {
+            var service = CreateCommandLineParser();
+
+            var parseResult = service.Parse(new Span<char>(@"$ cur ya.ru".ToCharArray()));
+
+            Assert.Single(parseResult.Errors);
+            Assert.Equal(Messages.InvalidCurlCommand, parseResult.Errors.Single());
+        }
+
+        [Fact]
+        public void ParseSettings_UnsupportedCurlParameter_WarningReported()
+        {
+            var service = CreateCommandLineParser();
+
+            string unsupportedParameter = "-O";
+            var parseResult = service.Parse(new Span<char>(
+               $"curl ya.ru {unsupportedParameter}".ToCharArray()));
+
+            Assert.Single(parseResult.Warnings);
+            Assert.Equal(Messages.GetParameterIsNotSupported(unsupportedParameter), parseResult.Warnings.Single());
+        }
+
+        [Fact]
+        public void ParseSettings_InvalidUrl_ErrorReported()
+        {
+            var service = CreateCommandLineParser();
+
+            var parseResult = service.Parse(new Span<char>($"curl ya...".ToCharArray()));
+
+            Assert.Single(parseResult.Errors);
+            Assert.Equal(Messages.UnableParseUrl, parseResult.Errors.Single());
         }
 
         private static CommandLineParser CreateCommandLineParser()

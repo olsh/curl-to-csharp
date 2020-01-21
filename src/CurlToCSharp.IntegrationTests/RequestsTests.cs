@@ -58,7 +58,6 @@ namespace CurlToCSharp.IntegrationTests
         }
 
         [Theory]
-        [InlineData("-H \"content-type: application/json\"")]
         [InlineData("-H \"content-type: application/json\" -d \"some\"")]
         public async Task ContentTypeLowerCaseHeader(string arguments)
         {

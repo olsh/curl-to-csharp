@@ -264,17 +264,6 @@ POST";
         }
 
         [Fact]
-        public void ParseSettings_InvalidCurlCommand_ErrorReported()
-        {
-            var service = CreateCommandLineParser();
-
-            var parseResult = service.Parse(new Span<char>(@"$ cur ya.ru".ToCharArray()));
-
-            Assert.Single(parseResult.Errors);
-            Assert.Equal(Messages.InvalidCurlCommand, parseResult.Errors.Single());
-        }
-
-        [Fact]
         public void ParseSettings_UnsupportedCurlParameter_WarningReported()
         {
             var service = CreateCommandLineParser();

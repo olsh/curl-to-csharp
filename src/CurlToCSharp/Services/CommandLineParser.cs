@@ -64,9 +64,10 @@ namespace CurlToCSharp.Services
             var valueString = value.ToString();
             if (string.Equals(valueString, "curl", StringComparison.InvariantCultureIgnoreCase))
             {
-                parseState.IsCurlCommand = true;
+                return;
             }
-            else if (convertResult.Data.Url == null && Uri.TryCreate(valueString, UriKind.Absolute, out var url)
+
+            if (convertResult.Data.Url == null && Uri.TryCreate(valueString, UriKind.Absolute, out var url)
                                                   && !string.IsNullOrEmpty(url.Host))
             {
                 convertResult.Data.Url = url;
@@ -149,11 +150,6 @@ namespace CurlToCSharp.Services
             if (!result.Data.HasHeader(HeaderNames.ContentType) && result.Data.HasDataPayload)
             {
                 result.Data.SetHeader(HeaderNames.ContentType, HeaderValues.ContentTypeWwwForm);
-            }
-
-            if (!state.IsCurlCommand)
-            {
-                result.Errors.Add(Messages.InvalidCurlCommand);
             }
 
             if (result.Data.Url == null)

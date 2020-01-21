@@ -49,7 +49,7 @@ namespace CurlToCSharp.UnitTests.Services
             var parseResult = service.Parse(new Span<char>(
                 @"$ curl -i https://sentry.io/api/0/projects/1/groups/ \
                     -d '{""status"": ""resolved""}' \
-                    -H 'Content-Type: application/json'".ToCharArray()));
+                    -H 'content-type: application/json'".ToCharArray()));
 
             Assert.Equal(@"{""status"": ""resolved""}", parseResult.Data.UploadData.First().Content);
             Assert.Equal(HttpMethod.Post.ToString().ToUpper(), parseResult.Data.HttpMethod);

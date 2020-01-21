@@ -397,7 +397,7 @@ namespace CurlToCSharp.Services
             var statements = new LinkedList<ExpressionStatementSyntax>();
             foreach (var header in options.Headers)
             {
-                if (header.Key == HeaderNames.ContentType)
+                if (string.Equals(header.Key, HeaderNames.ContentType, StringComparison.InvariantCultureIgnoreCase))
                 {
                     continue;
                 }

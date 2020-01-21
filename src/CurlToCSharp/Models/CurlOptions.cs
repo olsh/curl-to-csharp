@@ -7,7 +7,7 @@ namespace CurlToCSharp.Models
 {
     public class CurlOptions
     {
-        private readonly IDictionary<string, string> _headers = new Dictionary<string, string>();
+        private readonly IDictionary<string, string> _headers = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
         public CurlOptions()
         {

@@ -202,7 +202,7 @@ namespace CurlToCSharp.Services
                 SyntaxFactory.ExpressionStatement(
                     RoslynExtensions.CreateMemberAssignmentExpression(
                         memberAccessExpressionSyntax,
-                        RoslynExtensions.CreateObjectCreationExpression("MediaTypeHeaderValue", RoslynExtensions.CreateStringLiteralArgument(curlOptions.GetHeader(HeaderNames.ContentType))))));
+                        RoslynExtensions.CreateInvocationExpression("MediaTypeHeaderValue", "Parse", RoslynExtensions.CreateStringLiteralArgument(curlOptions.GetHeader(HeaderNames.ContentType))))));
 
             statements.TryAppendWhiteSpaceAtEnd();
 

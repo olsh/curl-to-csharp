@@ -64,6 +64,13 @@ namespace CurlToCSharp.IntegrationTests
             await AssertResponsesEqualsAsync(arguments);
         }
 
+        [Theory]
+        [InlineData("-H \"content-type: application/x-www-form-urlencoded; v=2.0\" -d \"some\"")]
+        public async Task ContentTypeWithParametersHeader(string arguments)
+        {
+            await AssertResponsesEqualsAsync(arguments);
+        }
+
         private static async Task AssertResponsesEqualsAsync(string arguments)
         {
             var curlArguments = $"{new Uri(new Uri(WebHostConstants.TestServerHost), "echo")} {arguments}";

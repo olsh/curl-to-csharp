@@ -18,7 +18,7 @@ namespace CurlToCSharp.Models.Parsing
         protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
         {
             var input = commandLine.ReadValue();
-            if (!TrySplit(input, FormSeparatorChar, out Span<char> key, out Span<char> value))
+            if (!input.TrySplit(FormSeparatorChar, out Span<char> key, out Span<char> value))
             {
                 convertResult.Warnings.Add($"Unable to parse form value \"{input.ToString()}\"");
 
@@ -94,23 +94,6 @@ namespace CurlToCSharp.Models.Parsing
                 type,
                 additionalProperties.GetValueOrDefault("type"),
                 additionalProperties.GetValueOrDefault("filename"));
-        }
-
-        private bool TrySplit(Span<char> input, char separator, out Span<char> key, out Span<char> value)
-        {
-            var separatorIndex = input.IndexOf(separator);
-            if (separatorIndex == -1)
-            {
-                value = Span<char>.Empty;
-                key = Span<char>.Empty;
-
-                return false;
-            }
-
-            key = input.Slice(0, separatorIndex);
-            value = input.Slice(separatorIndex + 1);
-
-            return true;
         }
     }
 }

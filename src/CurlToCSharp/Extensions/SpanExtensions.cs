@@ -123,5 +123,22 @@ namespace CurlToCSharp.Extensions
         {
             return commandLine.IndexOf('-') == 0;
         }
+
+        public static bool TrySplit(this Span<char> input, char separator, out Span<char> key, out Span<char> value)
+        {
+            var separatorIndex = input.IndexOf(separator);
+            if (separatorIndex == -1)
+            {
+                value = Span<char>.Empty;
+                key = Span<char>.Empty;
+
+                return false;
+            }
+
+            key = input.Slice(0, separatorIndex);
+            value = input.Slice(separatorIndex + 1);
+
+            return true;
+        }
     }
 }

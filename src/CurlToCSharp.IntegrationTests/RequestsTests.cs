@@ -18,6 +18,7 @@ namespace CurlToCSharp.IntegrationTests
     {
         [Theory]
         [InlineData("-d \"some data\"")]
+        [InlineData("-d key=\"value\"")]
         [InlineData("-d \"form=a b\" -d \"another data\"")]
         [InlineData("-d \"some data\" -d @\"Resources\\\\text-file.txt\" -d \"a b\"")]
         [InlineData("--data-binary @\"Resources\\\\text-file.txt\"")]

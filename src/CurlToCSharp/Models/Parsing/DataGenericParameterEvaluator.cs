@@ -1,6 +1,5 @@
 ﻿using System;
 
-using CurlToCSharp.Constants;
 using CurlToCSharp.Extensions;
 
 namespace CurlToCSharp.Models.Parsing
@@ -20,31 +19,13 @@ namespace CurlToCSharp.Models.Parsing
             }
 
             var value = commandLine.ReadValue();
-            string stringValue;
             var contentType = UploadDataType.Inline;
             if (isFileEntry)
             {
                 contentType = binary ? UploadDataType.BinaryFile : UploadDataType.InlineFile;
-                stringValue = value.ToString();
-            }
-            else
-            {
-                stringValue = NormalizeValue(value);
             }
 
-            convertResult.Data.UploadData.Add(new UploadData(stringValue, contentType));
-        }
-
-        private string NormalizeValue(Span<char> rawValue)
-        {
-            if (!rawValue.TrySplit(FormSeparatorChar, out Span<char> key, out Span<char> value))
-            {
-                return rawValue.ToString();
-            }
-
-            value = value.Trim(Chars.DoubleQuote);
-
-            return $"{key.ToString()}{FormSeparatorChar}{value.ToString()}";
+            convertResult.Data.UploadData.Add(new UploadData(value.ToString(), contentType));
         }
     }
 }

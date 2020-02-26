@@ -64,16 +64,23 @@ namespace CurlToCSharp.Extensions
                 return commandLine;
             }
 
-            var firstChar = commandLine[0];
             int closeIndex = 0;
-            var firstCharIsQuote = firstChar == Chars.SingleQuote || firstChar == Chars.DoubleQuote;
+
+            var indexOfSpecialChar = commandLine.IndexOfAny(Chars.SingleQuote, Chars.DoubleQuote, Chars.Space);
+            bool firstCharIsQuote = false;
+            char firstChar = '\0';
+            if (indexOfSpecialChar != -1 && commandLine[indexOfSpecialChar] != Chars.Space)
+            {
+                firstCharIsQuote = true;
+                firstChar = commandLine[indexOfSpecialChar];
+            }
+
             if (firstCharIsQuote && commandLine.Length > 1)
             {
                 var quote = firstChar;
-                commandLine = commandLine.Slice(1);
                 for (int i = 0; i < commandLine.Length; i++)
                 {
-                    if (commandLine[i] == quote && (i == 0 || commandLine[i - 1] != Chars.Escape))
+                    if (indexOfSpecialChar != i && commandLine[i] == quote && (i == 0 || commandLine[i - 1] != Chars.Escape))
                     {
                         closeIndex = i + 1;
                         break;
@@ -97,7 +104,18 @@ namespace CurlToCSharp.Extensions
             var value = commandLine.Slice(0, closeIndex);
             if (firstCharIsQuote)
             {
-                value = value.TrimQuotes(firstChar);
+                if (indexOfSpecialChar == 0)
+                {
+                    value = value.TrimQuotes(firstChar);
+                }
+                else
+                {
+                    value = new Span<char>(
+                        value.Slice(0, indexOfSpecialChar)
+                            .ToArray()
+                            .Concat(value.Slice(indexOfSpecialChar + 1)[..^1].ToArray())
+                            .ToArray());
+                }
             }
 
             commandLine = commandLine.Slice(closeIndex);

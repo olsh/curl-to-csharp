@@ -69,6 +69,7 @@ namespace CurlToCSharp.Extensions
             var indexOfSpecialChar = commandLine.IndexOfAny(Chars.SingleQuote, Chars.DoubleQuote, Chars.Space);
             bool firstCharIsQuote = false;
             char firstChar = '\0';
+            bool trimLastQuote = true;
             if (indexOfSpecialChar != -1 && commandLine[indexOfSpecialChar] != Chars.Space)
             {
                 firstCharIsQuote = true;
@@ -86,6 +87,12 @@ namespace CurlToCSharp.Extensions
                         break;
                     }
                 }
+
+                if (closeIndex == 0)
+                {
+                    closeIndex = commandLine.Length;
+                    trimLastQuote = false;
+                }
             }
             else
             {
@@ -96,11 +103,6 @@ namespace CurlToCSharp.Extensions
                 }
             }
 
-            if (closeIndex == -1)
-            {
-                return Span<char>.Empty;
-            }
-
             var value = commandLine.Slice(0, closeIndex);
             if (firstCharIsQuote)
             {
@@ -108,13 +110,9 @@ namespace CurlToCSharp.Extensions
                 {
                     value = value.TrimQuotes(firstChar);
                 }
-                else
+                else if (indexOfSpecialChar < closeIndex)
                 {
-                    value = new Span<char>(
-                        value.Slice(0, indexOfSpecialChar)
-                            .ToArray()
-                            .Concat(value.Slice(indexOfSpecialChar + 1)[..^1].ToArray())
-                            .ToArray());
+                    value = UnEscapeKeyValue(value, indexOfSpecialChar, trimLastQuote);
                 }
             }
 
@@ -157,6 +155,29 @@ namespace CurlToCSharp.Extensions
             value = input.Slice(separatorIndex + 1);
 
             return true;
+        }
+
+        private static Span<char> UnEscapeKeyValue(Span<char> value, int indexOfSpecialChar, bool trimLastQuote)
+        {
+            if (trimLastQuote)
+            {
+                value = new Span<char>(
+                    value.Slice(0, indexOfSpecialChar)
+                        .ToArray()
+                        .Concat(value.Slice(indexOfSpecialChar + 1)[..^1].ToArray())
+                        .ToArray());
+            }
+            else
+            {
+                value = new Span<char>(
+                    value.Slice(0, indexOfSpecialChar)
+                        .ToArray()
+                        .Concat(value.Slice(indexOfSpecialChar + 1).ToArray())
+                        .ToArray());
+
+            }
+
+            return value;
         }
     }
 }

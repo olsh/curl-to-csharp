@@ -81,5 +81,18 @@ namespace CurlToCSharp.UnitTests.Models.Parsing
             Assert.Equal("test.html", convertResult.Data.FormData.First().FileName);
             Assert.Equal(UploadDataType.BinaryFile, convertResult.Data.FormData.First().Type);
         }
+
+        [Fact]
+        public void Evaluate_InvalidValue_Success()
+        {
+            var evaluator = new FormParameterEvaluator();
+            var span = new Span<char>("key=\"\\\"".ToCharArray());
+            var convertResult = new ConvertResult<CurlOptions> { Data = new CurlOptions() };
+
+            evaluator.Evaluate(ref span, convertResult);
+
+            Assert.Equal("key", convertResult.Data.FormData.First().Name);
+            Assert.Equal("\"", convertResult.Data.FormData.First().Content);
+        }
     }
 }

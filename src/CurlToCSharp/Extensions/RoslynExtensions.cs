@@ -130,6 +130,11 @@ namespace CurlToCSharp.Extensions
                 expression);
         }
 
+        public static TSyntax PrependComment<TSyntax>(this TSyntax node, string comment) where TSyntax : SyntaxNode
+        {
+            return node.WithLeadingTrivia(SyntaxFactory.Comment(NewLineString + comment));
+        }
+
         public static TSyntax AppendWhiteSpace<TSyntax>(this TSyntax node) where TSyntax : SyntaxNode
         {
             return node.WithTrailingTrivia(SyntaxFactory.Comment(NewLineString));

@@ -83,7 +83,8 @@ namespace CurlToCSharp.Services
             return curlOptions.HasCookies
                    || (curlOptions.HasProxy && IsSupportedProxy(curlOptions.ProxyUri))
                    || ((curlOptions.HasCertificate && IsSupportedCertificate(curlOptions.CertificateType))
-                   || curlOptions.Insecure);
+                   || curlOptions.Insecure)
+                   || curlOptions.IsCompressed;
         }
 
         /// <summary>
@@ -653,6 +654,19 @@ namespace CurlToCSharp.Services
             if (curlOptions.HasProxy && IsSupportedProxy(curlOptions.ProxyUri))
             {
                 var memberAssignmentExpression = CreateProxyStatements(curlOptions);
+
+                statementSyntaxs.AddLast(
+                    SyntaxFactory.GlobalStatement(SyntaxFactory.ExpressionStatement(memberAssignmentExpression)));
+            }
+
+            if (curlOptions.IsCompressed)
+            {
+                var memberAssignmentExpression = RoslynExtensions.CreateMemberAssignmentExpression(
+                    HandlerVariableName,
+                    "AutomaticDecompression",
+                    SyntaxFactory.PrefixUnaryExpression(SyntaxKind.BitwiseNotExpression, RoslynExtensions.CreateMemberAccessExpression("DecompressionMethods", "None")));
+
+                memberAssignmentExpression = memberAssignmentExpression.PrependComment("// If you are using .NET Core 3.0+ you can use DecompressionMethods.All");
 
                 statementSyntaxs.AddLast(
                     SyntaxFactory.GlobalStatement(SyntaxFactory.ExpressionStatement(memberAssignmentExpression)));

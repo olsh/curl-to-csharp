@@ -7,7 +7,8 @@ namespace CurlToCSharp.Models
 {
     public class CurlOptions
     {
-        private readonly IDictionary<string, string> _headers = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+        private readonly IDictionary<string, string> _headers =
+            new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
         public CurlOptions()
         {
@@ -47,9 +48,13 @@ namespace CurlToCSharp.Models
 
         public bool HasProxyUserName => !string.IsNullOrEmpty(ProxyUserName);
 
+        public IReadOnlyDictionary<string, string> Headers => (IReadOnlyDictionary<string, string>)_headers;
+
         public string HttpMethod { get; set; }
 
         public bool Insecure { get; set; }
+
+        public bool IsCompressed { get; set; }
 
         public string ProxyPassword { get; set; }
 
@@ -66,8 +71,6 @@ namespace CurlToCSharp.Models
         public bool UseDefaultProxyCredentials { get; set; }
 
         public string UserPasswordPair { get; set; }
-
-        public IReadOnlyDictionary<string, string> Headers => (IReadOnlyDictionary<string, string>)_headers;
 
         public string GetFullUrl()
         {

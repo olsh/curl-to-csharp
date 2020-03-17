@@ -666,7 +666,7 @@ namespace CurlToCSharp.Services
                     "AutomaticDecompression",
                     SyntaxFactory.PrefixUnaryExpression(SyntaxKind.BitwiseNotExpression, RoslynExtensions.CreateMemberAccessExpression("DecompressionMethods", "None")));
 
-                memberAssignmentExpression = memberAssignmentExpression.PrependComment("// If you are using .NET Core 3.0+ you can use DecompressionMethods.All");
+                memberAssignmentExpression = memberAssignmentExpression.PrependComment("// If you are using .NET Core 3.0+ you can replace `~DecompressionMethods.None` to `DecompressionMethods.All`");
 
                 statementSyntaxs.AddLast(
                     SyntaxFactory.GlobalStatement(SyntaxFactory.ExpressionStatement(memberAssignmentExpression)));

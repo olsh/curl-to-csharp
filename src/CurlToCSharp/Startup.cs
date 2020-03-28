@@ -40,9 +40,6 @@ namespace CurlToCSharp
                 app.UseExceptionHandler("/error");
             }
 
-            var provider = new FileExtensionContentTypeProvider();
-            provider.Mappings[".webmanifest"] = "application/manifest+json";
-
             app.UseStaticFiles(
                 new StaticFileOptions
                     {
@@ -51,8 +48,7 @@ namespace CurlToCSharp
                                 ctx.Context.Response.Headers.Append(
                                     "Cache-Control",
                                     "public,max-age=31536000");
-                            },
-                        ContentTypeProvider = provider
+                            }
                     });
 
             app.UseRouting();

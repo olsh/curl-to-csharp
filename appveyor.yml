@@ -22,6 +22,7 @@ cache:
   - '%USERPROFILE%\.sonar\cache'
   - 'src\CurlToCSharp\node_modules\ -> src\CurlToCSharp\yarn.lock'
   - '%LOCALAPPDATA%\Yarn\cache -> src\CurlToCSharp\yarn.lock'
+  - '%LOCALAPPDATA%\Cypress\Cache -> src\CurlToCSharp\yarn.lock'
   - '%USERPROFILE%\.nuget\packages -> **\*.csproj'
   - 'C:\ProgramData\chocolatey\lib -> appveyor.yml'
   - 'tools -> build.cake'

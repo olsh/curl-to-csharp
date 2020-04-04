@@ -1,7 +1,7 @@
 version: 1.0.{build}
 image: Visual Studio 2019
 environment:
-  CYPRESS_KEY:
+  CYPRESS_RECORD_KEY:
     secure: zrEJrmRw4T8jXDP0u73B73A8QEfq6bRi1Z9F4d7bEumJK9sZVyW/KUG2qN1WWYeL
 install:
   - choco install curl
@@ -17,7 +17,7 @@ deploy:
     secure: anNXyv5QGtXmsPV21/COiAolYBhLYF8Pi3yWd/qIRd4=
 after_deploy:
   - cd src\CurlToCSharp
-  - yarn run cypress run --config-file cypress.production.json --record --key %CYPRESS_KEY%
+  - yarn run cypress run --config-file cypress.production.json --record
 cache:
   - '%USERPROFILE%\.sonar\cache'
   - 'src\CurlToCSharp\node_modules\ -> src\CurlToCSharp\yarn.lock'

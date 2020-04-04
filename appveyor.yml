@@ -17,7 +17,7 @@ deploy:
     secure: anNXyv5QGtXmsPV21/COiAolYBhLYF8Pi3yWd/qIRd4=
 after_deploy:
   - cd src\CurlToCSharp
-  - yarn run cypress run --config-file cypress.production.json
+  - yarn run cypress run --config-file cypress.production.json --record
 cache:
   - '%USERPROFILE%\.sonar\cache'
   - 'src\CurlToCSharp\node_modules\ -> src\CurlToCSharp\yarn.lock'

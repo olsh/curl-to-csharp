@@ -339,3 +339,6 @@ tools/*
 
 # SonarQube
 .sonarqube/
+
+# cypress
+**/cypress/videos

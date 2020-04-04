@@ -1,5 +1,8 @@
 version: 1.0.{build}
 image: Visual Studio 2019
+environment:
+  CYPRESS_KEY:
+    secure: zrEJrmRw4T8jXDP0u73B73A8QEfq6bRi1Z9F4d7bEumJK9sZVyW/KUG2qN1WWYeL
 install:
   - choco install curl
   - dotnet tool install -g Cake.Tool --version 0.35.0 
@@ -12,6 +15,9 @@ deploy:
   username: CurlToCSharp
   password:
     secure: anNXyv5QGtXmsPV21/COiAolYBhLYF8Pi3yWd/qIRd4=
+after_deploy:
+  - cd src\CurlToCSharp
+  - yarn run cypress run --config-file cypress.production.json
 cache:
   - '%USERPROFILE%\.sonar\cache'
   - 'src\CurlToCSharp\node_modules\ -> src\CurlToCSharp\yarn.lock'

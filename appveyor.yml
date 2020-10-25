@@ -6,6 +6,7 @@ environment:
 install:
   - choco install curl
   - dotnet tool install -g Cake.Tool --version 0.38.5
+  - ps: Install-Product node 12.19.0
 build_script:
 - cmd: dotnet cake -Target=CI
 test: off

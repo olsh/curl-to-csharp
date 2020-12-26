@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
@@ -20,7 +20,16 @@ namespace CurlToCSharp.Models.Parsing
         protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
         {
             var value = commandLine.ReadValue();
-            if (!Uri.TryCreate(value.ToString(), UriKind.Absolute, out Uri proxyUri))
+
+            // https://curl.se/docs/manpage.html#-x
+            // No protocol specified or http:// will be treated as HTTP proxy.
+            var uriString = value.ToString();
+            if (!uriString.Contains("://"))
+            {
+                uriString = "http://" + uriString;
+            }
+
+            if (!Uri.TryCreate(uriString, UriKind.Absolute, out Uri proxyUri))
             {
                 convertResult.Warnings.Add("Unable to parse proxy URI");
 

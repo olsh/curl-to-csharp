@@ -1,21 +1,13 @@
-[{*.cs,*.cake}]
-
-indent_size = 4
-
-[{*.csproj,*.json,*.yml,*.xml}]
-
-indent_size = 2
+root = true
 
 [*]
-
-dotnet_sort_system_directives_first = true
-
-dotnet_separate_import_directive_groups = true
-
 charset = utf-8
-
 indent_style = space
-
 insert_final_newline = true
-
 trim_trailing_whitespace = true
+dotnet_separate_import_directive_groups = true
+dotnet_sort_system_directives_first = true
+indent_size = 4
+
+[{*.csproj,*.json,*.yml}]
+indent_size = 2

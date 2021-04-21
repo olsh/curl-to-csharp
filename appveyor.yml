@@ -1,5 +1,6 @@
 version: 1.0.{build}
 image: Visual Studio 2019
+skip_branch_with_pr: true
 environment:
   CYPRESS_RECORD_KEY:
     secure: zrEJrmRw4T8jXDP0u73B73A8QEfq6bRi1Z9F4d7bEumJK9sZVyW/KUG2qN1WWYeL
@@ -8,7 +9,7 @@ install:
   - dotnet tool install -g Cake.Tool --version 0.38.5
   - SET JAVA_HOME=C:\Program Files\Java\jdk11
   - SET PATH=%JAVA_HOME%\bin;%PATH%
-  - ps: Install-Product node 12
+  - ps: Install-Product node 14
 build_script:
 - cmd: dotnet cake -Target=CI
 test: off

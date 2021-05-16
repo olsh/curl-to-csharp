@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 
+using CurlToCSharp.Constants;
 using CurlToCSharp.Extensions;
 using CurlToCSharp.Models;
 
@@ -506,10 +507,15 @@ namespace CurlToCSharp.Services
         /// </remarks>
         private UsingStatementSyntax CreateHttpClientUsing(CurlOptions curlOptions)
         {
+
             var argumentSyntax = ShouldGenerateHandler(curlOptions)
                                      ? new[] { SyntaxFactory.Argument(SyntaxFactory.IdentifierName(HandlerVariableName)) }
                                      : new ArgumentSyntax[0];
-            return RoslynExtensions.CreateUsingStatement(HttpClientVariableName, nameof(HttpClient), argumentSyntax);
+            var usingStatement = RoslynExtensions.CreateUsingStatement(HttpClientVariableName, nameof(HttpClient), argumentSyntax);
+
+            return usingStatement
+                .PrependComment("// In production code, don't destroy the HttpClient through using, but better reuse an existing instance"
+                + Chars.NewLineString + "// https://www.aspnetmonsters.com/2016/08/2016-08-27-httpclientwrong/");
         }
 
         /// <summary>
@@ -666,10 +672,10 @@ namespace CurlToCSharp.Services
                     "AutomaticDecompression",
                     SyntaxFactory.PrefixUnaryExpression(SyntaxKind.BitwiseNotExpression, RoslynExtensions.CreateMemberAccessExpression("DecompressionMethods", "None")));
 
-                memberAssignmentExpression = memberAssignmentExpression.PrependComment("// If you are using .NET Core 3.0+ you can replace `~DecompressionMethods.None` to `DecompressionMethods.All`");
+                memberAssignmentExpression = memberAssignmentExpression
+                    .PrependComment(Chars.NewLineString + "// If you are using .NET Core 3.0+ you can replace `~DecompressionMethods.None` to `DecompressionMethods.All`");
 
-                statementSyntaxs.AddLast(
-                    SyntaxFactory.GlobalStatement(SyntaxFactory.ExpressionStatement(memberAssignmentExpression)));
+                statementSyntaxs.AddLast(SyntaxFactory.GlobalStatement(SyntaxFactory.ExpressionStatement(memberAssignmentExpression)));
             }
 
             if (curlOptions.HasCertificate && IsSupportedCertificate(curlOptions.CertificateType))

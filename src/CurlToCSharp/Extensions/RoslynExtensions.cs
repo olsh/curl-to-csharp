@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
+
+using CurlToCSharp.Constants;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -9,8 +11,6 @@ namespace CurlToCSharp.Extensions
 {
     public static class RoslynExtensions
     {
-        private const string NewLineString = "\n";
-
         public static InvocationExpressionSyntax CreateInvocationExpression(
             string leftPart,
             string rightPart,
@@ -132,12 +132,17 @@ namespace CurlToCSharp.Extensions
 
         public static TSyntax PrependComment<TSyntax>(this TSyntax node, string comment) where TSyntax : SyntaxNode
         {
-            return node.WithLeadingTrivia(SyntaxFactory.Comment(NewLineString + comment));
+            return node.WithLeadingTrivia(SyntaxFactory.Comment(comment));
         }
 
         public static TSyntax AppendWhiteSpace<TSyntax>(this TSyntax node) where TSyntax : SyntaxNode
         {
-            return node.WithTrailingTrivia(SyntaxFactory.Comment(NewLineString));
+            return node.WithTrailingTrivia(SyntaxFactory.Comment(Chars.NewLineString));
+        }
+
+        public static TSyntax PrependWhiteSpace<TSyntax>(this TSyntax node) where TSyntax : SyntaxNode
+        {
+            return node.WithLeadingTrivia(SyntaxFactory.Comment(Chars.NewLineString));
         }
 
         public static void TryAppendWhiteSpaceAtEnd<TSyntax>(this ICollection<TSyntax> statements) where TSyntax : SyntaxNode

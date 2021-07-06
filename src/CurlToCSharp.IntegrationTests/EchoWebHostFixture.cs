@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 using CurlToCSharp.IntegrationTests.Constants;
@@ -20,6 +21,9 @@ namespace CurlToCSharp.IntegrationTests
                 .Build();
 
             Task.Run(() => _webHost.Run());
+
+            // What a second while server startup
+            Thread.Sleep(1000);
         }
 
         public void Dispose()

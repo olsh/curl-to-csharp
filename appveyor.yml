@@ -8,6 +8,7 @@ environment:
 install:
   - dotnet tool install -g Cake.Tool --version 1.1.0
   - nvm use 14.17.0
+  - npm install --global gulp-cli
 build_script:
 - dotnet cake --Target=CI --cypressConfigurationFile=cypress.production.json --cypressEnableRecording=true
 test: off

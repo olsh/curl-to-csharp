@@ -22,12 +22,6 @@ var tempPublishArchive = "publish.zip";
 var dockerImageTag = "olsh/curl-to-csharp";
 var dockerContainerName = "curl-to-csharp";
 
-Task("Yarn")
-    .Does(() =>
-    {
-        Yarn.Add(settings => settings.Package("gulp-cli").Globally());
-    });
-
 Task("Build")
   .Does(() =>
 {
@@ -54,7 +48,6 @@ Task("IntegrationTest")
 });
 
 Task("Pack")
-  .IsDependentOn("Yarn")
   .Does(() =>
 {
     var settings = new DotNetCorePublishSettings

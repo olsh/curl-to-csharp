@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -22,10 +22,10 @@ namespace CurlToCSharp.IntegrationTests
         [InlineData("-d key=\"value with space\"")]
         [InlineData("-d first=\"1=\" -d key=\"broken quotes\\\" -d another=\"")]
         [InlineData("-d \"form=a b\" -d \"another data\"")]
-        [InlineData("-d \"some data\" -d @\"Resources\\\\text-file.txt\" -d \"a b\"")]
-        [InlineData("--data-binary @\"Resources\\\\text-file.txt\"")]
+        [InlineData("-d \"some data\" -d @\"Resources/text-file.txt\" -d \"a b\"")]
+        [InlineData("--data-binary @\"Resources/text-file.txt\"")]
         [InlineData("--data-urlencode \"a=b c\"")]
-        [InlineData("--data-urlencode \"a@Resources\\\\text-file.txt\"")]
+        [InlineData("--data-urlencode \"a@Resources/text-file.txt\"")]
         public async Task Data(string arguments)
         {
             await AssertResponsesEqualsAsync(arguments);
@@ -40,7 +40,7 @@ namespace CurlToCSharp.IntegrationTests
         }
 
         [Theory]
-        [InlineData("-T \"Resources\\\\text-file.txt\"")]
+        [InlineData("-T \"Resources/text-file.txt\"")]
         public async Task UploadFile(string arguments)
         {
             await AssertResponsesEqualsAsync(arguments);

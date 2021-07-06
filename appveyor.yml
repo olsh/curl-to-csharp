@@ -1,6 +1,5 @@
 version: 1.0.{build}
 image: Visual Studio 2019
-skip_branch_with_pr: true
 environment:
   CYPRESS_RECORD_KEY:
     secure: zrEJrmRw4T8jXDP0u73B73A8QEfq6bRi1Z9F4d7bEumJK9sZVyW/KUG2qN1WWYeL
@@ -11,7 +10,7 @@ install:
   - SET PATH=%JAVA_HOME%\bin;%PATH%
   - ps: Install-Product node 14
 build_script:
-- cmd: dotnet cake -Target=CI
+- cmd: dotnet cake -Target=CI --cypressConfigurationFile=cypress.production.json --cypressEnableRecording=true
 test: off
 deploy:
 - provider: AzureAppServiceZipDeploy
@@ -19,9 +18,6 @@ deploy:
   username: CurlToCSharp
   password:
     secure: anNXyv5QGtXmsPV21/COiAolYBhLYF8Pi3yWd/qIRd4=
-after_deploy:
-  - cd src\CurlToCSharp
-  - yarn run cypress run --config-file cypress.production.json --record
 cache:
   - '%USERPROFILE%\.sonar\cache'
   - 'src\CurlToCSharp\node_modules\ -> src\CurlToCSharp\yarn.lock'

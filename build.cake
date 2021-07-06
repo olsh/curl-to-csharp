@@ -1,26 +1,31 @@
 #tool nuget:?package=MSBuild.SonarQube.Runner.Tool&version=4.8.0
 
 #addin nuget:?package=Cake.Sonar&version=1.1.25
-#addin nuget:?package=Cake.Yarn&version=0.4.6
+#addin nuget:?package=Cake.Yarn&version=0.4.8
+#addin nuget:?package=Cake.Docker&version=1.0.0
 
 var target = Argument("target", "Default");
+var cypressConfigurationFile = Argument("cypressConfigurationFile", "cypress.json");
+var cypressEnableRecording = Argument("cypressEnableRecording", false);
 
 var buildConfiguration = "Release";
 var projectName = "CurlToCSharp";
-var unitTestProjectName = "CurlToCSharp.UnitTests";
-var integrationTestProjectName = "CurlToCSharp.IntegrationTests";
-var projectFile = string.Format("./src/{0}/{0}.csproj", projectName);
+var unitTestProjectName = $"{projectName}.UnitTests";
+var integrationTestProjectName = $"{projectName}.IntegrationTests";
+var projectDirectory = $"./src/{projectName}/";
+var projectFile = $"{projectDirectory}{projectName}.csproj";
 var unitTestProjectFile = string.Format("./src/{0}/{0}.csproj", unitTestProjectName);
 var integrationTestProjectFile = string.Format("./src/{0}/{0}.csproj", integrationTestProjectName);
 var solutionFile = string.Format("./src/{0}.sln", projectName);
 var tempPublishDirectory = "./publish";
 var tempPublishArchive = "publish.zip";
+var dockerImageTag = "olsh/curl-to-csharp";
+var dockerContainerName = "curl-to-csharp";
 
 Task("Yarn")
     .Does(() =>
     {
-        Yarn
-        .Add(settings => settings.Package("gulp").Globally());
+        Yarn.Add(settings => settings.Package("gulp").Globally());
     });
 
 Task("Build")
@@ -91,12 +96,69 @@ Task("SonarEnd")
      });
   });
 
+Task("DockerBuild")
+  .IsDependentOn("Pack")
+  .Does(() => {
+     DockerBuild(new DockerImageBuildSettings() {
+       File = "Dockerfile",
+       Tag = new string [] { dockerImageTag }
+     },
+     tempPublishDirectory);
+  });
+
+Task("RunEndToEndTests")
+  .IsDependentOn("DockerBuild")
+  .Does(() => {
+     DockerRun(new DockerContainerRunSettings() {
+       Detach = true,
+       Publish = new string [] { "8080:80" },
+       Name = dockerContainerName
+     },
+     dockerImageTag,
+     null);
+
+    var currentWorkingDirectory = Context.Environment.WorkingDirectory;
+    Context.Environment.WorkingDirectory = MakeAbsolute(Directory(projectDirectory));
+    var cypressCommand = $"cypress run --config-file {cypressConfigurationFile}";
+    if (cypressEnableRecording)
+    {
+        cypressCommand += " --record";
+    }
+    Yarn.RunScript(cypressCommand);
+    Context.Environment.WorkingDirectory = currentWorkingDirectory;
+  });
+
+Setup(context =>
+{
+    try
+    {
+        DockerStop(new string [] { dockerContainerName });
+        DockerRm(new string [] { dockerContainerName });
+    }
+    catch
+    {
+    }
+});
+
+Teardown(context =>
+{
+    try
+    {
+        DockerStop(new string [] { dockerContainerName });
+        DockerRm(new string [] { dockerContainerName });
+    }
+    catch
+    {
+    }
+});
+
 Task("Default")
     .IsDependentOn("Pack");
 
 Task("Test")
   .IsDependentOn("UnitTest")
-  .IsDependentOn("IntegrationTest");
+  .IsDependentOn("IntegrationTest")
+  .IsDependentOn("RunEndToEndTests");
 
 Task("Sonar")
   .IsDependentOn("SonarBegin")

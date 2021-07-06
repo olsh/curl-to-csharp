@@ -2,12 +2,12 @@ version: 1.0.{build}
 image: Ubuntu2004
 services:
 - docker
+stack: node 14, java 11
 environment:
   CYPRESS_RECORD_KEY:
     secure: zrEJrmRw4T8jXDP0u73B73A8QEfq6bRi1Z9F4d7bEumJK9sZVyW/KUG2qN1WWYeL
 install:
   - dotnet tool install -g Cake.Tool --version 1.1.0
-  - nvm use 14.17.0
   - npm install --global gulp-cli
 build_script:
 - dotnet cake --Target=CI --cypressConfigurationFile=cypress.production.json --cypressEnableRecording=true

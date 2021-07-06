@@ -19,5 +19,8 @@ deploy:
   password:
     secure: anNXyv5QGtXmsPV21/COiAolYBhLYF8Pi3yWd/qIRd4=
 cache:
-  - 'src\CurlToCSharp\node_modules\ -> src\CurlToCSharp\yarn.lock'
+  - 'src/CurlToCSharp/node_modules/ -> src\CurlToCSharp\yarn.lock'
   - 'tools -> build.cake'
+  - '%USERPROFILE%/.nuget/packages -> **\*.csproj'
+  - '%USERPROFILE%/.sonar/cache'
+  - '%USERPROFILE%/.cache/Cypress -> src\CurlToCSharp\yarn.lock'

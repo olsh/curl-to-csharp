@@ -10,17 +10,26 @@ install:
   - dotnet tool install -g Cake.Tool --version 1.1.0
   - npm install --global gulp-cli
 build_script:
-- dotnet cake --Target=CI --cypressConfigurationFile=cypress.production.json --cypressEnableRecording=true
+- dotnet cake --Target=Test
 test: off
-deploy:
-- provider: AzureAppServiceZipDeploy
-  website: curltocsharp
-  username: CurlToCSharp
-  password:
-    secure: anNXyv5QGtXmsPV21/COiAolYBhLYF8Pi3yWd/qIRd4=
 cache:
   - 'src/CurlToCSharp/node_modules/ -> src\CurlToCSharp\yarn.lock'
   - 'tools -> build.cake'
   - '%USERPROFILE%/.nuget/packages -> **\*.csproj'
   - '%USERPROFILE%/.sonar/cache'
   - '%USERPROFILE%/.cache/Cypress -> src\CurlToCSharp\yarn.lock'
+
+for:
+  branches:
+  only:
+    - master
+
+  build_script:
+  - dotnet cake --Target=CI --cypressConfigurationFile=cypress.production.json --cypressEnableRecording=true
+
+  deploy:
+  - provider: AzureAppServiceZipDeploy
+    website: curltocsharp
+    username: CurlToCSharp
+    password:
+      secure: anNXyv5QGtXmsPV21/COiAolYBhLYF8Pi3yWd/qIRd4=

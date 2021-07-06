@@ -25,7 +25,7 @@ var dockerContainerName = "curl-to-csharp";
 Task("Yarn")
     .Does(() =>
     {
-        Yarn.Add(settings => settings.Package("gulp").Globally());
+        Yarn.Add(settings => settings.Package("gulp-cli").Globally());
     });
 
 Task("Build")

@@ -20,6 +20,7 @@ cache:
   - '%USERPROFILE%/.cache/Cypress -> src\CurlToCSharp\yarn.lock'
 
 for:
+-
   branches:
   only:
     - master

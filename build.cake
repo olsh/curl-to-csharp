@@ -80,7 +80,7 @@ Task("SonarBegin")
   .Does(() => {
      SonarBegin(new SonarBeginSettings {
         Url = "https://sonarcloud.io",
-        Login = EnvironmentVariable("sonar:apikey"),
+        Login = EnvironmentVariable("sonar_apikey"),
         Key = "curl-to-csharp",
         Name = "curl to C#",
         ArgumentCustomization = args => args
@@ -92,7 +92,7 @@ Task("SonarBegin")
 Task("SonarEnd")
   .Does(() => {
      SonarEnd(new SonarEndSettings {
-        Login = EnvironmentVariable("sonar:apikey")
+        Login = EnvironmentVariable("sonar_apikey")
      });
   });
 

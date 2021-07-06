@@ -22,8 +22,8 @@ cache:
 for:
 -
   branches:
-  only:
-    - master
+    only:
+      - master
 
   build_script:
   - dotnet cake --Target=CI --cypressConfigurationFile=cypress.production.json --cypressEnableRecording=true

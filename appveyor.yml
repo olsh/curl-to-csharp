@@ -13,11 +13,11 @@ build_script:
 - dotnet cake --Target=Test
 test: off
 cache:
-  - 'src/CurlToCSharp/node_modules/ -> src\CurlToCSharp\yarn.lock'
+  - 'src/CurlToCSharp/node_modules/ -> src/CurlToCSharp/yarn.lock'
   - 'tools -> build.cake'
-  - '%USERPROFILE%/.nuget/packages -> **\*.csproj'
-  - '%USERPROFILE%/.sonar/cache'
-  - '%USERPROFILE%/.cache/Cypress -> src\CurlToCSharp\yarn.lock'
+  - '~/.nuget/packages -> **\*.csproj'
+  - '~/.sonar/cache'
+  - '~/.cache/Cypress -> src/CurlToCSharp/yarn.lock'
 
 for:
 -

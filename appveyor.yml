@@ -15,9 +15,6 @@ test: off
 cache:
   - 'src/CurlToCSharp/node_modules/ -> src/CurlToCSharp/yarn.lock'
   - 'tools -> build.cake'
-  - '~/.nuget/packages -> **\*.csproj'
-  - '~/.sonar/cache'
-  - '~/.cache/Cypress -> src/CurlToCSharp/yarn.lock'
 
 for:
 -

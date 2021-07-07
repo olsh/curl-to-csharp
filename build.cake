@@ -99,6 +99,15 @@ Task("DockerBuild")
      tempPublishDirectory);
   });
 
+Task("DockerPush")
+  .IsDependentOn("Pack")
+  .Does(() => {
+    DockerLogin(EnvironmentVariable("docker_login"), EnvironmentVariable("docker_password"));
+
+    var dockerBuildArguments = $"buildx build {tempPublishDirectory} -f Dockerfile --push --platform linux/amd64,windows/amd64 -t {dockerImageTag}";
+    StartProcess("docker", new ProcessSettings{ Arguments = dockerBuildArguments });
+  });
+
 Task("RunEndToEndTests")
   .IsDependentOn("DockerBuild")
   .Does(() => {
@@ -161,7 +170,8 @@ Task("Sonar")
 
 Task("CI")
     .IsDependentOn("Sonar")
-    .IsDependentOn("CreateArtifact");
+    .IsDependentOn("CreateArtifact")
+    .IsDependentOn("DockerPush");
 
 RunTarget(target);
 

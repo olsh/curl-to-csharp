@@ -21,6 +21,7 @@ var tempPublishDirectory = "./publish";
 var tempPublishArchive = "publish.zip";
 var dockerImageTag = "olsh/curl-to-csharp";
 var dockerContainerName = "curl-to-csharp";
+var dockerBuildContainerName = $"{dockerContainerName}-build";
 
 Task("Build")
   .Does(() =>
@@ -104,6 +105,7 @@ Task("DockerPush")
   .Does(() => {
     DockerLogin(EnvironmentVariable("docker_login"), EnvironmentVariable("docker_password"));
 
+    StartProcess("docker", new ProcessSettings { Arguments = $"buildx create --use --name {dockerBuildContainerName}" });
     var dockerBuildArguments = $"buildx build {tempPublishDirectory} -f Dockerfile --push --platform linux/amd64,windows/amd64 -t {dockerImageTag}";
     StartProcess("docker", new ProcessSettings{ Arguments = dockerBuildArguments });
   });
@@ -134,6 +136,7 @@ Setup(context =>
 {
     try
     {
+        StartProcess("docker", new ProcessSettings { Arguments = $"buildx rm {dockerBuildContainerName}" });
         DockerStop(new string [] { dockerContainerName });
         DockerRm(new string [] { dockerContainerName });
     }
@@ -146,6 +149,7 @@ Teardown(context =>
 {
     try
     {
+        StartProcess("docker", new ProcessSettings { Arguments = $"buildx rm {dockerBuildContainerName}" });
         DockerStop(new string [] { dockerContainerName });
         DockerRm(new string [] { dockerContainerName });
     }

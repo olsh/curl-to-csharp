@@ -106,7 +106,7 @@ Task("DockerPush")
     DockerLogin(EnvironmentVariable("docker_login"), EnvironmentVariable("docker_password"));
 
     StartProcess("docker", new ProcessSettings { Arguments = $"buildx create --use --name {dockerBuildContainerName}" });
-    var dockerBuildArguments = $"buildx build {tempPublishDirectory} -f Dockerfile --push --platform linux/amd64,windows/amd64 -t {dockerImageTag}";
+    var dockerBuildArguments = $"buildx build {tempPublishDirectory} -f Dockerfile --push --platform linux/amd64,windows/amd64 -t {dockerImageTag} --progress plain";
     StartProcess("docker", new ProcessSettings{ Arguments = dockerBuildArguments });
   });
 
@@ -134,29 +134,26 @@ Task("RunEndToEndTests")
 
 Setup(context =>
 {
-    try
-    {
-        StartProcess("docker", new ProcessSettings { Arguments = $"buildx rm {dockerBuildContainerName}" });
-        DockerStop(new string [] { dockerContainerName });
-        DockerRm(new string [] { dockerContainerName });
-    }
-    catch
-    {
-    }
+  TryRemoveContainers();
 });
 
 Teardown(context =>
 {
-    try
-    {
-        StartProcess("docker", new ProcessSettings { Arguments = $"buildx rm {dockerBuildContainerName}" });
-        DockerStop(new string [] { dockerContainerName });
-        DockerRm(new string [] { dockerContainerName });
-    }
-    catch
-    {
-    }
+  TryRemoveContainers();
 });
+
+public void TryRemoveContainers()
+{
+  try
+  {
+      StartProcess("docker", new ProcessSettings { Arguments = $"buildx rm {dockerBuildContainerName}" });
+      DockerStop(new string [] { dockerContainerName });
+      DockerRm(new string [] { dockerContainerName });
+  }
+  catch
+  {
+  }
+}
 
 Task("Default")
     .IsDependentOn("Pack");

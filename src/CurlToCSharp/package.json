@@ -3,7 +3,7 @@
   "name": "curl.to.csharp",
   "private": true,
   "devDependencies": {
-    "cypress": "^9.2.0",
+    "cypress": "^9.4.1",
     "gulp": "^4.0.2",
     "gulp-clean-css": "^4.2.0",
     "gulp-concat": "^2.6.1",
@@ -13,6 +13,6 @@
   "dependencies": {
     "bootstrap": "^4.6.0",
     "jquery": "^3.6.0",
-    "prismjs": "^1.25.0"
+    "prismjs": "^1.26.0"
   }
 }

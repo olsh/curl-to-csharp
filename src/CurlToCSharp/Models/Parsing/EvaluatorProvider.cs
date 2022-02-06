@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace CurlToCSharp.Models.Parsing
 {
@@ -27,7 +27,8 @@ namespace CurlToCSharp.Models.Parsing
                            new UserAgentParameterEvaluator(),
                            new ProxyCredentialsParameterEvaluator(),
                            new GetParameterEvaluator(),
-                           new CompressedParameterEvaluator()
+                           new CompressedParameterEvaluator(),
+                           new RefererParameterEvaluator()
                        };
         }
     }

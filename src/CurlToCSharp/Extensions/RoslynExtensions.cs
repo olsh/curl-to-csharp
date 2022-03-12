@@ -74,6 +74,14 @@ namespace CurlToCSharp.Extensions
                     SyntaxFactory.Literal(argumentName)));
         }
 
+        public static ArgumentSyntax CreateIntLiteralArgument(int argument)
+        {
+            return SyntaxFactory.Argument(
+                SyntaxFactory.LiteralExpression(
+                    SyntaxKind.NumericLiteralExpression,
+                    SyntaxFactory.Literal(argument)));
+        }
+
         public static ParameterListSyntax CreateParameterListSyntax(params string[] parameters)
         {
             var separatedSyntaxList = new SeparatedSyntaxList<ParameterSyntax>().AddRange(

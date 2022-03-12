@@ -471,6 +471,38 @@ public class ConverterService : IConverterService
         return new StatementSyntax[] { authorizationEncodingStatement, tryAddHeaderStatement };
     }
 
+    public ExpressionStatementSyntax CreateSetHttpVersionStatement(CurlOptions options)
+    {
+        var arguments = new LinkedList<ArgumentSyntax>();
+        var majorVersionArgument = options.HttpVersion switch
+        {
+            HttpVersion.Http09 => RoslynExtensions.CreateIntLiteralArgument(0),
+            HttpVersion.Http10 => RoslynExtensions.CreateIntLiteralArgument(1),
+            HttpVersion.Http11 => RoslynExtensions.CreateIntLiteralArgument(1),
+            HttpVersion.Http20 => RoslynExtensions.CreateIntLiteralArgument(2),
+            HttpVersion.Http30 => RoslynExtensions.CreateIntLiteralArgument(3),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+        arguments.AddLast(majorVersionArgument);
+
+        var minorVersionArgument = options.HttpVersion switch
+        {
+            HttpVersion.Http09 => RoslynExtensions.CreateIntLiteralArgument(9),
+            HttpVersion.Http11 => RoslynExtensions.CreateIntLiteralArgument(1),
+            _ => RoslynExtensions.CreateIntLiteralArgument(0)
+        };
+        arguments.AddLast(minorVersionArgument);
+
+        var versionObjectCreationExpression =
+            RoslynExtensions.CreateObjectCreationExpression("Version", arguments.ToArray());
+
+        return SyntaxFactory.ExpressionStatement(
+            RoslynExtensions.CreateMemberAssignmentExpression(
+                RequestVariableName,
+                "Version",
+                versionObjectCreationExpression));
+    }
+
     /// <summary>
     /// Generates the basic authorization encoding statement.
     /// </summary>
@@ -622,6 +654,11 @@ public class ConverterService : IConverterService
                                 byteArrayContentExpression))
                         .AppendWhiteSpace())));
             }
+        }
+        else if (curlOptions.HttpVersionSpecified)
+        {
+            var httpVersionStatement = CreateSetHttpVersionStatement(curlOptions);
+            innerBlock = innerBlock.AddStatements(httpVersionStatement);
         }
 
         var sendStatement = CreateSendStatement();

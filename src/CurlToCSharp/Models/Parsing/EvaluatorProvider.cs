@@ -30,7 +30,12 @@ namespace CurlToCSharp.Models.Parsing
                            new ProxyCredentialsParameterEvaluator(),
                            new GetParameterEvaluator(),
                            new CompressedParameterEvaluator(),
-                           new RefererParameterEvaluator()
+                           new RefererParameterEvaluator(),
+                           new Http09ParameterEvaluator(),
+                           new Http10ParameterEvaluator(),
+                           new Http11ParameterEvaluator(),
+                           new Http20ParameterEvaluator(),
+                           new Http30ParameterEvaluator()
                        };
         }
     }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -32,6 +32,8 @@ namespace CurlToCSharp.Models
 
         public bool HasCertificate => !string.IsNullOrEmpty(CertificateFileName);
 
+        public bool HasKey => !string.IsNullOrEmpty(KeyFileName);
+
         public bool HasCertificatePassword => !string.IsNullOrEmpty(CertificatePassword);
 
         public bool HasCookies => !string.IsNullOrWhiteSpace(CookieValue);
@@ -55,6 +57,10 @@ namespace CurlToCSharp.Models
         public bool Insecure { get; set; }
 
         public bool IsCompressed { get; set; }
+
+        public string KeyFileName { get; set; }
+
+        public KeyType KeyType { get; set; }
 
         public string ProxyPassword { get; set; }
 

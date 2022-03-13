@@ -802,7 +802,10 @@ public class ConverterService : IConverterService
         if (curlOptions.CertificateType == CertificateType.Pem)
         {
             certificateAssignmentExpression = certificateAssignmentExpression
-                .PrependComment(Chars.NewLineString + "// PEM certificates support requires .NET 5 and higher");
+                .PrependComment(
+                    Chars.NewLineString + "// PEM certificates support requires .NET 5 and higher" +
+                    Chars.NewLineString + "// Export to PFX is needed because of this bug https://github.com/dotnet/runtime/issues/23749#issuecomment-747407051"
+                );
         }
 
         statementSyntaxs.AddLast(SyntaxFactory.GlobalStatement(SyntaxFactory.ExpressionStatement(certificateAssignmentExpression)));
@@ -863,7 +866,11 @@ public class ConverterService : IConverterService
             newCertificateArguments.AddLast(RoslynExtensions.CreateStringLiteralArgument(curlOptions.KeyFileName));
         }
 
-        return RoslynExtensions.CreateInvocationExpression(X509Certificate2ClassName, methodName, newCertificateArguments.ToArray());
+        var createFromPemInvocationExpression = RoslynExtensions.CreateInvocationExpression(X509Certificate2ClassName, methodName, newCertificateArguments.ToArray());
+        var pfxTypeExpression = RoslynExtensions.CreateMemberAccessExpression("X509ContentType", "Pfx");
+        createFromPemInvocationExpression = RoslynExtensions.CreateInvocationExpression(createFromPemInvocationExpression, "Export", SyntaxFactory.Argument(pfxTypeExpression));
+
+        return RoslynExtensions.CreateObjectCreationExpression(X509Certificate2ClassName, SyntaxFactory.Argument(createFromPemInvocationExpression));
     }
 
     /// <summary>

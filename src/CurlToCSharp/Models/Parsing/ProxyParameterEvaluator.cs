@@ -1,48 +1,45 @@
-using System;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 using CurlToCSharp.Extensions;
 
-namespace CurlToCSharp.Models.Parsing
+namespace CurlToCSharp.Models.Parsing;
+
+public class ProxyParameterEvaluator : ParameterEvaluator
 {
-    public class ProxyParameterEvaluator : ParameterEvaluator
+    private static readonly Regex PortRegex = new Regex(@":\d+$", RegexOptions.Compiled);
+
+    public ProxyParameterEvaluator()
     {
-        private static readonly Regex PortRegex = new Regex(@":\d+$", RegexOptions.Compiled);
+        Keys = new HashSet<string> { "-x", "--proxy" };
+    }
 
-        public ProxyParameterEvaluator()
+    protected override HashSet<string> Keys { get; }
+
+    protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
+    {
+        var value = commandLine.ReadValue();
+
+        // https://curl.se/docs/manpage.html#-x
+        // No protocol specified or http:// will be treated as HTTP proxy.
+        var uriString = value.ToString();
+        if (!uriString.Contains("://"))
         {
-            Keys = new HashSet<string> { "-x", "--proxy" };
+            uriString = "http://" + uriString;
         }
 
-        protected override HashSet<string> Keys { get; }
-
-        protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
+        if (!Uri.TryCreate(uriString, UriKind.Absolute, out Uri proxyUri))
         {
-            var value = commandLine.ReadValue();
+            convertResult.Warnings.Add("Unable to parse proxy URI");
 
-            // https://curl.se/docs/manpage.html#-x
-            // No protocol specified or http:// will be treated as HTTP proxy.
-            var uriString = value.ToString();
-            if (!uriString.Contains("://"))
-            {
-                uriString = "http://" + uriString;
-            }
-
-            if (!Uri.TryCreate(uriString, UriKind.Absolute, out Uri proxyUri))
-            {
-                convertResult.Warnings.Add("Unable to parse proxy URI");
-
-                return;
-            }
-
-            // If the port number is not specified in the proxy string, it is assumed to be 1080.
-            if (!PortRegex.IsMatch(proxyUri.OriginalString))
-            {
-                proxyUri = new UriBuilder(proxyUri.Scheme, proxyUri.Host, 1080).Uri;
-            }
-
-            convertResult.Data.ProxyUri = proxyUri;
+            return;
         }
+
+        // If the port number is not specified in the proxy string, it is assumed to be 1080.
+        if (!PortRegex.IsMatch(proxyUri.OriginalString))
+        {
+            proxyUri = new UriBuilder(proxyUri.Scheme, proxyUri.Host, 1080).Uri;
+        }
+
+        convertResult.Data.ProxyUri = proxyUri;
     }
 }

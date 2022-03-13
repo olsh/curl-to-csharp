@@ -1,20 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+namespace CurlToCSharp.Models.Parsing;
 
-namespace CurlToCSharp.Models.Parsing
+public class DataParameterEvaluator : DataGenericParameterEvaluator
 {
-    public class DataParameterEvaluator : DataGenericParameterEvaluator
+    public DataParameterEvaluator()
     {
-        public DataParameterEvaluator()
-        {
-            Keys = new HashSet<string> { "-d", "--data" };
-        }
+        Keys = new HashSet<string> { "-d", "--data" };
+    }
 
-        protected override HashSet<string> Keys { get; }
+    protected override HashSet<string> Keys { get; }
 
-        protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
-        {
-            Evaluate(ref commandLine, convertResult, true, false);
-        }
+    protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
+    {
+        Evaluate(ref commandLine, convertResult, true, false);
     }
 }

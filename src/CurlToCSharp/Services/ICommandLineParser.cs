@@ -1,11 +1,8 @@
-﻿using System;
-
 using CurlToCSharp.Models;
 
-namespace CurlToCSharp.Services
+namespace CurlToCSharp.Services;
+
+public interface ICommandLineParser
 {
-    public interface ICommandLineParser
-    {
-        ConvertResult<CurlOptions> Parse(Span<char> commandLine);
-    }
+    ConvertResult<CurlOptions> Parse(Span<char> commandLine);
 }

@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace CurlToCSharp.Models.Parsing;
 
 public class Http30ParameterEvaluator : ParameterEvaluator

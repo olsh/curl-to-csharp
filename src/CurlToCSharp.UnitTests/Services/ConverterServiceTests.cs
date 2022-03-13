@@ -1,65 +1,59 @@
-﻿using System;
-using System.Linq;
-
 using CurlToCSharp.Models;
 using CurlToCSharp.Services;
 
-using Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Http;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Net.Http.Headers;
 
-using Xunit;
+namespace CurlToCSharp.UnitTests.Services;
 
-namespace CurlToCSharp.UnitTests.Services
+public class ConverterServiceTests
 {
-    public class ConverterServiceTests
+    [Fact]
+    public void ToCsharp_ValidCurlOptions_CanBeCompiled()
     {
-        [Fact]
-        public void ToCsharp_ValidCurlOptions_CanBeCompiled()
+        var converterService = new ConverterService();
+        var curlOptions = new CurlOptions
         {
-            var converterService = new ConverterService();
-            var curlOptions = new CurlOptions
-                                  {
-                                      HttpMethod = HttpMethod.Post.ToString().ToUpper(),
-                                      Url = new Uri("https://google.com"),
-                                      UploadData = { new UploadData("{\"status\": \"resolved\"}") },
-                                      UserPasswordPair = "user:pass"
-                                  };
-            curlOptions.SetHeader(HeaderNames.ContentType, "application/json");
-            curlOptions.SetHeader(HeaderNames.Authorization, "Bearer b7d03a6947b217efb6f3ec3bd3504582");
+            HttpMethod = HttpMethod.Post.ToString().ToUpper(),
+            Url = new Uri("https://google.com"),
+            UploadData = { new UploadData("{\"status\": \"resolved\"}") },
+            UserPasswordPair = "user:pass"
+        };
+        curlOptions.SetHeader(HeaderNames.ContentType, "application/json");
+        curlOptions.SetHeader(HeaderNames.Authorization, "Bearer b7d03a6947b217efb6f3ec3bd3504582");
 
-            var result = converterService.ToCsharp(curlOptions);
+        var result = converterService.ToCsharp(curlOptions);
 
-            var tree = WrapToClass(result.Data);
-            var diagnostics = tree.GetDiagnostics();
+        var tree = WrapToClass(result.Data);
+        var diagnostics = tree.GetDiagnostics();
 
-            Assert.Empty(diagnostics);
-        }
+        Assert.Empty(diagnostics);
+    }
 
-        [Fact]
-        public void ToCsharp_GetRequest_ContainsSendStatement()
+    [Fact]
+    public void ToCsharp_GetRequest_ContainsSendStatement()
+    {
+        var converterService = new ConverterService();
+        var curlOptions = new CurlOptions
         {
-            var converterService = new ConverterService();
-            var curlOptions = new CurlOptions
-                                  {
-                                      HttpMethod = HttpMethod.Get.ToString().ToUpper(),
-                                      Url = new Uri("https://google.com")
-                                  };
+            HttpMethod = HttpMethod.Get.ToString().ToUpper(),
+            Url = new Uri("https://google.com")
+        };
 
-            var result = converterService.ToCsharp(curlOptions);
+        var result = converterService.ToCsharp(curlOptions);
 
-            var tree = CSharpSyntaxTree.ParseText(result.Data);
-            Assert.NotEmpty(tree.GetRoot()
-                .DescendantNodes()
-                .OfType<MemberAccessExpressionSyntax>()
-                .Where(ae => ae.Name.Identifier.ValueText == "SendAsync"));
-        }
+        var tree = CSharpSyntaxTree.ParseText(result.Data);
+        Assert.NotEmpty(tree.GetRoot()
+            .DescendantNodes()
+            .OfType<MemberAccessExpressionSyntax>()
+            .Where(ae => ae.Name.Identifier.ValueText == "SendAsync"));
+    }
 
-        private SyntaxTree WrapToClass(string code)
-        {
-            var wrapCode = $@"
+    private SyntaxTree WrapToClass(string code)
+    {
+        var wrapCode = $@"
 class TestClass
 {{
     public void TestMethod()
@@ -69,7 +63,6 @@ class TestClass
 }}
 ";
 
-            return CSharpSyntaxTree.ParseText(wrapCode);
-        }
+        return CSharpSyntaxTree.ParseText(wrapCode);
     }
 }

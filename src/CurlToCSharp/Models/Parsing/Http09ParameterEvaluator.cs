@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 namespace CurlToCSharp.Models.Parsing;
 
 public class Http09ParameterEvaluator : ParameterEvaluator

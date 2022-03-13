@@ -1,9 +1,8 @@
-﻿using CurlToCSharp.Models;
+using CurlToCSharp.Models;
 
-namespace CurlToCSharp.Services
+namespace CurlToCSharp.Services;
+
+public interface IConverterService
 {
-    public interface IConverterService
-    {
-        ConvertResult<string> ToCsharp(CurlOptions curlOptions);
-    }
+    ConvertResult<string> ToCsharp(CurlOptions curlOptions);
 }

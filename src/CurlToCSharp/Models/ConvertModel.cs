@@ -1,11 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
-namespace CurlToCSharp.Models
+namespace CurlToCSharp.Models;
+
+public class ConvertModel
 {
-    public class ConvertModel
-    {
-        [Required]
-        [MaxLength(10000)]
-        public string Curl { get; set; }
-    }
+    [Required]
+    [MaxLength(10000)]
+    public string Curl { get; set; }
 }

@@ -1,16 +1,15 @@
-﻿namespace CurlToCSharp.Models.Parsing
+namespace CurlToCSharp.Models.Parsing;
+
+public class ParsingOptions
 {
-    public class ParsingOptions
+    public ParsingOptions()
     {
-        public ParsingOptions()
-        {
-        }
-
-        public ParsingOptions(int maxUploadFiles)
-        {
-            MaxUploadFiles = maxUploadFiles;
-        }
-
-        public int MaxUploadFiles { get; set; }
     }
+
+    public ParsingOptions(int maxUploadFiles)
+    {
+        MaxUploadFiles = maxUploadFiles;
+    }
+
+    public int MaxUploadFiles { get; set; }
 }

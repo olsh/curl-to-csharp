@@ -1,11 +1,10 @@
-﻿namespace CurlToCSharp.Models
+namespace CurlToCSharp.Models;
+
+public enum UploadDataType
 {
-    public enum UploadDataType
-    {
-        Inline,
+    Inline,
 
-        InlineFile,
+    InlineFile,
 
-        BinaryFile
-    }
+    BinaryFile
 }

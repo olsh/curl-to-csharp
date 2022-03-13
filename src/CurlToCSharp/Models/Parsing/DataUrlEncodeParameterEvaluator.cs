@@ -1,49 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
-
 using CurlToCSharp.Extensions;
 
-namespace CurlToCSharp.Models.Parsing
+namespace CurlToCSharp.Models.Parsing;
+
+public class DataUrlEncodeParameterEvaluator : ParameterEvaluator
 {
-    public class DataUrlEncodeParameterEvaluator : ParameterEvaluator
+    public DataUrlEncodeParameterEvaluator()
     {
-        public DataUrlEncodeParameterEvaluator()
+        Keys = new HashSet<string> { "--data-urlencode" };
+    }
+
+    protected override HashSet<string> Keys { get; }
+
+    protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
+    {
+        void AddKeyValue(Span<char> span, int splitIndex, UploadDataType contentType)
         {
-            Keys = new HashSet<string> { "--data-urlencode" };
+            var dataKey = span.Slice(0, splitIndex)
+                .ToString();
+            var dataValue = span.Slice(splitIndex + 1)
+                .ToString();
+            convertResult.Data.UploadData.Add(new UploadData(dataKey, dataValue, contentType, true));
         }
 
-        protected override HashSet<string> Keys { get; }
+        var value = commandLine.ReadValue();
 
-        protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
+        var indexOfForm = value.IndexOf(FormSeparatorChar);
+        if (indexOfForm != -1)
         {
-            void AddKeyValue(Span<char> span, int splitIndex, UploadDataType contentType)
-            {
-                var dataKey = span.Slice(0, splitIndex)
-                    .ToString();
-                var dataValue = span.Slice(splitIndex + 1)
-                    .ToString();
-                convertResult.Data.UploadData.Add(new UploadData(dataKey, dataValue, contentType, true));
-            }
+            AddKeyValue(value, indexOfForm, UploadDataType.Inline);
 
-            var value = commandLine.ReadValue();
-
-            var indexOfForm = value.IndexOf(FormSeparatorChar);
-            if (indexOfForm != -1)
-            {
-                AddKeyValue(value, indexOfForm, UploadDataType.Inline);
-
-                return;
-            }
-
-            var indexOfFile = value.IndexOf(FileSeparatorChar);
-            if (indexOfFile != -1)
-            {
-                AddKeyValue(value, indexOfFile, UploadDataType.BinaryFile);
-
-                return;
-            }
-
-            convertResult.Data.UploadData.Add(new UploadData(value.ToString(), true));
+            return;
         }
+
+        var indexOfFile = value.IndexOf(FileSeparatorChar);
+        if (indexOfFile != -1)
+        {
+            AddKeyValue(value, indexOfFile, UploadDataType.BinaryFile);
+
+            return;
+        }
+
+        convertResult.Data.UploadData.Add(new UploadData(value.ToString(), true));
     }
 }

@@ -1,9 +1,8 @@
-﻿using CurlToCSharp.Models.Parsing;
+using CurlToCSharp.Models.Parsing;
 
-namespace CurlToCSharp.Models
+namespace CurlToCSharp.Models;
+
+public class ApplicationOptions
 {
-    public class ApplicationOptions
-    {
-        public ParsingOptions Parsing { get; set; }
-    }
+    public ParsingOptions Parsing { get; set; }
 }

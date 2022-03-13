@@ -1,26 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-
 using CurlToCSharp.Extensions;
 
 using Microsoft.Net.Http.Headers;
 
-namespace CurlToCSharp.Models.Parsing
+namespace CurlToCSharp.Models.Parsing;
+
+public class UserAgentParameterEvaluator : ParameterEvaluator
 {
-    public class UserAgentParameterEvaluator : ParameterEvaluator
+    public UserAgentParameterEvaluator()
     {
-        public UserAgentParameterEvaluator()
-        {
-            Keys = new HashSet<string> { "-A", "--user-agent" };
-        }
+        Keys = new HashSet<string> { "-A", "--user-agent" };
+    }
 
-        protected override HashSet<string> Keys { get; }
+    protected override HashSet<string> Keys { get; }
 
-        protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
-        {
-            var value = commandLine.ReadValue();
+    protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
+    {
+        var value = commandLine.ReadValue();
 
-            convertResult.Data.SetHeader(HeaderNames.UserAgent, value.ToString());
-        }
+        convertResult.Data.SetHeader(HeaderNames.UserAgent, value.ToString());
     }
 }

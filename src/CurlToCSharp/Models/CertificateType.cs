@@ -1,13 +1,12 @@
-﻿namespace CurlToCSharp.Models
+namespace CurlToCSharp.Models;
+
+public enum CertificateType
 {
-    public enum CertificateType
-    {
-        Pem,
+    Pem,
 
-        Der,
+    Der,
 
-        Eng,
+    Eng,
 
-        P12
-    }
+    P12
 }

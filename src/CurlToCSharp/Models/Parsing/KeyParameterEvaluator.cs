@@ -1,6 +1,3 @@
-﻿using System;
-using System.Collections.Generic;
-
 using CurlToCSharp.Extensions;
 
 namespace CurlToCSharp.Models.Parsing;

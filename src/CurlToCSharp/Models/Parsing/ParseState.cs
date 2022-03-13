@@ -1,7 +1,6 @@
-﻿namespace CurlToCSharp.Models.Parsing
+namespace CurlToCSharp.Models.Parsing;
+
+public class ParseState
 {
-    public class ParseState
-    {
-        public string LastUnknownValue { get; set; }
-    }
+    public string LastUnknownValue { get; set; }
 }

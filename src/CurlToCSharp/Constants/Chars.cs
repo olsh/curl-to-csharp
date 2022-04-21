@@ -11,4 +11,6 @@ public static class Chars
     public const char Space = ' ';
 
     public const string NewLineString = "\n";
+
+    public const string CurlSingleQuote = "'\\''";
 }

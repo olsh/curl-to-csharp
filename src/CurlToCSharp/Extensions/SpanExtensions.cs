@@ -77,11 +77,16 @@ public static class SpanExtensions
             var quote = firstChar;
             for (int i = 0; i < commandLine.Length; i++)
             {
-                if (indexOfSpecialChar != i && commandLine[i] == quote && (i == 0 || commandLine[i - 1] != Chars.Escape))
+                bool isCurlEscape = commandLine[i] == Chars.SingleQuote && commandLine.Length >= i + 4 && commandLine.ToString().Substring(i, 4) == Chars.CurlSingleQuote;
+
+                bool bbb = indexOfSpecialChar != i && commandLine[i] == quote && (i == 0 || commandLine[i - 1] != Chars.Escape);
+                if (!isCurlEscape && bbb)
                 {
                     closeIndex = i + 1;
                     break;
                 }
+                if (isCurlEscape)
+                    i += 3;
             }
 
             if (closeIndex == 0)
@@ -114,7 +119,7 @@ public static class SpanExtensions
 
         commandLine = commandLine.Slice(closeIndex);
 
-        return value.UnEscape();
+        return value;
     }
 
     public static Span<char> ReadParameter(this ref Span<char> commandLine)
@@ -175,4 +180,5 @@ public static class SpanExtensions
 
         return value;
     }
+
 }

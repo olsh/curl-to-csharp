@@ -134,6 +134,17 @@ public class CommandLineParserTests
     }
 
     [Fact]
+    public void ParseSettings_Single_CorrectlyParsed()
+    {
+        var service = CreateCommandLineParser();
+
+        var curl = @"curl -d 'it'\''s me'";
+        var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
+
+        Assert.Equal(new[] { "it's me" }, parseResult.Data.UploadData.Select(d => d.Content));
+    }
+
+    [Fact]
     public void ParseSettings_HeaderWithMultipleSeparators_CorrectlyParsed()
     {
         var service = CreateCommandLineParser();

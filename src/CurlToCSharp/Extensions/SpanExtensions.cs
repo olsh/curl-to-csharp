@@ -21,6 +21,14 @@ public static class SpanExtensions
                 continue;
             }
 
+            if (IsEscapingSequence(input, i))
+            {
+                list.AddLast(Chars.SingleQuote);
+                i += 3;
+
+                continue;
+            }
+
             list.AddLast(input[i]);
         }
 
@@ -77,6 +85,12 @@ public static class SpanExtensions
             var quote = firstChar;
             for (int i = 0; i < commandLine.Length; i++)
             {
+                if (indexOfSpecialChar != i && IsEscapingSequence(commandLine, i))
+                {
+                    i += 3;
+                    continue;
+                }
+
                 if (indexOfSpecialChar != i && commandLine[i] == quote && (i == 0 || commandLine[i - 1] != Chars.Escape))
                 {
                     closeIndex = i + 1;
@@ -174,5 +188,18 @@ public static class SpanExtensions
         }
 
         return value;
+    }
+
+    public static bool IsEscapingSequence(Span<char> value, int startIndex)
+    {
+        if (value.Length - startIndex < 4)
+        {
+            return false;
+        }
+
+        return value[startIndex] == Chars.SingleQuote
+               && value[startIndex + 1] == Chars.Escape
+               && value[startIndex + 2] == Chars.SingleQuote
+               && value[startIndex + 3] == Chars.SingleQuote;
     }
 }

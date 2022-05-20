@@ -26,7 +26,7 @@ for:
       - master
 
   build_script:
-  - dotnet cake --Target=CI --cypressConfigurationFile=cypress.production.json --cypressEnableRecording=true
+  - dotnet cake --Target=CI --cypressEnableRecording=true
 
   deploy:
   - provider: AzureAppServiceZipDeploy

@@ -1,8 +1,8 @@
 #tool nuget:?package=MSBuild.SonarQube.Runner.Tool&version=4.8.0
 
-#addin nuget:?package=Cake.Sonar&version=1.1.25
+#addin nuget:?package=Cake.Sonar&version=1.1.30
 #addin nuget:?package=Cake.Yarn&version=0.4.8
-#addin nuget:?package=Cake.Docker&version=1.0.0
+#addin nuget:?package=Cake.Docker&version=1.1.2
 
 var target = Argument("target", "Default");
 var cypressConfigurationFile = Argument("cypressConfigurationFile", "cypress.json");

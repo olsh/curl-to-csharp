@@ -1,5 +1,4 @@
 version: 1.0.{build}
-skip_branch_with_pr: true
 image: Ubuntu2004
 services:
 - docker

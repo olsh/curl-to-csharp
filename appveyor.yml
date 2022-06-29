@@ -29,8 +29,13 @@ for:
   - dotnet cake --Target=CI --cypressEnableRecording=true
 
   deploy:
-  - provider: AzureAppServiceZipDeploy
-    website: curltocsharp
-    username: CurlToCSharp
-    password:
-      secure: anNXyv5QGtXmsPV21/COiAolYBhLYF8Pi3yWd/qIRd4=
+  - provider: Octopus
+    push_packages: true
+    create_release: true
+    deploy_release: true
+    server: https://olsh.octopus.app
+    api_key:
+      secure: jXJ3iAuj61EU565McVN9j/5aX/TXOu9wy6+QLCl6J8v8Sp+Xs4GHr+zUBsaCQ28P
+    project: CurlToCSharp
+    environment: Production
+    deploy_wait: true

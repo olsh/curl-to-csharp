@@ -117,7 +117,7 @@ Task("RunEndToEndTests")
   .Does(() => {
      DockerRun(new DockerContainerRunSettings() {
        Detach = true,
-       Publish = new string [] { "8080:5000" },
+       Publish = new string [] { "8080:80" },
        Name = dockerContainerName
      },
      dockerImageTag,

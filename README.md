@@ -14,7 +14,7 @@ https://curl.olsh.me
 1. Run container
 
 ```bash
-docker run -p 8080:5000 olsh/curl-to-csharp
+docker run -p 8080:80 olsh/curl-to-csharp
 ```
 
 2. Open http://localhost:8080

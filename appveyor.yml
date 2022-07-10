@@ -38,5 +38,4 @@ for:
       secure: jXJ3iAuj61EU565McVN9j/5aX/TXOu9wy6+QLCl6J8v8Sp+Xs4GHr+zUBsaCQ28P
     project: CurlToCSharp
     environment: Production
-    deploy_wait: true
     release_number: $(APPVEYOR_BUILD_VERSION)

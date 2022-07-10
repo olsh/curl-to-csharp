@@ -67,8 +67,9 @@ Task("CreateArtifact")
   .WithCriteria(BuildSystem.AppVeyor.IsRunningOnAppVeyor)
   .Does(() =>
 {
-    MoveFile(tempPublishArchive, $"CurlToCSharp-{BuildSystem.AppVeyor.Environment.Build.Version}.zip");
-    BuildSystem.AppVeyor.UploadArtifact(tempPublishArchive);
+    var artifactFileName = $"CurlToCSharp-{BuildSystem.AppVeyor.Environment.Build.Version}.zip";
+    MoveFile(tempPublishArchive, artifactFileName);
+    BuildSystem.AppVeyor.UploadArtifact(artifactFileName);
 });
 
 Task("SonarBegin")

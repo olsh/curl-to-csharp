@@ -1,21 +1,25 @@
 using CurlToCSharp.IntegrationTests.Constants;
 
-using Microsoft.AspNetCore;
-
 namespace CurlToCSharp.IntegrationTests;
 
 internal class EchoWebHostFixture : IDisposable
 {
-    private readonly IWebHost _webHost;
+    private readonly IHost _webHost;
 
     public EchoWebHostFixture()
     {
-        _webHost = WebHost.CreateDefaultBuilder()
-            .UseStartup<Startup>()
-            .UseUrls(WebHostConstants.TestServerHost)
+        _webHost = Host.CreateDefaultBuilder()
+            .ConfigureWebHostDefaults(builder =>
+            {
+                builder.UseStartup<Startup>();
+                builder.UseKestrel(options =>
+                {
+                    options.ListenLocalhost(WebHostConstants.TestServerPort);
+                });
+            })
             .Build();
 
-        Task.Run(() => _webHost.Run());
+        _webHost.RunAsync();
 
         // What a second while server startup
         Thread.Sleep(1000);

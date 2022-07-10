@@ -2,5 +2,7 @@ namespace CurlToCSharp.IntegrationTests.Constants;
 
 internal static class WebHostConstants
 {
-    public const string TestServerHost = "http://localhost:4653";
+    public static readonly string TestServerHost = $"http://localhost:{TestServerPort}";
+
+    public const int TestServerPort = 4653;
 }

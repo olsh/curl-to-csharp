@@ -133,7 +133,7 @@ public class ConverterService : IConverterService
                     dataExpression = SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(data.Content));
                 }
 
-                dataExpression = RoslynExtensions.CreateInvocationExpression("WebUtility", "UrlEncode", SyntaxFactory.Argument(dataExpression));
+                dataExpression = RoslynExtensions.CreateInvocationExpression("Uri", "EscapeDataString", SyntaxFactory.Argument(dataExpression));
 
                 if (data.HasName)
                 {

@@ -26,12 +26,12 @@ var dockerBuildContainerName = $"{dockerContainerName}-build";
 Task("Build")
   .Does(() =>
 {
-    var settings = new DotNetCoreBuildSettings
+    var settings = new DotNetBuildSettings
     {
         Configuration = buildConfiguration
     };
 
-    DotNetCoreBuild(solutionFile, settings);
+    DotNetBuild(solutionFile, settings);
 });
 
 Task("UnitTest")
@@ -51,13 +51,13 @@ Task("IntegrationTest")
 Task("Pack")
   .Does(() =>
 {
-    var settings = new DotNetCorePublishSettings
+    var settings = new DotNetPublishSettings
     {
         Configuration = buildConfiguration,
         OutputDirectory = tempPublishDirectory
     };
 
-    DotNetCorePublish(projectFile, settings);
+    DotNetPublish(projectFile, settings);
 
     Zip(tempPublishDirectory, tempPublishArchive);
 });
@@ -180,11 +180,11 @@ RunTarget(target);
 
 void RunTests(string projectFile)
 {
-     var settings = new DotNetCoreTestSettings
+     var settings = new DotNetTestSettings
      {
          Configuration = buildConfiguration,
          NoBuild = true
      };
 
-     DotNetCoreTest(projectFile, settings);
+     DotNetTest(projectFile, settings);
 }

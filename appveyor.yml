@@ -39,3 +39,4 @@ for:
     project: CurlToCSharp
     environment: Production
     release_number: $(APPVEYOR_BUILD_VERSION)
+    deploy_wait: true

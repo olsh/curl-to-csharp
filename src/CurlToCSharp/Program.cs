@@ -1,19 +1,20 @@
-using Microsoft.AspNetCore;
-
 namespace CurlToCSharp;
 
 public static class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
-        CreateWebHostBuilder(args)
+        await CreateWebHostBuilder(args)
             .Build()
-            .Run();
+            .RunAsync();
     }
 
-    private static IWebHostBuilder CreateWebHostBuilder(string[] args)
+    private static IHostBuilder CreateWebHostBuilder(string[] args)
     {
-        return WebHost.CreateDefaultBuilder(args)
-            .UseStartup<Startup>();
+        return Host.CreateDefaultBuilder(args)
+            .ConfigureWebHostDefaults(builder =>
+            {
+                builder.UseStartup<Startup>();
+            });
     }
 }

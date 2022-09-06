@@ -1,6 +1,6 @@
 namespace Curl.Parser.Net.Models.Parsing;
 
-public class CompressedParameterEvaluator : ParameterEvaluator
+internal class CompressedParameterEvaluator : ParameterEvaluator
 {
     public CompressedParameterEvaluator()
     {

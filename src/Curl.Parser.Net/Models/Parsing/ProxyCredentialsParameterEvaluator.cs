@@ -2,7 +2,7 @@ using Curl.Parser.Net.Extensions;
 
 namespace Curl.Parser.Net.Models.Parsing;
 
-public class ProxyCredentialsParameterEvaluator : ParameterEvaluator
+internal class ProxyCredentialsParameterEvaluator : ParameterEvaluator
 {
     public ProxyCredentialsParameterEvaluator()
     {

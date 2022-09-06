@@ -1,8 +1,9 @@
+using Curl.Parser.Net.Enums;
 using Curl.Parser.Net.Extensions;
 
 namespace Curl.Parser.Net.Models.Parsing;
 
-public class CertificateTypeParameterEvaluator : ParameterEvaluator
+internal class CertificateTypeParameterEvaluator : ParameterEvaluator
 {
     public CertificateTypeParameterEvaluator()
     {

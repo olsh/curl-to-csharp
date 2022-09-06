@@ -1,6 +1,6 @@
 namespace Curl.Parser.Net.Models.Parsing;
 
-public class InsecureParameterEvaluator : ParameterEvaluator
+internal class InsecureParameterEvaluator : ParameterEvaluator
 {
     public InsecureParameterEvaluator()
     {

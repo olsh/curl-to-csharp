@@ -1,6 +1,6 @@
 namespace Curl.Parser.Net.Models.Parsing;
 
-public class DataRawParameterEvaluator : DataGenericParameterEvaluator
+internal class DataRawParameterEvaluator : DataGenericParameterEvaluator
 {
     public DataRawParameterEvaluator()
     {

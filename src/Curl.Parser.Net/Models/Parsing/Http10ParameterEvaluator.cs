@@ -2,7 +2,7 @@ using Curl.Parser.Net.Enums;
 
 namespace Curl.Parser.Net.Models.Parsing;
 
-public class Http10ParameterEvaluator : ParameterEvaluator
+internal class Http10ParameterEvaluator : ParameterEvaluator
 {
     public Http10ParameterEvaluator()
     {

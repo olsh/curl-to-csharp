@@ -96,9 +96,9 @@ public class Converter : IConverter
         return certificateType is CertificateType.P12 or CertificateType.Pem;
     }
 
-    private bool IsSupportedKey(KeyType keyType)
+    private bool IsSupportedKey(CertificateType keyType)
     {
-        return keyType is KeyType.Pem;
+        return keyType is CertificateType.Pem;
     }
 
     private bool ShouldGenerateHandler(CurlOptions curlOptions)

@@ -2,7 +2,7 @@ using Curl.Parser.Net.Extensions;
 
 namespace Curl.Parser.Net.Models.Parsing;
 
-public class CookieParameterEvaluator : ParameterEvaluator
+internal class CookieParameterEvaluator : ParameterEvaluator
 {
     public CookieParameterEvaluator()
     {

@@ -2,7 +2,7 @@ using Curl.Parser.Net.Extensions;
 
 namespace Curl.Parser.Net.Models.Parsing;
 
-public class RefererParameterEvaluator : ParameterEvaluator
+internal class RefererParameterEvaluator : ParameterEvaluator
 {
     private const string AutoRefererParameter = ";auto";
 

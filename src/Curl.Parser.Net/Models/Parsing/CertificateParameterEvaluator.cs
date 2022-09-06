@@ -2,7 +2,7 @@ using Curl.Parser.Net.Extensions;
 
 namespace Curl.Parser.Net.Models.Parsing;
 
-public class CertificateParameterEvaluator : ParameterEvaluator
+internal class CertificateParameterEvaluator : ParameterEvaluator
 {
     public CertificateParameterEvaluator()
     {

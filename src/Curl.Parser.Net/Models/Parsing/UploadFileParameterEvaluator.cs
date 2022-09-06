@@ -4,7 +4,7 @@ using Curl.Parser.Net.Extensions;
 
 namespace Curl.Parser.Net.Models.Parsing;
 
-public class UploadFileParameterEvaluator : ParameterEvaluator
+internal class UploadFileParameterEvaluator : ParameterEvaluator
 {
     private readonly ParsingOptions _parsingOptions;
 

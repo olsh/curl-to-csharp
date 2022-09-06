@@ -1,9 +1,10 @@
 using Curl.Parser.Net.Constants;
+using Curl.Parser.Net.Enums;
 using Curl.Parser.Net.Extensions;
 
 namespace Curl.Parser.Net.Models.Parsing;
 
-public class FormParameterEvaluator : ParameterEvaluator
+internal class FormParameterEvaluator : ParameterEvaluator
 {
     public FormParameterEvaluator()
     {

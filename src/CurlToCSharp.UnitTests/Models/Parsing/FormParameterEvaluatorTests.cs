@@ -1,3 +1,4 @@
+using Curl.Parser.Net.Enums;
 using Curl.Parser.Net.Models;
 using Curl.Parser.Net.Models.Parsing;
 

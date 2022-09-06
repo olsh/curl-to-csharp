@@ -3,7 +3,7 @@ using Curl.Parser.Net.Extensions;
 
 namespace Curl.Parser.Net.Models.Parsing;
 
-public class UserAgentParameterEvaluator : ParameterEvaluator
+internal class UserAgentParameterEvaluator : ParameterEvaluator
 {
     public UserAgentParameterEvaluator()
     {

@@ -1,4 +1,4 @@
-namespace Curl.Parser.Net.Models;
+namespace Curl.Parser.Net.Enums;
 
 public enum CertificateType
 {

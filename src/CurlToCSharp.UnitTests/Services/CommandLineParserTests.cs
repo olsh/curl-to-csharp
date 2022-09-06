@@ -1,9 +1,7 @@
 using Curl.Parser.Net;
 using Curl.Parser.Net.Constants;
-using Curl.Parser.Net.Models;
+using Curl.Parser.Net.Enums;
 using Curl.Parser.Net.Models.Parsing;
-
-using Microsoft.Net.Http.Headers;
 
 using HeaderNames = Microsoft.Net.Http.Headers.HeaderNames;
 

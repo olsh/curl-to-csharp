@@ -4,7 +4,7 @@ using Curl.Parser.Net.Extensions;
 
 namespace Curl.Parser.Net.Models.Parsing;
 
-public class ProxyParameterEvaluator : ParameterEvaluator
+internal class ProxyParameterEvaluator : ParameterEvaluator
 {
     private static readonly Regex PortRegex = new Regex(@":\d+$", RegexOptions.Compiled);
 

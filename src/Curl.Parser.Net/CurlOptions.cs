@@ -62,7 +62,7 @@ public class CurlOptions
 
     public string KeyFileName { get; set; }
 
-    public KeyType KeyType { get; set; }
+    public CertificateType KeyType { get; set; }
 
     public string ProxyPassword { get; set; }
 

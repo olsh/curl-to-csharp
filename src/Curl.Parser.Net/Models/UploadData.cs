@@ -1,3 +1,5 @@
+using Curl.Parser.Net.Enums;
+
 namespace Curl.Parser.Net.Models;
 
 public class UploadData : UploadContent

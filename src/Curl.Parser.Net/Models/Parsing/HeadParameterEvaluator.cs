@@ -1,6 +1,6 @@
 namespace Curl.Parser.Net.Models.Parsing;
 
-public class HeadParameterEvaluator : ParameterEvaluator
+internal class HeadParameterEvaluator : ParameterEvaluator
 {
     public HeadParameterEvaluator()
     {

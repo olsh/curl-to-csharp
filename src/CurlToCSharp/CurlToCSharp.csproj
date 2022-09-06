@@ -1,7 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.2.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Curl.Converter.Net\Curl.Converter.Net.csproj" />
   </ItemGroup>
 
   <Target Name="CustomActionsBeforePublish" BeforeTargets="BeforePublish">

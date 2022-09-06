@@ -342,3 +342,6 @@ tools/*
 
 # cypress
 **/cypress/videos
+
+.vscode/
+.DS_Store

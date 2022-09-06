@@ -1,4 +1,4 @@
-using CurlToCSharp.Models.Parsing;
+using Curl.Parser.Net.Models.Parsing;
 
 namespace CurlToCSharp.Models;
 

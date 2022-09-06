@@ -1,4 +1,4 @@
-using CurlToCSharp.Models;
+using Curl.Parser.Net.Models;
 
 using Microsoft.AspNetCore.Mvc;
 

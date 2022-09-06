@@ -1,8 +1,10 @@
 using System.Diagnostics;
 
+using Curl.Converter.Net;
+using Curl.Parser.Net;
+using Curl.Parser.Net.Models.Parsing;
+
 using CurlToCSharp.IntegrationTests.Constants;
-using CurlToCSharp.Models.Parsing;
-using CurlToCSharp.Services;
 
 using Microsoft.CodeAnalysis.CSharp.Scripting;
 using Microsoft.CodeAnalysis.Scripting;
@@ -100,8 +102,8 @@ public class RequestsTests : IClassFixture<EchoWebHostFixture>
 
     private static async Task<string> ExecuteCsharpRequestAsync(string curlArguments)
     {
-        var commandLineParser = new CommandLineParser(new ParsingOptions(int.MaxValue));
-        var converterService = new ConverterService();
+        var commandLineParser = new Parser(new ParsingOptions(int.MaxValue));
+        var converterService = new Converter();
         var parserResult = commandLineParser.Parse(new Span<char>($"curl {curlArguments}".ToCharArray()));
         var csharp = converterService.ToCsharp(parserResult.Data);
 

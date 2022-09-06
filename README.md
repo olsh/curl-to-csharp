@@ -28,7 +28,7 @@ You can grab latest binaries [here](https://ci.appveyor.com/project/olsh/curl-to
 1. Install cake
 
 ```bash
-dotnet tool install -g Cake.Tool`
+dotnet tool install -g Cake.Tool
 ```
 
 2. Run build

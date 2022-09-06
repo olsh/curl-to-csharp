@@ -1,9 +1,11 @@
-using CurlToCSharp.Constants;
-using CurlToCSharp.Models;
-using CurlToCSharp.Models.Parsing;
-using CurlToCSharp.Services;
+using Curl.Parser.Net;
+using Curl.Parser.Net.Constants;
+using Curl.Parser.Net.Models;
+using Curl.Parser.Net.Models.Parsing;
 
 using Microsoft.Net.Http.Headers;
+
+using HeaderNames = Microsoft.Net.Http.Headers.HeaderNames;
 
 namespace CurlToCSharp.UnitTests.Services;
 
@@ -163,7 +165,7 @@ public class CommandLineParserTests
         var curl = @"curl \
 https://test.zendesk.com/api/v2/tickets.json \
 -d '\\some_data' \
--v -u {email_address}:{password} -X \ 
+-v -u {email_address}:{password} -X \
 POST";
 
         var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
@@ -246,10 +248,10 @@ POST";
         var service = CreateCommandLineParser();
 
         var parseResult = service.Parse(new Span<char>(
-            @"$ curl ya.ru 
---data-urlencode ""b"" 
---data-urlencode ""=b"" 
---data-urlencode ""a=b"" 
+            @"$ curl ya.ru
+--data-urlencode ""b""
+--data-urlencode ""=b""
+--data-urlencode ""a=b""
 --data-urlencode ""@b""
 --data-urlencode ""a@b""
 ".ToCharArray()));
@@ -265,7 +267,7 @@ POST";
         Assert.Equal("a", parseResult.Data.UploadData.ElementAt(4).Name);
         Assert.Equal("b", parseResult.Data.UploadData.ElementAt(4).Content);
         Assert.Equal(UploadDataType.BinaryFile, parseResult.Data.UploadData.ElementAt(4).Type);
-        Assert.Equal(HeaderValues.ContentTypeWwwForm, parseResult.Data.GetHeader(HeaderNames.ContentType));
+        Assert.Equal("application/x-www-form-urlencoded", parseResult.Data.GetHeader(HeaderNames.ContentType));
     }
 
     [Fact]
@@ -292,8 +294,8 @@ POST";
         Assert.Equal(Messages.UnableParseUrl, parseResult.Errors.Single());
     }
 
-    private static CommandLineParser CreateCommandLineParser()
+    private static Parser CreateCommandLineParser()
     {
-        return new CommandLineParser(new ParsingOptions(10));
+        return new Parser(new ParsingOptions(10));
     }
 }

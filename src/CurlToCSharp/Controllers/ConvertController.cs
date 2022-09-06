@@ -1,5 +1,8 @@
+using Curl.Converter.Net;
+using Curl.Parser.Net;
+using Curl.Parser.Net.Models;
+
 using CurlToCSharp.Models;
-using CurlToCSharp.Services;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,11 +11,11 @@ namespace CurlToCSharp.Controllers;
 [Route("[controller]")]
 public class ConvertController : Controller
 {
-    private readonly IConverterService _converterService;
+    private readonly IConverter _converterService;
 
-    private readonly ICommandLineParser _commandLineParser;
+    private readonly IParser _commandLineParser;
 
-    public ConvertController(IConverterService converterService, ICommandLineParser commandLineParser)
+    public ConvertController(IConverter converterService, IParser commandLineParser)
     {
         _converterService = converterService;
         _commandLineParser = commandLineParser;

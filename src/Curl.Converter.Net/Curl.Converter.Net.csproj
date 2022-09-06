@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;netcoreapp3.1;net5.0;net6.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>Curl.Converter.Net</PackageId>
+    <Authors>curl-to-csharp</Authors>
+    <Description>
+      A cURL parser and C# code converter based on curl-to-csharp project for .NET.
+
+      Supported platforms:
+      - For ASP.NET 6, .NET 6
+      - For ASP.NET 5, .NET 5
+      - For ASP.NET Core 3, .NET Core 3.0
+      - For ASP.NET Core 2.1, .NET Core 2.1
+    </Description>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/olsh/curl-to-csharp</PackageProjectUrl>
+    <PackageIcon>android-chrome-512x512.png</PackageIcon>
+    <PackageIconUrl />
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>curl csharp parser converter http roslyn codegenerator</PackageTags>
+    <RepositoryUrl>git://github.com/olsh/curl-to-csharp</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Curl.Parser.Net\Curl.Parser.Net.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GitVersion.MsBuild" Version="5.10.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="..\CurlToCSharp\wwwroot\android-chrome-512x512.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

@@ -15,14 +15,14 @@ internal class KeyTypeParameterEvaluator : ParameterEvaluator
     protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
     {
         var value = commandLine.ReadValue().ToString();
-        if (Enum.TryParse(value, true, out CertificateType keyType))
+        if (Enum.TryParse(value, true, out KeyType keyType))
         {
             convertResult.Data.KeyType = keyType;
         }
         else
         {
             convertResult.Warnings.Add($"Unable to parse key type {value}, PEM type will be used");
-            convertResult.Data.KeyType = CertificateType.Pem;
+            convertResult.Data.KeyType = KeyType.Pem;
         }
     }
 }

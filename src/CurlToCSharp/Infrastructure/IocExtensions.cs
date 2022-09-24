@@ -15,7 +15,7 @@ public static class IocExtensions
             provider => provider.GetService<IOptions<ApplicationOptions>>()
                 .Value.Parsing);
 
-        services.AddSingleton<IParser, Parser>();
-        services.AddSingleton<IConverter, Converter>();
+        services.AddSingleton<ICurlParser, CurlParser>();
+        services.AddSingleton<ICurlConverter, CurlConverter>();
     }
 }

@@ -5,16 +5,16 @@ using Curl.Parser.Net.Models.Parsing;
 
 namespace Curl.Parser.Net;
 
-public class Parser : IParser
+public class CurlParser : ICurlParser
 {
     private readonly IEnumerable<ParameterEvaluator> _evaluators;
 
-    public Parser(ParsingOptions parsingOptions)
+    public CurlParser(ParsingOptions parsingOptions)
         : this(EvaluatorProvider.All(parsingOptions))
     {
     }
 
-    private Parser(IEnumerable<ParameterEvaluator> evaluators)
+    private CurlParser(IEnumerable<ParameterEvaluator> evaluators)
     {
         _evaluators = evaluators;
     }

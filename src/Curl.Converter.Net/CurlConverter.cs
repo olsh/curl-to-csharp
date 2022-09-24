@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Curl.Converter.Net;
 
-public class Converter : IConverter
+public class CurlConverter : ICurlConverter
 {
     private const string RequestVariableName = "request";
 
@@ -96,9 +96,9 @@ public class Converter : IConverter
         return certificateType is CertificateType.P12 or CertificateType.Pem;
     }
 
-    private bool IsSupportedKey(CertificateType keyType)
+    private bool IsSupportedKey(KeyType keyType)
     {
-        return keyType is CertificateType.Pem;
+        return keyType is KeyType.Pem;
     }
 
     private bool ShouldGenerateHandler(CurlOptions curlOptions)

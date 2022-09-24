@@ -102,8 +102,8 @@ public class RequestsTests : IClassFixture<EchoWebHostFixture>
 
     private static async Task<string> ExecuteCsharpRequestAsync(string curlArguments)
     {
-        var commandLineParser = new Parser(new ParsingOptions(int.MaxValue));
-        var converterService = new Converter();
+        var commandLineParser = new CurlParser(new ParsingOptions(int.MaxValue));
+        var converterService = new CurlConverter();
         var parserResult = commandLineParser.Parse(new Span<char>($"curl {curlArguments}".ToCharArray()));
         var csharp = converterService.ToCsharp(parserResult.Data);
 

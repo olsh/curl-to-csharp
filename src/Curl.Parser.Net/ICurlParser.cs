@@ -2,7 +2,7 @@ using Curl.Parser.Net.Models;
 
 namespace Curl.Parser.Net;
 
-public interface IParser
+public interface ICurlParser
 {
     ConvertResult<CurlOptions> Parse(Span<char> commandLine);
 }

@@ -11,14 +11,14 @@ namespace CurlToCSharp.Controllers;
 [Route("[controller]")]
 public class ConvertController : Controller
 {
-    private readonly IConverter _converterService;
+    private readonly ICurlConverter _curlConverterService;
 
-    private readonly IParser _commandLineParser;
+    private readonly ICurlParser _commandLineCurlParser;
 
-    public ConvertController(IConverter converterService, IParser commandLineParser)
+    public ConvertController(ICurlConverter curlConverterService, ICurlParser commandLineCurlParser)
     {
-        _converterService = converterService;
-        _commandLineParser = commandLineParser;
+        _curlConverterService = curlConverterService;
+        _commandLineCurlParser = commandLineCurlParser;
     }
 
     [HttpPost]
@@ -32,13 +32,13 @@ public class ConvertController : Controller
                         .ToArray()));
         }
 
-        var parseResult = _commandLineParser.Parse(new Span<char>(model.Curl.ToCharArray()));
+        var parseResult = _commandLineCurlParser.Parse(new Span<char>(model.Curl.ToCharArray()));
         if (!parseResult.Success)
         {
             return BadRequest(parseResult);
         }
 
-        var csharp = _converterService.ToCsharp(parseResult.Data);
+        var csharp = _curlConverterService.ToCsharp(parseResult.Data);
         csharp.AddWarnings(parseResult.Warnings);
 
         return Ok(csharp);

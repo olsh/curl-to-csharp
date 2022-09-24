@@ -265,7 +265,7 @@ POST";
         Assert.Equal("a", parseResult.Data.UploadData.ElementAt(4).Name);
         Assert.Equal("b", parseResult.Data.UploadData.ElementAt(4).Content);
         Assert.Equal(UploadDataType.BinaryFile, parseResult.Data.UploadData.ElementAt(4).Type);
-        Assert.Equal("application/x-www-form-urlencoded", parseResult.Data.GetHeader(HeaderNames.ContentType));
+        Assert.Equal(HeaderValues.ContentTypeWwwForm, parseResult.Data.GetHeader(HeaderNames.ContentType));
     }
 
     [Fact]
@@ -292,8 +292,8 @@ POST";
         Assert.Equal(Messages.UnableParseUrl, parseResult.Errors.Single());
     }
 
-    private static Parser CreateCommandLineParser()
+    private static CurlParser CreateCommandLineParser()
     {
-        return new Parser(new ParsingOptions(10));
+        return new CurlParser(new ParsingOptions(10));
     }
 }

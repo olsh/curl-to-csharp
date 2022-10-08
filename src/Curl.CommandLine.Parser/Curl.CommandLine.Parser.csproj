@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <PackageId>CurlParser</PackageId>
+    <PackageId>Curl.CommandLine.Parser</PackageId>
     <Authors>curl-to-csharp</Authors>
     <Description>
       A cURL parser based on curl-to-csharp project for .NET.

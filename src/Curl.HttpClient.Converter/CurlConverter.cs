@@ -562,7 +562,7 @@ public class CurlConverter : ICurlConverter
         var argumentSyntax = ShouldGenerateHandler(curlOptions)
             ? new[] { SyntaxFactory.Argument(SyntaxFactory.IdentifierName(HandlerVariableName)) }
             : new ArgumentSyntax[0];
-        var usingStatement = RoslynExtensions.CreateUsingStatement(HttpClientVariableName, nameof(System.Net.Http.HttpClient), argumentSyntax);
+        var usingStatement = RoslynExtensions.CreateUsingStatement(HttpClientVariableName, nameof(HttpClient), argumentSyntax);
 
         return usingStatement
             .PrependComment("// In production code, don't destroy the HttpClient through using, but better use IHttpClientFactory factory or at least reuse an existing HttpClient instance"

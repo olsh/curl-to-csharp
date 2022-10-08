@@ -38,7 +38,7 @@ dotnet cake build.cake
 ```
 
 ## NuGet Packages
-### Curl.Parser.Net
+### Curl.CommandLine.Parser
 #### Key Features
 - Parse cURL command into individual cURL options.
 - Return parsing errors and warnings if the cURL input is invalid.
@@ -46,21 +46,21 @@ dotnet cake build.cake
 #### Installation
 Install with NuGet
 ```cmd
-dotnet add package Curl.Parser.Net
+dotnet add package Curl.CommandLine.Parser
 ```
 
 #### Usage/Examples
 ```c#
 var input = @"curl https://sentry.io/api/0/projects/1/groups/?status=unresolved -d '{""status"": ""resolved""}' -H 'Content-Type: application/json' -u 'username:password' -H 'Accept: application/json' -H 'User-Agent: curl/7.60.0'";
 
-var output = new Parser(new ParsingOptions() { MaxUploadFiles = 10 }).Parse(input);
+var output = new CurlParser(new ParsingOptions() { MaxUploadFiles = 10 }).Parse(input);
 
 Console.WriteLine(output.Data.UploadData.First().Content);
 // Output:
 // {"status": "resolved"}
 ```
 
-### Curl.Converter.Net
+### Curl.HttpClient.Converter
 #### Key Features
 - Parse cURL command into C# code.
 - Convert output from CurlParser into C# code.
@@ -69,16 +69,14 @@ Console.WriteLine(output.Data.UploadData.First().Content);
 #### Installation
 Install with NuGet
 ```cmd
-dotnet add package Curl.Converter.Net
+dotnet add package Curl.HttpClient.Converter
 ```
 
 #### Usage/Examples
 ```c#
 var input = @"curl https://sentry.io/api/0/projects/1/groups/?status=unresolved -d '{""status"": ""resolved""}' -H 'Content-Type: application/json' -u 'username:password' -H 'Accept: application/json' -H 'User-Agent: curl/7.60.0'";
-
-var output = new Converter().Parse(input, 10);
-
-Console.WriteLine(output.Data);
+var curlOption = new CurlParser(new ParsingOptions() { MaxUploadFiles = 10 }).Parse(input);
+var output = new CurlConverter().ToCsharp(curlOption.Data);
 // Output:
 /*
 // In production code, don't destroy the HttpClient through using, but better reuse an existing instance

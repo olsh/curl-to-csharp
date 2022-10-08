@@ -1,6 +1,6 @@
-using Curl.Parser.Net.Enums;
-using Curl.Parser.Net.Models;
-using Curl.Parser.Net.Models.Parsing;
+using Curl.CommandLine.Parser.Enums;
+using Curl.CommandLine.Parser.Models;
+using Curl.CommandLine.Parser.Models.Parsing;
 
 namespace CurlToCSharp.UnitTests.Models.Parsing;
 

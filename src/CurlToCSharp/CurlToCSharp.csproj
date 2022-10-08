@@ -5,7 +5,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Curl.Converter.Net\Curl.Converter.Net.csproj" />
+    <ProjectReference Include="..\Curl.HttpClient.Converter\Curl.HttpClient.Converter.csproj" />
   </ItemGroup>
 
   <Target Name="CustomActionsBeforePublish" BeforeTargets="BeforePublish">

@@ -1,5 +1,5 @@
-using Curl.Converter.Net;
-using Curl.Parser.Net.Models;
+using Curl.HttpClient.Converter;
+using Curl.CommandLine.Parser.Models;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;

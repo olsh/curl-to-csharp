@@ -1,6 +1,6 @@
-using Curl.Converter.Net;
-using Curl.Parser.Net;
-using Curl.Parser.Net.Models;
+using Curl.HttpClient.Converter;
+using Curl.CommandLine.Parser;
+using Curl.CommandLine.Parser.Models;
 
 using CurlToCSharp.Models;
 

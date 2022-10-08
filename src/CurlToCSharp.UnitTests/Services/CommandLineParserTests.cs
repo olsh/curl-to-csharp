@@ -1,7 +1,7 @@
-using Curl.Parser.Net;
-using Curl.Parser.Net.Constants;
-using Curl.Parser.Net.Enums;
-using Curl.Parser.Net.Models.Parsing;
+using Curl.CommandLine.Parser;
+using Curl.CommandLine.Parser.Constants;
+using Curl.CommandLine.Parser.Enums;
+using Curl.CommandLine.Parser.Models.Parsing;
 
 using HeaderNames = Microsoft.Net.Http.Headers.HeaderNames;
 
@@ -246,10 +246,10 @@ POST";
         var service = CreateCommandLineParser();
 
         var parseResult = service.Parse(new Span<char>(
-            @"$ curl ya.ru
---data-urlencode ""b""
---data-urlencode ""=b""
---data-urlencode ""a=b""
+            @"$ curl ya.ru 
+--data-urlencode ""b"" 
+--data-urlencode ""=b"" 
+--data-urlencode ""a=b"" 
 --data-urlencode ""@b""
 --data-urlencode ""a@b""
 ".ToCharArray()));

@@ -1,8 +1,8 @@
 using System.Diagnostics;
 
-using Curl.Converter.Net;
-using Curl.Parser.Net;
-using Curl.Parser.Net.Models.Parsing;
+using Curl.HttpClient.Converter;
+using Curl.CommandLine.Parser;
+using Curl.CommandLine.Parser.Models.Parsing;
 
 using CurlToCSharp.IntegrationTests.Constants;
 

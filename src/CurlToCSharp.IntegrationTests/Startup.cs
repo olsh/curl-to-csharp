@@ -2,7 +2,8 @@ using System.Text;
 
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.Net.Http.Headers;
+
+using HeaderNames = Curl.CommandLine.Parser.Constants.HeaderNames;
 
 namespace CurlToCSharp.IntegrationTests;
 

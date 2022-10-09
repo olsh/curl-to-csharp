@@ -1,10 +1,11 @@
-namespace Curl.CommandLine.Parser.Enums;
-
-public enum UploadDataType
+namespace Curl.CommandLine.Parser.Enums
 {
-    Inline,
+    public enum UploadDataType
+    {
+        Inline,
 
-    InlineFile,
+        InlineFile,
 
-    BinaryFile
+        BinaryFile
+    }
 }

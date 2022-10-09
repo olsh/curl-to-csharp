@@ -1,18 +1,22 @@
-namespace Curl.CommandLine.Parser.Models.Parsing;
+using System;
+using System.Collections.Generic;
 
-internal class GetParameterEvaluator : ParameterEvaluator
+namespace Curl.CommandLine.Parser.Models.Parsing
 {
-    public GetParameterEvaluator()
+    internal class GetParameterEvaluator : ParameterEvaluator
     {
-        Keys = new HashSet<string> { "-G", "--get" };
-    }
+        public GetParameterEvaluator()
+        {
+            Keys = new HashSet<string> { "-G", "--get" };
+        }
 
-    protected override bool CanBeEmpty => true;
+        protected override bool CanBeEmpty => true;
 
-    protected override HashSet<string> Keys { get; }
+        protected override HashSet<string> Keys { get; }
 
-    protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
-    {
-        convertResult.Data.ForceGet = true;
+        protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
+        {
+            convertResult.Data.ForceGet = true;
+        }
     }
 }

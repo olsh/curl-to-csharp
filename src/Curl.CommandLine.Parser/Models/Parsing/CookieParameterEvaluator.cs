@@ -1,19 +1,23 @@
+using System;
+using System.Collections.Generic;
+
 using Curl.CommandLine.Parser.Extensions;
 
-namespace Curl.CommandLine.Parser.Models.Parsing;
-
-internal class CookieParameterEvaluator : ParameterEvaluator
+namespace Curl.CommandLine.Parser.Models.Parsing
 {
-    public CookieParameterEvaluator()
+    internal class CookieParameterEvaluator : ParameterEvaluator
     {
-        Keys = new HashSet<string> { "-b", "--cookie" };
-    }
+        public CookieParameterEvaluator()
+        {
+            Keys = new HashSet<string> { "-b", "--cookie" };
+        }
 
-    protected override HashSet<string> Keys { get; }
+        protected override HashSet<string> Keys { get; }
 
-    protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
-    {
-        convertResult.Data.CookieValue = commandLine.ReadValue()
-            .ToString();
+        protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
+        {
+            convertResult.Data.CookieValue = commandLine.ReadValue()
+                .ToString();
+        }
     }
 }

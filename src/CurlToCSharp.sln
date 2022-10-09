@@ -20,9 +20,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CurlToCSharp.IntegrationTes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CurlToCSharp.UnitTests", "CurlToCSharp.UnitTests\CurlToCSharp.UnitTests.csproj", "{7A9D7C19-2F4A-4059-80A3-FFC99C5184FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curl.CommandLine.Parser", "Curl.CommandLine.Parser\Curl.CommandLine.Parser.csproj", "{AB71CE72-57D7-4733-A30B-B70D8976B0EE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Curl.CommandLine.Parser", "Curl.CommandLine.Parser\Curl.CommandLine.Parser.csproj", "{AB71CE72-57D7-4733-A30B-B70D8976B0EE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curl.HttpClient.Converter", "Curl.HttpClient.Converter\Curl.HttpClient.Converter.csproj", "{B205472A-4B19-4171-BD3A-0AF313C6F811}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Curl.HttpClient.Converter", "Curl.HttpClient.Converter\Curl.HttpClient.Converter.csproj", "{B205472A-4B19-4171-BD3A-0AF313C6F811}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{79759FEF-C681-4408-BFA2-B780E8891FBA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +55,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{96715803-FA09-45C8-8568-193FD45DEBAC} = {79759FEF-C681-4408-BFA2-B780E8891FBA}
+		{7A9D7C19-2F4A-4059-80A3-FFC99C5184FA} = {79759FEF-C681-4408-BFA2-B780E8891FBA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {42D67957-C5CC-4760-A522-EB128355B4E2}

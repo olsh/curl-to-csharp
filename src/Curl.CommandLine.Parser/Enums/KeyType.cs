@@ -1,10 +1,11 @@
-namespace Curl.CommandLine.Parser.Enums;
-
-public enum KeyType
+namespace Curl.CommandLine.Parser.Enums
 {
-    Pem,
+    public enum KeyType
+    {
+        Pem,
 
-    Der,
+        Der,
 
-    Eng
+        Eng
+    }
 }

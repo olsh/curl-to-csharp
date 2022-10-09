@@ -1,18 +1,22 @@
-namespace Curl.CommandLine.Parser.Models.Parsing;
+using System;
+using System.Collections.Generic;
 
-internal class CompressedParameterEvaluator : ParameterEvaluator
+namespace Curl.CommandLine.Parser.Models.Parsing
 {
-    public CompressedParameterEvaluator()
+    internal class CompressedParameterEvaluator : ParameterEvaluator
     {
-        Keys = new HashSet<string> { "--compressed" };
-    }
+        public CompressedParameterEvaluator()
+        {
+            Keys = new HashSet<string> { "--compressed" };
+        }
 
-    protected override bool CanBeEmpty => true;
+        protected override bool CanBeEmpty => true;
 
-    protected override HashSet<string> Keys { get; }
+        protected override HashSet<string> Keys { get; }
 
-    protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
-    {
-        convertResult.Data.IsCompressed = true;
+        protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
+        {
+            convertResult.Data.IsCompressed = true;
+        }
     }
 }

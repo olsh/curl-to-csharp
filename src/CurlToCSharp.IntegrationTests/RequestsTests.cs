@@ -2,7 +2,6 @@ using System.Diagnostics;
 
 using Curl.HttpClient.Converter;
 using Curl.CommandLine.Parser;
-using Curl.CommandLine.Parser.Models.Parsing;
 
 using CurlToCSharp.IntegrationTests.Constants;
 

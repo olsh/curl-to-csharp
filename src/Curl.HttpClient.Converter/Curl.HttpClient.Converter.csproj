@@ -1,9 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <PackageId>Curl.HttpClient.Converter</PackageId>
     <Authors>curl-to-csharp</Authors>
     <Description>
@@ -16,7 +14,6 @@
     <PackageTags>curl csharp parser converter http roslyn codegenerator</PackageTags>
     <RepositoryUrl>https://github.com/olsh/curl-to-csharp.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,7 +27,6 @@
   <ItemGroup>
     <None Include="..\CurlToCSharp\wwwroot\android-chrome-512x512.png">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
     </None>
   </ItemGroup>
 

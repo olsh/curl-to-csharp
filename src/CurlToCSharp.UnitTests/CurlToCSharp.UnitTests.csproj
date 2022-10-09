@@ -1,6 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  
+  <PropertyGroup>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -15,7 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CurlToCSharp\CurlToCSharp.csproj" />
+    <ProjectReference Include="..\Curl.CommandLine.Parser\Curl.CommandLine.Parser.csproj" />
+    <ProjectReference Include="..\Curl.HttpClient.Converter\Curl.HttpClient.Converter.csproj" />
   </ItemGroup>
 
 </Project>

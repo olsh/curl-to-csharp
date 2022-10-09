@@ -1,96 +1,100 @@
+using System;
+using System.Collections.Generic;
+
 using Curl.CommandLine.Parser.Constants;
 using Curl.CommandLine.Parser.Enums;
 using Curl.CommandLine.Parser.Extensions;
 
-namespace Curl.CommandLine.Parser.Models.Parsing;
-
-internal class FormParameterEvaluator : ParameterEvaluator
+namespace Curl.CommandLine.Parser.Models.Parsing
 {
-    public FormParameterEvaluator()
+    internal class FormParameterEvaluator : ParameterEvaluator
     {
-        Keys = new HashSet<string> { "-F", "--form" };
-    }
-
-    protected override HashSet<string> Keys { get; }
-
-    protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
-    {
-        var input = commandLine.ReadValue();
-        if (!input.TrySplit(FormSeparatorChar, out Span<char> key, out Span<char> value))
+        public FormParameterEvaluator()
         {
-            convertResult.Warnings.Add($"Unable to parse form value \"{input.ToString()}\"");
-
-            return;
+            Keys = new HashSet<string> { "-F", "--form" };
         }
 
-        if (value.Length > 0)
-        {
-            var firstPropertySeparatorIndex = value.IndexOf(';');
-            Dictionary<string, string> additionalProperties;
-            if (firstPropertySeparatorIndex > 0)
-            {
-                additionalProperties = GetAdditionalProperties(convertResult, value);
-                value = value.Slice(0, firstPropertySeparatorIndex);
-            }
-            else
-            {
-                additionalProperties = new Dictionary<string, string>();
-            }
+        protected override HashSet<string> Keys { get; }
 
-            var firstCharOfValue = value[0];
-            if (firstCharOfValue == '<')
+        protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
+        {
+            var input = commandLine.ReadValue();
+            if (!input.TrySplit(FormSeparatorChar, out Span<char> key, out Span<char> value))
             {
-                convertResult.Data.FormData.Add(CreateFormData(key, value, UploadDataType.InlineFile, additionalProperties));
+                convertResult.Warnings.Add($"Unable to parse form value \"{input.ToString()}\"");
 
                 return;
             }
 
-            if (firstCharOfValue == '@')
+            if (value.Length > 0)
             {
-                convertResult.Data.FormData.Add(CreateFormData(key, value, UploadDataType.BinaryFile, additionalProperties));
+                var firstPropertySeparatorIndex = value.IndexOf(';');
+                Dictionary<string, string> additionalProperties;
+                if (firstPropertySeparatorIndex > 0)
+                {
+                    additionalProperties = GetAdditionalProperties(convertResult, value);
+                    value = value.Slice(0, firstPropertySeparatorIndex);
+                }
+                else
+                {
+                    additionalProperties = new Dictionary<string, string>();
+                }
 
-                return;
+                var firstCharOfValue = value[0];
+                if (firstCharOfValue == '<')
+                {
+                    convertResult.Data.FormData.Add(CreateFormData(key, value, UploadDataType.InlineFile, additionalProperties));
+
+                    return;
+                }
+
+                if (firstCharOfValue == '@')
+                {
+                    convertResult.Data.FormData.Add(CreateFormData(key, value, UploadDataType.BinaryFile, additionalProperties));
+
+                    return;
+                }
             }
+
+            convertResult.Data.FormData.Add(new FormData(key.ToString(), value.ToString(), UploadDataType.Inline));
         }
 
-        convertResult.Data.FormData.Add(new FormData(key.ToString(), value.ToString(), UploadDataType.Inline));
-    }
-
-    private static Dictionary<string, string> GetAdditionalProperties(ConvertResult<CurlOptions> convertResult, Span<char> value)
-    {
-        var stringValue = value.ToString();
-        var valueProperties = stringValue.Split(';');
-
-        Dictionary<string, string> additionalProperties = new Dictionary<string, string>();
-        for (int i = 1; i < valueProperties.Length; i++)
+        private static Dictionary<string, string> GetAdditionalProperties(ConvertResult<CurlOptions> convertResult, Span<char> value)
         {
-            var valueProperty = valueProperties[i];
-            var keyValue = valueProperty.Split("=");
-            if (keyValue.Length != 2)
-            {
-                convertResult.Warnings.Add($"Unable to parse part of form value \"{valueProperty}\"");
+            var stringValue = value.ToString();
+            var valueProperties = stringValue.Split(';');
 
-                continue;
+            Dictionary<string, string> additionalProperties = new Dictionary<string, string>();
+            for (int i = 1; i < valueProperties.Length; i++)
+            {
+                var valueProperty = valueProperties[i];
+                var keyValue = valueProperty.Split("=");
+                if (keyValue.Length != 2)
+                {
+                    convertResult.Warnings.Add($"Unable to parse part of form value \"{valueProperty}\"");
+
+                    continue;
+                }
+
+                additionalProperties.TryAdd(keyValue[0].ToLower(), TrimValue(keyValue[1]));
             }
 
-            additionalProperties.TryAdd(keyValue[0].ToLower(), TrimValue(keyValue[1]));
+            return additionalProperties;
         }
 
-        return additionalProperties;
-    }
+        private static string TrimValue(string value)
+        {
+            return value.Trim(Chars.Space, Chars.DoubleQuote, Chars.SingleQuote);
+        }
 
-    private static string TrimValue(string value)
-    {
-        return value.Trim(Chars.Space, Chars.DoubleQuote, Chars.SingleQuote);
-    }
-
-    private static FormData CreateFormData(Span<char> key, Span<char> value, UploadDataType type, Dictionary<string, string> additionalProperties)
-    {
-        return new FormData(
-            key.ToString(),
-            TrimValue(value.Slice(1).ToString()),
-            type,
-            additionalProperties.GetValueOrDefault("type"),
-            additionalProperties.GetValueOrDefault("filename"));
+        private static FormData CreateFormData(Span<char> key, Span<char> value, UploadDataType type, Dictionary<string, string> additionalProperties)
+        {
+            return new FormData(
+                key.ToString(),
+                TrimValue(value.Slice(1).ToString()),
+                type,
+                additionalProperties.GetValueOrDefault("type"),
+                additionalProperties.GetValueOrDefault("filename"));
+        }
     }
 }

@@ -1,10 +1,12 @@
-using Curl.HttpClient.Converter;
+using Curl.CommandLine.Parser;
 using Curl.CommandLine.Parser.Models;
+using Curl.HttpClient.Converter;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.Net.Http.Headers;
+
+using HeaderNames = Curl.CommandLine.Parser.Constants.HeaderNames;
 
 namespace CurlToCSharp.UnitTests.Services;
 

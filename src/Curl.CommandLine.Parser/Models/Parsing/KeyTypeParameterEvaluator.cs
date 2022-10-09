@@ -1,28 +1,32 @@
+using System;
+using System.Collections.Generic;
+
 using Curl.CommandLine.Parser.Enums;
 using Curl.CommandLine.Parser.Extensions;
 
-namespace Curl.CommandLine.Parser.Models.Parsing;
-
-internal class KeyTypeParameterEvaluator : ParameterEvaluator
+namespace Curl.CommandLine.Parser.Models.Parsing
 {
-    public KeyTypeParameterEvaluator()
+    internal class KeyTypeParameterEvaluator : ParameterEvaluator
     {
-        Keys = new HashSet<string> { "--key-type" };
-    }
-
-    protected override HashSet<string> Keys { get; }
-
-    protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
-    {
-        var value = commandLine.ReadValue().ToString();
-        if (Enum.TryParse(value, true, out KeyType keyType))
+        public KeyTypeParameterEvaluator()
         {
-            convertResult.Data.KeyType = keyType;
+            Keys = new HashSet<string> { "--key-type" };
         }
-        else
+
+        protected override HashSet<string> Keys { get; }
+
+        protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
         {
-            convertResult.Warnings.Add($"Unable to parse key type {value}, PEM type will be used");
-            convertResult.Data.KeyType = KeyType.Pem;
+            var value = commandLine.ReadValue().ToString();
+            if (Enum.TryParse(value, true, out KeyType keyType))
+            {
+                convertResult.Data.KeyType = keyType;
+            }
+            else
+            {
+                convertResult.Warnings.Add($"Unable to parse key type {value}, PEM type will be used");
+                convertResult.Data.KeyType = KeyType.Pem;
+            }
         }
     }
 }

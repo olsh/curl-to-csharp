@@ -1,35 +1,39 @@
+using System;
+using System.Collections.Generic;
+
 using Curl.CommandLine.Parser.Extensions;
 
-namespace Curl.CommandLine.Parser.Models.Parsing;
-
-internal class ProxyCredentialsParameterEvaluator : ParameterEvaluator
+namespace Curl.CommandLine.Parser.Models.Parsing
 {
-    public ProxyCredentialsParameterEvaluator()
+    internal class ProxyCredentialsParameterEvaluator : ParameterEvaluator
     {
-        Keys = new HashSet<string> { "-U", "--proxy-user" };
-    }
-
-    protected override HashSet<string> Keys { get; }
-
-    protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
-    {
-        var value = commandLine.ReadValue();
-        if (value.IsEmpty || value.IndexOf(':') == -1)
+        public ProxyCredentialsParameterEvaluator()
         {
-            convertResult.Warnings.Add("Unable to parse proxy credentials");
-
-            return;
+            Keys = new HashSet<string> { "-U", "--proxy-user" };
         }
 
-        if (value.Length == 1)
+        protected override HashSet<string> Keys { get; }
+
+        protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
         {
-            convertResult.Data.UseDefaultProxyCredentials = true;
+            var value = commandLine.ReadValue();
+            if (value.IsEmpty || value.IndexOf(':') == -1)
+            {
+                convertResult.Warnings.Add("Unable to parse proxy credentials");
 
-            return;
+                return;
+            }
+
+            if (value.Length == 1)
+            {
+                convertResult.Data.UseDefaultProxyCredentials = true;
+
+                return;
+            }
+
+            var passwordSeparatorIndex = value.IndexOf(':');
+            convertResult.Data.ProxyUserName = value.Slice(0, passwordSeparatorIndex).ToString();
+            convertResult.Data.ProxyPassword = value.Slice(passwordSeparatorIndex + 1).ToString();
         }
-
-        var passwordSeparatorIndex = value.IndexOf(':');
-        convertResult.Data.ProxyUserName = value.Slice(0, passwordSeparatorIndex).ToString();
-        convertResult.Data.ProxyPassword = value.Slice(passwordSeparatorIndex + 1).ToString();
     }
 }

@@ -1,18 +1,23 @@
-namespace Curl.CommandLine.Parser.Models.Parsing;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
 
-internal class HeadParameterEvaluator : ParameterEvaluator
+namespace Curl.CommandLine.Parser.Models.Parsing
 {
-    public HeadParameterEvaluator()
+    internal class HeadParameterEvaluator : ParameterEvaluator
     {
-        Keys = new HashSet<string> { "-I", "--head" };
-    }
+        public HeadParameterEvaluator()
+        {
+            Keys = new HashSet<string> { "-I", "--head" };
+        }
 
-    protected override bool CanBeEmpty => true;
+        protected override bool CanBeEmpty => true;
 
-    protected override HashSet<string> Keys { get; }
+        protected override HashSet<string> Keys { get; }
 
-    protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
-    {
-        convertResult.Data.HttpMethod = HttpMethod.Head.ToString().ToUpper();
+        protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
+        {
+            convertResult.Data.HttpMethod = HttpMethod.Head.ToString().ToUpper();
+        }
     }
 }

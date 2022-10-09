@@ -12,7 +12,7 @@ public static class IocExtensions
     public static void RegisterServices(this IServiceCollection services)
     {
         services.AddSingleton(
-            provider => provider.GetService<IOptions<ApplicationOptions>>()
+            provider => provider.GetRequiredService<IOptions<ApplicationOptions>>()
                 .Value.Parsing);
 
         services.AddSingleton<ICurlParser, CurlParser>();

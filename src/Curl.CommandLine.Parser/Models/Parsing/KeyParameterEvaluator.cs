@@ -1,26 +1,30 @@
+using System;
+using System.Collections.Generic;
+
 using Curl.CommandLine.Parser.Extensions;
 
-namespace Curl.CommandLine.Parser.Models.Parsing;
-
-internal class KeyParameterEvaluator : ParameterEvaluator
+namespace Curl.CommandLine.Parser.Models.Parsing
 {
-    public KeyParameterEvaluator()
+    internal class KeyParameterEvaluator : ParameterEvaluator
     {
-        Keys = new HashSet<string> { "--key" };
-    }
-
-    protected override HashSet<string> Keys { get; }
-
-    protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
-    {
-        var value = commandLine.ReadValue();
-        if (value.IsEmpty)
+        public KeyParameterEvaluator()
         {
-            convertResult.Warnings.Add("Unable to parse key");
-
-            return;
+            Keys = new HashSet<string> { "--key" };
         }
 
-        convertResult.Data.KeyFileName = value.ToString();
+        protected override HashSet<string> Keys { get; }
+
+        protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
+        {
+            var value = commandLine.ReadValue();
+            if (value.IsEmpty)
+            {
+                convertResult.Warnings.Add("Unable to parse key");
+
+                return;
+            }
+
+            convertResult.Data.KeyFileName = value.ToString();
+        }
     }
 }

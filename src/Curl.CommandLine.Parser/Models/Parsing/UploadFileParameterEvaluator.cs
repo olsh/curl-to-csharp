@@ -1,92 +1,96 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 using Curl.CommandLine.Parser.Extensions;
 
-namespace Curl.CommandLine.Parser.Models.Parsing;
-
-internal class UploadFileParameterEvaluator : ParameterEvaluator
+namespace Curl.CommandLine.Parser.Models.Parsing
 {
-    private readonly ParsingOptions _parsingOptions;
-
-    public UploadFileParameterEvaluator(ParsingOptions parsingOptions)
+    internal class UploadFileParameterEvaluator : ParameterEvaluator
     {
-        _parsingOptions = parsingOptions;
-        Keys = new HashSet<string> { "-T", "--upload-file" };
-    }
+        private readonly ParsingOptions _parsingOptions;
 
-    protected override HashSet<string> Keys { get; }
-
-    protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
-    {
-        void AddFilesLimitWarning()
+        public UploadFileParameterEvaluator(ParsingOptions parsingOptions)
         {
-            convertResult.Warnings.Add($"Only first {_parsingOptions.MaxUploadFiles} files were parsed");
+            _parsingOptions = parsingOptions;
+            Keys = new HashSet<string> { "-T", "--upload-file" };
         }
 
-        var value = commandLine.ReadValue();
+        protected override HashSet<string> Keys { get; }
 
-        if (value.IsEmpty)
+        protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
         {
-            return;
-        }
+            void AddFilesLimitWarning()
+            {
+                convertResult.Warnings.Add($"Only first {_parsingOptions.MaxUploadFiles} files were parsed");
+            }
 
-        // Comma separated list of files
-        if (value.Length > 1 && value[0] == '{' && value[value.Length - 1] == '}')
-        {
-            var filesSpan = value.Slice(1, value.Length - 2);
-            if (filesSpan.IsEmpty)
+            var value = commandLine.ReadValue();
+
+            if (value.IsEmpty)
             {
                 return;
             }
 
-            var files = filesSpan.ToString()
-                .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-            foreach (var file in files.Take(_parsingOptions.MaxUploadFiles))
+            // Comma separated list of files
+            if (value.Length > 1 && value[0] == '{' && value[^1] == '}')
             {
-                convertResult.Data.UploadFiles.Add(file.Trim());
-            }
-
-            if (files.Length > _parsingOptions.MaxUploadFiles)
-            {
-                AddFilesLimitWarning();
-            }
-        }
-        else
-        {
-            // Range of files
-            var stringValue = value.ToString();
-            var match = Regex.Match(stringValue, @"\[(?<start>\d+)-(?<end>\d+)\]");
-            if (match.Success)
-            {
-                int.TryParse(match.Groups["start"].Value, out var start);
-                int.TryParse(match.Groups["end"].Value, out var end);
-
-                if (start >= end)
+                var filesSpan = value.Slice(1, value.Length - 2);
+                if (filesSpan.IsEmpty)
                 {
-                    convertResult.Warnings.Add("Invalid upload files range");
-
                     return;
                 }
 
-                var firstPart = stringValue.Substring(0, match.Index);
-                var lastPart = stringValue.Substring(match.Index + match.Length);
+                var files = filesSpan.ToString()
+                    .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-                var totalFiles = end - start + 1;
-                if (totalFiles > _parsingOptions.MaxUploadFiles)
+                foreach (var file in files.Take(_parsingOptions.MaxUploadFiles))
                 {
-                    AddFilesLimitWarning();
-                    end = start + _parsingOptions.MaxUploadFiles - 1;
+                    convertResult.Data.UploadFiles.Add(file.Trim());
                 }
 
-                for (var i = start; i <= end; i++)
+                if (files.Length > _parsingOptions.MaxUploadFiles)
                 {
-                    convertResult.Data.UploadFiles.Add($"{firstPart}{i}{lastPart}");
+                    AddFilesLimitWarning();
                 }
             }
             else
             {
-                convertResult.Data.UploadFiles.Add(stringValue);
+                // Range of files
+                var stringValue = value.ToString();
+                var match = Regex.Match(stringValue, @"\[(?<start>\d+)-(?<end>\d+)\]");
+                if (match.Success)
+                {
+                    int.TryParse(match.Groups["start"].Value, out var start);
+                    int.TryParse(match.Groups["end"].Value, out var end);
+
+                    if (start >= end)
+                    {
+                        convertResult.Warnings.Add("Invalid upload files range");
+
+                        return;
+                    }
+
+                    var firstPart = stringValue.Substring(0, match.Index);
+                    var lastPart = stringValue.Substring(match.Index + match.Length);
+
+                    var totalFiles = end - start + 1;
+                    if (totalFiles > _parsingOptions.MaxUploadFiles)
+                    {
+                        AddFilesLimitWarning();
+                        end = start + _parsingOptions.MaxUploadFiles - 1;
+                    }
+
+                    for (var i = start; i <= end; i++)
+                    {
+                        convertResult.Data.UploadFiles.Add($"{firstPart}{i}{lastPart}");
+                    }
+                }
+                else
+                {
+                    convertResult.Data.UploadFiles.Add(stringValue);
+                }
             }
         }
     }

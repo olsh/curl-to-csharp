@@ -1,6 +1,7 @@
+using Curl.CommandLine.Parser;
 using Curl.CommandLine.Parser.Models;
 
-namespace CurlToCSharp.UnitTests.Models;
+namespace CurlToCSharp.UnitTests;
 
 public class CurlOptionsTests
 {

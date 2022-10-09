@@ -1,39 +1,42 @@
-namespace Curl.CommandLine.Parser.Models.Parsing;
+using System.Collections.Generic;
 
-public static class EvaluatorProvider
+namespace Curl.CommandLine.Parser.Models.Parsing
 {
-    public static List<ParameterEvaluator> All(ParsingOptions parsingOptions)
+    public static class EvaluatorProvider
     {
-        return new List<ParameterEvaluator>
+        public static List<ParameterEvaluator> All(ParsingOptions parsingOptions)
         {
-            new RequestParameterEvaluator(),
-            new HeaderParameterEvaluator(),
-            new CookieParameterEvaluator(),
-            new DataParameterEvaluator(),
-            new DataRawParameterEvaluator(),
-            new DataBinaryParameterEvaluator(),
-            new DataUrlEncodeParameterEvaluator(),
-            new UserParameterEvaluator(),
-            new UploadFileParameterEvaluator(parsingOptions),
-            new UrlParameterEvaluator(),
-            new ProxyParameterEvaluator(),
-            new HeadParameterEvaluator(),
-            new InsecureParameterEvaluator(),
-            new FormParameterEvaluator(),
-            new CertificateTypeParameterEvaluator(),
-            new CertificateParameterEvaluator(),
-            new KeyTypeParameterEvaluator(),
-            new KeyParameterEvaluator(),
-            new UserAgentParameterEvaluator(),
-            new ProxyCredentialsParameterEvaluator(),
-            new GetParameterEvaluator(),
-            new CompressedParameterEvaluator(),
-            new RefererParameterEvaluator(),
-            new Http09ParameterEvaluator(),
-            new Http10ParameterEvaluator(),
-            new Http11ParameterEvaluator(),
-            new Http20ParameterEvaluator(),
-            new Http30ParameterEvaluator()
-        };
+            return new List<ParameterEvaluator>
+            {
+                new RequestParameterEvaluator(),
+                new HeaderParameterEvaluator(),
+                new CookieParameterEvaluator(),
+                new DataParameterEvaluator(),
+                new DataRawParameterEvaluator(),
+                new DataBinaryParameterEvaluator(),
+                new DataUrlEncodeParameterEvaluator(),
+                new UserParameterEvaluator(),
+                new UploadFileParameterEvaluator(parsingOptions),
+                new UrlParameterEvaluator(),
+                new ProxyParameterEvaluator(),
+                new HeadParameterEvaluator(),
+                new InsecureParameterEvaluator(),
+                new FormParameterEvaluator(),
+                new CertificateTypeParameterEvaluator(),
+                new CertificateParameterEvaluator(),
+                new KeyTypeParameterEvaluator(),
+                new KeyParameterEvaluator(),
+                new UserAgentParameterEvaluator(),
+                new ProxyCredentialsParameterEvaluator(),
+                new GetParameterEvaluator(),
+                new CompressedParameterEvaluator(),
+                new RefererParameterEvaluator(),
+                new Http09ParameterEvaluator(),
+                new Http10ParameterEvaluator(),
+                new Http11ParameterEvaluator(),
+                new Http20ParameterEvaluator(),
+                new Http30ParameterEvaluator()
+            };
+        }
     }
 }

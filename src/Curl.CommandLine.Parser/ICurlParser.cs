@@ -1,8 +1,9 @@
-using Curl.CommandLine.Parser.Models;
+using System;
 
-namespace Curl.CommandLine.Parser;
-
-public interface ICurlParser
+namespace Curl.CommandLine.Parser
 {
-    ConvertResult<CurlOptions> Parse(Span<char> commandLine);
+    public interface ICurlParser
+    {
+        ConvertResult<CurlOptions> Parse(Span<char> commandLine);
+    }
 }

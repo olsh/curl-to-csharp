@@ -1,16 +1,20 @@
-namespace Curl.CommandLine.Parser.Models.Parsing;
+using System;
+using System.Collections.Generic;
 
-internal class DataParameterEvaluator : DataGenericParameterEvaluator
+namespace Curl.CommandLine.Parser.Models.Parsing
 {
-    public DataParameterEvaluator()
+    internal class DataParameterEvaluator : DataGenericParameterEvaluator
     {
-        Keys = new HashSet<string> { "-d", "--data" };
-    }
+        public DataParameterEvaluator()
+        {
+            Keys = new HashSet<string> { "-d", "--data" };
+        }
 
-    protected override HashSet<string> Keys { get; }
+        protected override HashSet<string> Keys { get; }
 
-    protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
-    {
-        Evaluate(ref commandLine, convertResult, true, false);
+        protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
+        {
+            Evaluate(ref commandLine, convertResult, true, false);
+        }
     }
 }

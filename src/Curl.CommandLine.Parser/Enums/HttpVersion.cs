@@ -1,16 +1,17 @@
-namespace Curl.CommandLine.Parser.Enums;
-
-public enum HttpVersion
+namespace Curl.CommandLine.Parser.Enums
 {
-    Default,
+    public enum HttpVersion
+    {
+        Default,
 
-    Http09,
+        Http09,
 
-    Http10,
+        Http10,
 
-    Http11,
+        Http11,
 
-    Http20,
+        Http20,
 
-    Http30
+        Http30
+    }
 }

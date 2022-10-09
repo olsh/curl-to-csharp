@@ -1,6 +1,5 @@
 using Curl.HttpClient.Converter;
 using Curl.CommandLine.Parser;
-using Curl.CommandLine.Parser.Models;
 
 using CurlToCSharp.Models;
 
@@ -28,7 +27,7 @@ public class ConvertController : Controller
         {
             return BadRequest(
                 new ConvertResult<ConvertModel>(
-                    ModelState.SelectMany(r => r.Value.Errors.Select(e => e.ErrorMessage))
+                    ModelState.SelectMany(r => r.Value?.Errors.Select(e => e.ErrorMessage))
                         .ToArray()));
         }
 

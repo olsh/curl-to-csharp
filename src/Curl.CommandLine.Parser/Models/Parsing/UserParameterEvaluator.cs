@@ -1,19 +1,23 @@
+using System;
+using System.Collections.Generic;
+
 using Curl.CommandLine.Parser.Extensions;
 
-namespace Curl.CommandLine.Parser.Models.Parsing;
-
-internal class UserParameterEvaluator : ParameterEvaluator
+namespace Curl.CommandLine.Parser.Models.Parsing
 {
-    public UserParameterEvaluator()
+    internal class UserParameterEvaluator : ParameterEvaluator
     {
-        Keys = new HashSet<string> { "-u", "--user" };
-    }
+        public UserParameterEvaluator()
+        {
+            Keys = new HashSet<string> { "-u", "--user" };
+        }
 
-    protected override HashSet<string> Keys { get; }
+        protected override HashSet<string> Keys { get; }
 
-    protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
-    {
-        convertResult.Data.UserPasswordPair = commandLine.ReadValue()
-            .ToString();
+        protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
+        {
+            convertResult.Data.UserPasswordPair = commandLine.ReadValue()
+                .ToString();
+        }
     }
 }

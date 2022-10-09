@@ -1,6 +1,7 @@
-namespace Curl.CommandLine.Parser.Models.Parsing;
-
-public class ParseState
+namespace Curl.CommandLine.Parser
 {
-    public string LastUnknownValue { get; set; }
+    public class ParseState
+    {
+        public string LastUnknownValue { get; set; }
+    }
 }

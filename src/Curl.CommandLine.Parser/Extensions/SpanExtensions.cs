@@ -1,205 +1,210 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 using Curl.CommandLine.Parser.Constants;
 
-namespace Curl.CommandLine.Parser.Extensions;
-
-internal static class SpanExtensions
+namespace Curl.CommandLine.Parser.Extensions
 {
-    public static Span<char> TrimCommandLine(this Span<char> input)
+    internal static class SpanExtensions
     {
-        return input
-            .TrimStart(new ReadOnlySpan<char>(new[] { Chars.Escape, Chars.Space }))
-            .Trim();
-    }
-
-    public static Span<char> UnEscape(this Span<char> input)
-    {
-        var list = new LinkedList<char>();
-        for (var i = 0; i < input.Length; i++)
+        public static Span<char> TrimCommandLine(this Span<char> input)
         {
-            if (input[i] == Chars.Escape && (i == 0 || input[i - 1] != Chars.Escape))
-            {
-                continue;
-            }
-
-            if (IsEscapingSequence(input, i))
-            {
-                list.AddLast(Chars.SingleQuote);
-                i += 3;
-
-                continue;
-            }
-
-            list.AddLast(input[i]);
+            return input
+                .TrimStart(new ReadOnlySpan<char>(new[] { Chars.Escape, Chars.Space }))
+                .Trim();
         }
 
-        return new Span<char>(list.ToArray());
-    }
-
-    public static Span<char> TrimQuotes(this Span<char> input, char quote)
-    {
-        int start;
-        for (start = 0; start < input.Length; start++)
+        public static Span<char> UnEscape(this Span<char> input)
         {
-            var escaped = start > 0 && input[start - 1] == Chars.Escape;
-            if (input[start] != quote || escaped)
+            var list = new LinkedList<char>();
+            for (var i = 0; i < input.Length; i++)
             {
-                break;
-            }
-        }
-
-        int end;
-        for (end = input.Length - 1; end > start; end--)
-        {
-            var escaped = input[end - 1] == Chars.Escape;
-            if (input[end] != quote || escaped)
-            {
-                break;
-            }
-        }
-
-        return input.Slice(start, end + 1 - start);
-    }
-
-    public static Span<char> ReadValue(this ref Span<char> commandLine)
-    {
-        commandLine = commandLine.TrimCommandLine();
-        if (commandLine.IsEmpty)
-        {
-            return commandLine;
-        }
-
-        int closeIndex = 0;
-
-        var indexOfSpecialChar = commandLine.IndexOfAny(Chars.SingleQuote, Chars.DoubleQuote, Chars.Space);
-        bool firstCharIsQuote = false;
-        char firstChar = '\0';
-        bool trimLastQuote = true;
-        if (indexOfSpecialChar != -1 && commandLine[indexOfSpecialChar] != Chars.Space)
-        {
-            firstCharIsQuote = true;
-            firstChar = commandLine[indexOfSpecialChar];
-        }
-
-        if (firstCharIsQuote && commandLine.Length > 1)
-        {
-            var quote = firstChar;
-            for (int i = 0; i < commandLine.Length; i++)
-            {
-                if (indexOfSpecialChar != i && IsEscapingSequence(commandLine, i))
+                if (input[i] == Chars.Escape && (i == 0 || input[i - 1] != Chars.Escape))
                 {
-                    i += 3;
                     continue;
                 }
 
-                if (indexOfSpecialChar != i && commandLine[i] == quote && (i == 0 || commandLine[i - 1] != Chars.Escape))
+                if (IsEscapingSequence(input, i))
                 {
-                    closeIndex = i + 1;
+                    list.AddLast(Chars.SingleQuote);
+                    i += 3;
+
+                    continue;
+                }
+
+                list.AddLast(input[i]);
+            }
+
+            return new Span<char>(list.ToArray());
+        }
+
+        public static Span<char> TrimQuotes(this Span<char> input, char quote)
+        {
+            int start;
+            for (start = 0; start < input.Length; start++)
+            {
+                var escaped = start > 0 && input[start - 1] == Chars.Escape;
+                if (input[start] != quote || escaped)
+                {
                     break;
                 }
             }
 
-            if (closeIndex == 0)
+            int end;
+            for (end = input.Length - 1; end > start; end--)
             {
-                closeIndex = commandLine.Length;
-                trimLastQuote = false;
+                var escaped = input[end - 1] == Chars.Escape;
+                if (input[end] != quote || escaped)
+                {
+                    break;
+                }
             }
+
+            return input.Slice(start, end + 1 - start);
         }
-        else
+
+        public static Span<char> ReadValue(this ref Span<char> commandLine)
         {
-            closeIndex = commandLine.IndexOf(Chars.Space);
-            if (closeIndex == -1)
+            commandLine = commandLine.TrimCommandLine();
+            if (commandLine.IsEmpty)
             {
-                closeIndex = commandLine.Length;
+                return commandLine;
             }
-        }
 
-        var value = commandLine.Slice(0, closeIndex);
-        if (firstCharIsQuote)
-        {
-            if (indexOfSpecialChar == 0)
+            int closeIndex = 0;
+
+            var indexOfSpecialChar = commandLine.IndexOfAny(Chars.SingleQuote, Chars.DoubleQuote, Chars.Space);
+            bool firstCharIsQuote = false;
+            char firstChar = '\0';
+            bool trimLastQuote = true;
+            if (indexOfSpecialChar != -1 && commandLine[indexOfSpecialChar] != Chars.Space)
             {
-                value = value.TrimQuotes(firstChar);
+                firstCharIsQuote = true;
+                firstChar = commandLine[indexOfSpecialChar];
             }
-            else if (indexOfSpecialChar < closeIndex)
+
+            if (firstCharIsQuote && commandLine.Length > 1)
             {
-                value = UnEscapeKeyValue(value, indexOfSpecialChar, trimLastQuote);
+                var quote = firstChar;
+                for (int i = 0; i < commandLine.Length; i++)
+                {
+                    if (indexOfSpecialChar != i && IsEscapingSequence(commandLine, i))
+                    {
+                        i += 3;
+                        continue;
+                    }
+
+                    if (indexOfSpecialChar != i && commandLine[i] == quote && (i == 0 || commandLine[i - 1] != Chars.Escape))
+                    {
+                        closeIndex = i + 1;
+                        break;
+                    }
+                }
+
+                if (closeIndex == 0)
+                {
+                    closeIndex = commandLine.Length;
+                    trimLastQuote = false;
+                }
             }
+            else
+            {
+                closeIndex = commandLine.IndexOf(Chars.Space);
+                if (closeIndex == -1)
+                {
+                    closeIndex = commandLine.Length;
+                }
+            }
+
+            var value = commandLine.Slice(0, closeIndex);
+            if (firstCharIsQuote)
+            {
+                if (indexOfSpecialChar == 0)
+                {
+                    value = value.TrimQuotes(firstChar);
+                }
+                else if (indexOfSpecialChar < closeIndex)
+                {
+                    value = UnEscapeKeyValue(value, indexOfSpecialChar, trimLastQuote);
+                }
+            }
+
+            commandLine = commandLine.Slice(closeIndex);
+
+            return value.UnEscape();
         }
 
-        commandLine = commandLine.Slice(closeIndex);
-
-        return value.UnEscape();
-    }
-
-    public static Span<char> ReadParameter(this ref Span<char> commandLine)
-    {
-        var indexOfSpace = commandLine.IndexOf(Chars.Space);
-        if (indexOfSpace == -1)
+        public static Span<char> ReadParameter(this ref Span<char> commandLine)
         {
-            indexOfSpace = commandLine.Length;
+            var indexOfSpace = commandLine.IndexOf(Chars.Space);
+            if (indexOfSpace == -1)
+            {
+                indexOfSpace = commandLine.Length;
+            }
+
+            var parameter = commandLine.Slice(0, indexOfSpace);
+            commandLine = commandLine.Slice(indexOfSpace);
+
+            return parameter;
         }
 
-        var parameter = commandLine.Slice(0, indexOfSpace);
-        commandLine = commandLine.Slice(indexOfSpace);
-
-        return parameter;
-    }
-
-    public static bool IsParameter(this Span<char> commandLine)
-    {
-        return commandLine.IndexOf('-') == 0;
-    }
-
-    public static bool TrySplit(this Span<char> input, char separator, out Span<char> key, out Span<char> value)
-    {
-        var separatorIndex = input.IndexOf(separator);
-        if (separatorIndex == -1)
+        public static bool IsParameter(this Span<char> commandLine)
         {
-            value = Span<char>.Empty;
-            key = Span<char>.Empty;
-
-            return false;
+            return commandLine.IndexOf('-') == 0;
         }
 
-        key = input.Slice(0, separatorIndex);
-        value = input.Slice(separatorIndex + 1);
-
-        return true;
-    }
-
-    private static Span<char> UnEscapeKeyValue(Span<char> value, int indexOfSpecialChar, bool trimLastQuote)
-    {
-        if (trimLastQuote)
+        public static bool TrySplit(this Span<char> input, char separator, out Span<char> key, out Span<char> value)
         {
-            value = new Span<char>(
-                value.Slice(0, indexOfSpecialChar)
-                    .ToArray()
-                    .Concat(value.Slice(indexOfSpecialChar + 1)[..^1].ToArray())
-                    .ToArray());
+            var separatorIndex = input.IndexOf(separator);
+            if (separatorIndex == -1)
+            {
+                value = Span<char>.Empty;
+                key = Span<char>.Empty;
+
+                return false;
+            }
+
+            key = input.Slice(0, separatorIndex);
+            value = input.Slice(separatorIndex + 1);
+
+            return true;
         }
-        else
+
+        private static Span<char> UnEscapeKeyValue(Span<char> value, int indexOfSpecialChar, bool trimLastQuote)
         {
-            value = new Span<char>(
-                value.Slice(0, indexOfSpecialChar)
-                    .ToArray()
-                    .Concat(value.Slice(indexOfSpecialChar + 1).ToArray())
-                    .ToArray());
+            if (trimLastQuote)
+            {
+                value = new Span<char>(
+                    value.Slice(0, indexOfSpecialChar)
+                        .ToArray()
+                        .Concat(value.Slice(indexOfSpecialChar + 1)[..^1].ToArray())
+                        .ToArray());
+            }
+            else
+            {
+                value = new Span<char>(
+                    value.Slice(0, indexOfSpecialChar)
+                        .ToArray()
+                        .Concat(value.Slice(indexOfSpecialChar + 1).ToArray())
+                        .ToArray());
 
+            }
+
+            return value;
         }
 
-        return value;
-    }
-
-    public static bool IsEscapingSequence(Span<char> value, int startIndex)
-    {
-        if (value.Length - startIndex < 4)
+        public static bool IsEscapingSequence(Span<char> value, int startIndex)
         {
-            return false;
-        }
+            if (value.Length - startIndex < 4)
+            {
+                return false;
+            }
 
-        return value[startIndex] == Chars.SingleQuote
-               && value[startIndex + 1] == Chars.Escape
-               && value[startIndex + 2] == Chars.SingleQuote
-               && value[startIndex + 3] == Chars.SingleQuote;
+            return value[startIndex] == Chars.SingleQuote
+                   && value[startIndex + 1] == Chars.Escape
+                   && value[startIndex + 2] == Chars.SingleQuote
+                   && value[startIndex + 3] == Chars.SingleQuote;
+        }
     }
 }

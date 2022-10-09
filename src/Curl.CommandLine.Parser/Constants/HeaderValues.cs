@@ -1,6 +1,7 @@
-namespace Curl.CommandLine.Parser.Constants;
-
-internal class HeaderValues
+namespace Curl.CommandLine.Parser.Constants
 {
-    public const string ContentTypeWwwForm = "application/x-www-form-urlencoded";
+    internal class HeaderValues
+    {
+        public const string ContentTypeWwwForm = "application/x-www-form-urlencoded";
+    }
 }

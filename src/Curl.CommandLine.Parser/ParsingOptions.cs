@@ -1,15 +1,16 @@
-namespace Curl.CommandLine.Parser.Models.Parsing;
-
-public class ParsingOptions
+namespace Curl.CommandLine.Parser
 {
-    public ParsingOptions()
+    public class ParsingOptions
     {
-    }
+        public ParsingOptions()
+        {
+        }
 
-    public ParsingOptions(int maxUploadFiles)
-    {
-        MaxUploadFiles = maxUploadFiles;
-    }
+        public ParsingOptions(int maxUploadFiles)
+        {
+            MaxUploadFiles = maxUploadFiles;
+        }
 
-    public int MaxUploadFiles { get; set; }
+        public int MaxUploadFiles { get; set; }
+    }
 }

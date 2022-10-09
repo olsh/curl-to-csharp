@@ -1,9 +1,6 @@
 using Curl.CommandLine.Parser;
 using Curl.CommandLine.Parser.Constants;
 using Curl.CommandLine.Parser.Enums;
-using Curl.CommandLine.Parser.Models.Parsing;
-
-using HeaderNames = Microsoft.Net.Http.Headers.HeaderNames;
 
 namespace CurlToCSharp.UnitTests.Services;
 

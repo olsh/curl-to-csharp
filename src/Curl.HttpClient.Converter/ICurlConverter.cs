@@ -1,8 +1,9 @@
-using Curl.CommandLine.Parser.Models;
+using Curl.CommandLine.Parser;
 
-namespace Curl.HttpClient.Converter;
-
-public interface ICurlConverter
+namespace Curl.HttpClient.Converter
 {
-    ConvertResult<string> ToCsharp(CurlOptions curlOptions);
+    public interface ICurlConverter
+    {
+        ConvertResult<string> ToCsharp(CurlOptions curlOptions);
+    }
 }

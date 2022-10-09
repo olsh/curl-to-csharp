@@ -1,20 +1,24 @@
+using System;
+using System.Collections.Generic;
+
 using Curl.CommandLine.Parser.Enums;
 
-namespace Curl.CommandLine.Parser.Models.Parsing;
-
-internal class Http09ParameterEvaluator : ParameterEvaluator
+namespace Curl.CommandLine.Parser.Models.Parsing
 {
-    public Http09ParameterEvaluator()
+    internal class Http09ParameterEvaluator : ParameterEvaluator
     {
-        Keys = new HashSet<string> { "--http0.9" };
-    }
+        public Http09ParameterEvaluator()
+        {
+            Keys = new HashSet<string> { "--http0.9" };
+        }
 
-    protected override bool CanBeEmpty => true;
+        protected override bool CanBeEmpty => true;
 
-    protected override HashSet<string> Keys { get; }
+        protected override HashSet<string> Keys { get; }
 
-    protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
-    {
-        convertResult.Data.HttpVersion = HttpVersion.Http09;
+        protected override void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
+        {
+            convertResult.Data.HttpVersion = HttpVersion.Http09;
+        }
     }
 }

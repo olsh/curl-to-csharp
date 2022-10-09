@@ -1,32 +1,36 @@
+using System;
+using System.Collections.Generic;
+
 using Curl.CommandLine.Parser.Constants;
 
-namespace Curl.CommandLine.Parser.Models.Parsing;
-
-public abstract class ParameterEvaluator
+namespace Curl.CommandLine.Parser.Models.Parsing
 {
-    protected const char FileSeparatorChar = '@';
-
-    protected const char FormSeparatorChar = '=';
-
-    protected abstract HashSet<string> Keys { get; }
-
-    protected virtual bool CanBeEmpty => false;
-
-    public bool CanEvaluate(string handle)
+    public abstract class ParameterEvaluator
     {
-        return Keys.Contains(handle);
-    }
+        protected const char FileSeparatorChar = '@';
 
-    public void Evaluate(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
-    {
-        commandLine = commandLine.TrimStart(Chars.Escape).Trim();
-        if (!CanBeEmpty && commandLine.IsEmpty)
+        protected const char FormSeparatorChar = '=';
+
+        protected abstract HashSet<string> Keys { get; }
+
+        protected virtual bool CanBeEmpty => false;
+
+        public bool CanEvaluate(string handle)
         {
-            return;
+            return Keys.Contains(handle);
         }
 
-        EvaluateInner(ref commandLine, convertResult);
-    }
+        public void Evaluate(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
+        {
+            commandLine = commandLine.TrimStart(Chars.Escape).Trim();
+            if (!CanBeEmpty && commandLine.IsEmpty)
+            {
+                return;
+            }
 
-    protected abstract void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult);
+            EvaluateInner(ref commandLine, convertResult);
+        }
+
+        protected abstract void EvaluateInner(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult);
+    }
 }

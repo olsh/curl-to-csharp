@@ -1,12 +1,13 @@
-namespace Curl.CommandLine.Parser.Enums;
-
-public enum CertificateType
+namespace Curl.CommandLine.Parser.Enums
 {
-    Pem,
+    public enum CertificateType
+    {
+        Pem,
 
-    Der,
+        Der,
 
-    Eng,
+        Eng,
 
-    P12
+        P12
+    }
 }

@@ -20,6 +20,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CurlToCSharp.IntegrationTes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CurlToCSharp.UnitTests", "CurlToCSharp.UnitTests\CurlToCSharp.UnitTests.csproj", "{7A9D7C19-2F4A-4059-80A3-FFC99C5184FA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curl.CommandLine.Parser", "Curl.CommandLine.Parser\Curl.CommandLine.Parser.csproj", "{AB71CE72-57D7-4733-A30B-B70D8976B0EE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Curl.HttpClient.Converter", "Curl.HttpClient.Converter\Curl.HttpClient.Converter.csproj", "{B205472A-4B19-4171-BD3A-0AF313C6F811}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +42,14 @@ Global
 		{7A9D7C19-2F4A-4059-80A3-FFC99C5184FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A9D7C19-2F4A-4059-80A3-FFC99C5184FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A9D7C19-2F4A-4059-80A3-FFC99C5184FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB71CE72-57D7-4733-A30B-B70D8976B0EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB71CE72-57D7-4733-A30B-B70D8976B0EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB71CE72-57D7-4733-A30B-B70D8976B0EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB71CE72-57D7-4733-A30B-B70D8976B0EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B205472A-4B19-4171-BD3A-0AF313C6F811}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B205472A-4B19-4171-BD3A-0AF313C6F811}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B205472A-4B19-4171-BD3A-0AF313C6F811}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B205472A-4B19-4171-BD3A-0AF313C6F811}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

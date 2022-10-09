@@ -1,4 +1,4 @@
-using CurlToCSharp.Models;
+using Curl.CommandLine.Parser.Models;
 
 namespace CurlToCSharp.UnitTests.Models;
 

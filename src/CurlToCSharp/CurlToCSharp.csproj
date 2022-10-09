@@ -4,6 +4,10 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Curl.HttpClient.Converter\Curl.HttpClient.Converter.csproj" />
+  </ItemGroup>
+
   <Target Name="CustomActionsBeforePublish" BeforeTargets="BeforePublish">
     <Exec Command="yarn" />
     <Exec Command="gulp" />

@@ -1,5 +1,7 @@
+using Curl.HttpClient.Converter;
+using Curl.CommandLine.Parser;
+
 using CurlToCSharp.Models;
-using CurlToCSharp.Services;
 
 using Microsoft.Extensions.Options;
 
@@ -13,7 +15,7 @@ public static class IocExtensions
             provider => provider.GetService<IOptions<ApplicationOptions>>()
                 .Value.Parsing);
 
-        services.AddSingleton<ICommandLineParser, CommandLineParser>();
-        services.AddSingleton<IConverterService, ConverterService>();
+        services.AddSingleton<ICurlParser, CurlParser>();
+        services.AddSingleton<ICurlConverter, CurlConverter>();
     }
 }

@@ -1,5 +1,5 @@
-using CurlToCSharp.Models;
-using CurlToCSharp.Models.Parsing;
+using Curl.CommandLine.Parser.Models;
+using Curl.CommandLine.Parser.Models.Parsing;
 
 namespace CurlToCSharp.UnitTests.Models.Parsing;
 

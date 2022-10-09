@@ -1,9 +1,9 @@
-using CurlToCSharp.Constants;
-using CurlToCSharp.Models;
-using CurlToCSharp.Models.Parsing;
-using CurlToCSharp.Services;
+using Curl.CommandLine.Parser;
+using Curl.CommandLine.Parser.Constants;
+using Curl.CommandLine.Parser.Enums;
+using Curl.CommandLine.Parser.Models.Parsing;
 
-using Microsoft.Net.Http.Headers;
+using HeaderNames = Microsoft.Net.Http.Headers.HeaderNames;
 
 namespace CurlToCSharp.UnitTests.Services;
 
@@ -163,7 +163,7 @@ public class CommandLineParserTests
         var curl = @"curl \
 https://test.zendesk.com/api/v2/tickets.json \
 -d '\\some_data' \
--v -u {email_address}:{password} -X \ 
+-v -u {email_address}:{password} -X \
 POST";
 
         var parseResult = service.Parse(new Span<char>(curl.ToCharArray()));
@@ -292,8 +292,8 @@ POST";
         Assert.Equal(Messages.UnableParseUrl, parseResult.Errors.Single());
     }
 
-    private static CommandLineParser CreateCommandLineParser()
+    private static CurlParser CreateCommandLineParser()
     {
-        return new CommandLineParser(new ParsingOptions(10));
+        return new CurlParser(new ParsingOptions(10));
     }
 }

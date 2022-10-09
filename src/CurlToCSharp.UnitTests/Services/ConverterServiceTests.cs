@@ -1,5 +1,5 @@
-using CurlToCSharp.Models;
-using CurlToCSharp.Services;
+using Curl.HttpClient.Converter;
+using Curl.CommandLine.Parser.Models;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -13,7 +13,7 @@ public class ConverterServiceTests
     [Fact]
     public void ToCsharp_ValidCurlOptions_CanBeCompiled()
     {
-        var converterService = new ConverterService();
+        var converterService = new CurlConverter();
         var curlOptions = new CurlOptions
         {
             HttpMethod = HttpMethod.Post.ToString().ToUpper(),
@@ -35,7 +35,7 @@ public class ConverterServiceTests
     [Fact]
     public void ToCsharp_GetRequest_ContainsSendStatement()
     {
-        var converterService = new ConverterService();
+        var converterService = new CurlConverter();
         var curlOptions = new CurlOptions
         {
             HttpMethod = HttpMethod.Get.ToString().ToUpper(),

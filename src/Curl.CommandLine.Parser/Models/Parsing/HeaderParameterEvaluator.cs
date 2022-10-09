@@ -24,8 +24,8 @@ internal class HeaderParameterEvaluator : ParameterEvaluator
         }
 
         var headerKey = value.Slice(0, separatorIndex)
-            .ToString()
-            .Trim();
+            .Trim()
+            .ToString();
 
         if (string.IsNullOrEmpty(headerKey))
         {

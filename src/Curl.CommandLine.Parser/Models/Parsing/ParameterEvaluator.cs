@@ -19,7 +19,7 @@ public abstract class ParameterEvaluator
 
     public void Evaluate(ref Span<char> commandLine, ConvertResult<CurlOptions> convertResult)
     {
-        commandLine = commandLine.ToString().TrimStart(Chars.Escape).Trim().ToCharArray();
+        commandLine = commandLine.TrimStart(Chars.Escape).Trim();
         if (!CanBeEmpty && commandLine.IsEmpty)
         {
             return;

@@ -6,9 +6,9 @@ internal static class SpanExtensions
 {
     public static Span<char> TrimCommandLine(this Span<char> input)
     {
-        return input.ToString()
-            .TrimStart(Chars.Escape, Chars.Space)
-            .Trim().ToCharArray();
+        return input
+            .TrimStart(new ReadOnlySpan<char>(new[] { Chars.Escape, Chars.Space }))
+            .Trim();
     }
 
     public static Span<char> UnEscape(this Span<char> input)

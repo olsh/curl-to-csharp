@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <Target Name="CustomActionsBeforePublish" BeforeTargets="BeforePublish">
-    <Exec Command="yarn" />
+    <Exec Command="npm install" />
     <Exec Command="gulp" />
   </Target>
 

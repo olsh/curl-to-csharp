@@ -27,6 +27,7 @@ var parserProjectName = "Curl.CommandLine.Parser";
 var parserProjectFile = $"./src/{parserProjectName}/{parserProjectName}.csproj";
 var httpConverterProjectName = "Curl.HttpClient.Converter";
 var httpConverterProjectFile = $"./src/{httpConverterProjectName}/{httpConverterProjectName}.csproj";
+var extensionsVersion = XmlPeek(parserProjectFile, "Project/PropertyGroup[1]/VersionPrefix/text()");
 
 Task("Build")
   .Does(() =>
@@ -90,8 +91,8 @@ Task("CreateArtifact")
     MoveFile(tempPublishArchive, artifactFileName);
     BuildSystem.AppVeyor.UploadArtifact(artifactFileName);
 
-    BuildSystem.AppVeyor.UploadArtifact("Curl.CommandLine.Parser.nupkg");
-    BuildSystem.AppVeyor.UploadArtifact("Curl.HttpClient.Converter.nupkg");
+    BuildSystem.AppVeyor.UploadArtifact(string.Format("{0}.{1}.nupkg", parserProjectName, nugetVersion));
+    BuildSystem.AppVeyor.UploadArtifact(string.Format("{0}.{1}.nupkg", httpConverterProjectName, nugetVersion));
 });
 
 Task("SonarBegin")

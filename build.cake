@@ -91,8 +91,15 @@ Task("CreateArtifact")
     MoveFile(tempPublishArchive, artifactFileName);
     BuildSystem.AppVeyor.UploadArtifact(artifactFileName);
 
-    BuildSystem.AppVeyor.UploadArtifact(string.Format("{0}.{1}.nupkg", parserProjectName, nugetVersion));
-    BuildSystem.AppVeyor.UploadArtifact(string.Format("{0}.{1}.nupkg", httpConverterProjectName, nugetVersion));
+    var parserPackageFile = string.Format("{0}.{1}.nupkg", parserProjectName, nugetVersion);
+    var httpConverterPackageFile = string.Format("{0}.{1}.nupkg", httpConverterProjectName, nugetVersion);
+
+    BuildSystem.AppVeyor.UploadArtifact(parserPackageFile);
+    BuildSystem.AppVeyor.UploadArtifact(httpConverterPackageFile);
+
+    // Delete files to avoid pushing them to Octopus Deploy
+    DeleteFile(parserPackageFile);
+    DeleteFile(httpConverterPackageFile);
 });
 
 Task("SonarBegin")

@@ -12,6 +12,10 @@ namespace Curl.CommandLine.Parser
     {
         private readonly IEnumerable<ParameterEvaluator> _evaluators;
 
+        public CurlParser() : this(new ParsingOptions(10))
+        {
+        }
+
         public CurlParser(ParsingOptions parsingOptions)
             : this(EvaluatorProvider.All(parsingOptions))
         {

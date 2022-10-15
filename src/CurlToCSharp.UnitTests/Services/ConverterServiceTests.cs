@@ -15,7 +15,7 @@ public class ConverterServiceTests
     [Fact]
     public void ToCsharp_ValidCurlOptions_CanBeCompiled()
     {
-        var converterService = new CurlConverter();
+        var converterService = new CurlHttpClientConverter();
         var curlOptions = new CurlOptions
         {
             HttpMethod = HttpMethod.Post.ToString().ToUpper(),
@@ -37,7 +37,7 @@ public class ConverterServiceTests
     [Fact]
     public void ToCsharp_GetRequest_ContainsSendStatement()
     {
-        var converterService = new CurlConverter();
+        var converterService = new CurlHttpClientConverter();
         var curlOptions = new CurlOptions
         {
             HttpMethod = HttpMethod.Get.ToString().ToUpper(),

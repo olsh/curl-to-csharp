@@ -15,7 +15,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Curl.HttpClient.Converter
 {
-    public class CurlConverter : ICurlConverter
+    public class CurlHttpClientConverter : ICurlConverter
     {
         private const string RequestVariableName = "request";
 
@@ -472,7 +472,7 @@ namespace Curl.HttpClient.Converter
             return new StatementSyntax[] { authorizationEncodingStatement, tryAddHeaderStatement };
         }
 
-        public ExpressionStatementSyntax CreateSetHttpVersionStatement(CurlOptions options)
+        private ExpressionStatementSyntax CreateSetHttpVersionStatement(CurlOptions options)
         {
             var arguments = new LinkedList<ArgumentSyntax>();
             var majorVersionArgument = options.HttpVersion switch

@@ -77,8 +77,8 @@ dotnet add package Curl.HttpClient.Converter
 #### Usage/Examples
 ```c#
 var input = @"curl https://sentry.io/api/0/projects/1/groups/?status=unresolved -d '{""status"": ""resolved""}' -H 'Content-Type: application/json' -u 'username:password' -H 'Accept: application/json' -H 'User-Agent: curl/7.60.0'";
-var curlOption = new CurlParser(new ParsingOptions() { MaxUploadFiles = 10 }).Parse(input);
-var output = new CurlConverter().ToCsharp(curlOption.Data);
+var curlOption = new CurlParser().Parse(input);
+var output = new CurlHttpClientConverter().ToCsharp(curlOption.Data);
 // Output:
 /*
 // In production code, don't destroy the HttpClient through using, but better reuse an existing instance

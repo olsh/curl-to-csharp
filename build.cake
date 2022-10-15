@@ -27,7 +27,7 @@ var parserProjectName = "Curl.CommandLine.Parser";
 var parserProjectFile = $"./src/{parserProjectName}/{parserProjectName}.csproj";
 var httpConverterProjectName = "Curl.HttpClient.Converter";
 var httpConverterProjectFile = $"./src/{httpConverterProjectName}/{httpConverterProjectName}.csproj";
-var extensionsVersion = XmlPeek(parserProjectFile, "Project/PropertyGroup[1]/VersionPrefix/text()");
+var nugetVersion = XmlPeek("./src/Directory.Build.props", "Project/PropertyGroup[1]/VersionPrefix/text()");
 
 Task("Build")
   .Does(() =>

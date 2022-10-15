@@ -31,6 +31,7 @@ for:
   deploy:
   - provider: Octopus
     push_packages: true
+    artifact: CurlToCSharp.$(APPVEYOR_BUILD_VERSION).zip
     create_release: true
     deploy_release: true
     server: https://olsh.octopus.app

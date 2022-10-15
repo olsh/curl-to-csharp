@@ -39,9 +39,11 @@ dotnet cake build.cake
 
 ## NuGet Packages
 ### Curl.CommandLine.Parser
+[![NuGet](https://img.shields.io/nuget/v/Curl.CommandLine.Parser.svg)](https://www.nuget.org/packages/Curl.CommandLine.Parser/)
+
 #### Key Features
-- Parse cURL command into individual cURL options.
-- Return parsing errors and warnings if the cURL input is invalid.
+- Parses cURL command into individual cURL options.
+- Returns parsing errors and warnings if the cURL input is invalid.
 
 #### Installation
 Install with NuGet
@@ -61,10 +63,10 @@ Console.WriteLine(output.Data.UploadData.First().Content);
 ```
 
 ### Curl.HttpClient.Converter
+[![NuGet](https://img.shields.io/nuget/v/Curl.HttpClient.Converter.svg)](https://www.nuget.org/packages/Curl.HttpClient.Converter/)
 #### Key Features
-- Parse cURL command into C# code.
-- Convert output from CurlParser into C# code.
-- Return parsing errors and warnings if the cURL input is invalid.
+- Converts output from CurlParser into C# code.
+- Returns parsing errors and warnings if the cURL input is invalid.
 
 #### Installation
 Install with NuGet

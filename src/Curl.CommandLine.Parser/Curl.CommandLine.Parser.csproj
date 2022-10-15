@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -9,18 +9,10 @@
     </Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/olsh/curl-to-csharp</PackageProjectUrl>
-    <PackageIcon>android-chrome-512x512.png</PackageIcon>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>curl csharp parser http roslyn</PackageTags>
-    <RepositoryUrl>https://github.com/olsh/curl-to-csharp.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/olsh/curl-to-csharp</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="..\CurlToCSharp\wwwroot\android-chrome-512x512.png">
-      <Pack>True</Pack>
-    </None>
-  </ItemGroup>
 
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">

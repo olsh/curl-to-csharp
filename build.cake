@@ -23,6 +23,11 @@ var dockerImageTag = "olsh/curl-to-csharp";
 var dockerContainerName = "curl-to-csharp";
 var dockerBuildContainerName = $"{dockerContainerName}-build";
 
+var parserProjectName = "Curl.CommandLine.Parser";
+var parserProjectFile = $"./src/{parserProjectName}/{parserProjectName}.csproj";
+var httpConverterProjectName = "Curl.HttpClient.Converter";
+var httpConverterProjectFile = $"./src/{httpConverterProjectName}/{httpConverterProjectName}.csproj";
+
 Task("Build")
   .Does(() =>
 {
@@ -62,14 +67,31 @@ Task("Pack")
     Zip(tempPublishDirectory, tempPublishArchive);
 });
 
+Task("NugetPack")
+  .Does(() =>
+{
+     var settings = new DotNetPackSettings
+     {
+         Configuration = buildConfiguration,
+         OutputDirectory = "."
+     };
+
+     DotNetPack(parserProjectFile, settings);
+     DotNetPack(httpConverterProjectFile, settings);
+});
+
 Task("CreateArtifact")
   .IsDependentOn("Pack")
+  .IsDependentOn("NugetPack")
   .WithCriteria(BuildSystem.AppVeyor.IsRunningOnAppVeyor)
   .Does(() =>
 {
     var artifactFileName = $"CurlToCSharp.{BuildSystem.AppVeyor.Environment.Build.Version}.zip";
     MoveFile(tempPublishArchive, artifactFileName);
     BuildSystem.AppVeyor.UploadArtifact(artifactFileName);
+
+    BuildSystem.AppVeyor.UploadArtifact("Curl.CommandLine.Parser.nupkg");
+    BuildSystem.AppVeyor.UploadArtifact("Curl.HttpClient.Converter.nupkg");
 });
 
 Task("SonarBegin")

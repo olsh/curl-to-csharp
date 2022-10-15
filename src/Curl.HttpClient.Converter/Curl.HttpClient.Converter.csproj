@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -9,10 +9,8 @@
     </Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/olsh/curl-to-csharp</PackageProjectUrl>
-    <PackageIcon>android-chrome-512x512.png</PackageIcon>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageTags>curl csharp parser converter http roslyn codegenerator</PackageTags>
-    <RepositoryUrl>https://github.com/olsh/curl-to-csharp.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/olsh/curl-to-csharp</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
@@ -22,12 +20,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\CurlToCSharp\wwwroot\android-chrome-512x512.png">
-      <Pack>True</Pack>
-    </None>
   </ItemGroup>
 
 </Project>

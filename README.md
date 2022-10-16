@@ -9,6 +9,10 @@ This ASP.NET Core app converts curl commands to C# code
 
 https://curl.olsh.me
 
+## Telegram bot
+
+https://t.me/curl_to_csharp_bot
+
 ## Run with docker
 
 1. Run container

@@ -11,7 +11,7 @@
     "gulp-uglify": "^3.0.2"
   },
   "dependencies": {
-    "bootstrap": "^5.2.2",
+    "bootstrap": "^5.2.3",
     "jquery": "^3.6.1",
     "prismjs": "^1.29.0"
   }

@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "bootstrap": "^5.2.3",
-    "jquery": "^3.6.1",
+    "jquery": "^3.6.3",
     "prismjs": "^1.29.0"
   }
 }

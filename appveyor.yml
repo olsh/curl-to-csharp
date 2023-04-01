@@ -7,7 +7,7 @@ environment:
   CYPRESS_RECORD_KEY:
     secure: zrEJrmRw4T8jXDP0u73B73A8QEfq6bRi1Z9F4d7bEumJK9sZVyW/KUG2qN1WWYeL
 install:
-  - dotnet tool install -g Cake.Tool --version 2.3.0
+  - dotnet tool install -g Cake.Tool --version 3.0.0
   - npm install --location=global gulp-cli
 build_script:
 - dotnet cake --Target=Test

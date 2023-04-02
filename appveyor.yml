@@ -1,5 +1,5 @@
 version: 1.0.{build}
-image: Ubuntu2004
+image: Ubuntu
 services:
 - docker
 stack: node 16, jdk 11
@@ -11,7 +11,7 @@ install:
   - npm install --location=global gulp-cli
 build_script:
 - dotnet cake --Target=Test
-test: off
+test: false
 cache:
   - 'src/CurlToCSharp/node_modules/ -> src/CurlToCSharp/package-lock.json'
   - 'tools -> build.cake'
@@ -41,7 +41,3 @@ for:
     environment: Production
     release_number: $(APPVEYOR_BUILD_VERSION)
     deploy_wait: true
-
-on_finish:
-  - sh: export APPVEYOR_SSH_BLOCK=true
-  - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -

@@ -3,10 +3,6 @@
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-
-    <!-- There is an issue with the Razor view compilation on AppVeyor, when the views are missing after the publishing. -->
-    <PreserveCompilationContext>true</PreserveCompilationContext>
-    <MvcRazorCompileOnPublish>false</MvcRazorCompileOnPublish>
   </PropertyGroup>
 
   <ItemGroup>

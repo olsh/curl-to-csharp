@@ -1,20 +1,26 @@
-namespace CurlToCSharp;
+using CurlToCSharp.Infrastructure;
 
-public static class Program
-{
-    public static void Main(string[] args)
-    {
-        CreateWebHostBuilder(args)
-            .Build()
-            .Run();
-    }
+var builder = WebApplication.CreateBuilder(args);
 
-    private static IHostBuilder CreateWebHostBuilder(string[] args)
+// Add services to the container.
+builder.Services.AddControllersWithViews();
+builder.Services.RegisterServices();
+
+var app = builder.Build();
+app.UseStaticFiles(
+    new StaticFileOptions
     {
-        return Host.CreateDefaultBuilder(args)
-            .ConfigureWebHostDefaults(builder =>
-            {
-                builder.UseStartup<Startup>();
-            });
-    }
-}
+        OnPrepareResponse = ctx =>
+        {
+            ctx.Context.Response.Headers.Append(
+                "Cache-Control",
+                "public,max-age=31536000");
+        }
+    });
+
+app.UseRouting();
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();

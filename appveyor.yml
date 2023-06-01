@@ -15,7 +15,7 @@ test: false
 cache:
   - 'src/CurlToCSharp/node_modules/ -> src/CurlToCSharp/package-lock.json'
   - 'tools -> build.cake'
-  - '$HOME/.nuget/packages -> **\*.csproj'
+  - '$HOME/.nuget/packages -> **/*.csproj'
   - '$HOME/.sonar/cache'
   - '$HOME/.cache/Cypress -> src/CurlToCSharp/package-lock.json'
 

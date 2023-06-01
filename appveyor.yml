@@ -2,7 +2,7 @@ version: 1.0.{build}
 image: Ubuntu
 services:
 - docker
-stack: node 16, jdk 11
+stack: node 18, jdk 11
 environment:
   CYPRESS_RECORD_KEY:
     secure: zrEJrmRw4T8jXDP0u73B73A8QEfq6bRi1Z9F4d7bEumJK9sZVyW/KUG2qN1WWYeL

@@ -195,7 +195,10 @@ Task("Sonar")
   .IsDependentOn("SonarEnd");
 
 Task("CI")
-    .IsDependentOn("Sonar")
+    // The full framework sonar breaks builds on linux
+    // Probably we should enable it after the issue will be fixed
+    // https://github.com/cake-contrib/Cake.Sonar/issues/114
+    // .IsDependentOn("Sonar")
     .IsDependentOn("CreateArtifact")
     .IsDependentOn("DockerPush");
 

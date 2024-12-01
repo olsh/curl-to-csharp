@@ -3,7 +3,7 @@
   "name": "curl.to.csharp",
   "private": true,
   "devDependencies": {
-    "cypress": "^13.14.1",
+    "cypress": "^13.16.0",
     "gulp": "^5.0.0",
     "gulp-clean-css": "^4.2.0",
     "gulp-concat": "^2.6.1",

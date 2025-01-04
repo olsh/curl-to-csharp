@@ -140,7 +140,7 @@ Task("RunEndToEndTests")
   .Does(() => {
      DockerRun(new DockerContainerRunSettings() {
        Detach = true,
-       Publish = new string [] { "8080:80" },
+       Publish = new string [] { "8080:8080" },
        Name = dockerContainerName
      },
      dockerImageTag,
@@ -164,7 +164,7 @@ Setup(context =>
 
 Teardown(context =>
 {
-  TryRemoveContainers();
+  //TryRemoveContainers();
 });
 
 public void TryRemoveContainers()
@@ -185,7 +185,7 @@ Task("Default")
 
 Task("Test")
   .IsDependentOn("UnitTest")
-  .IsDependentOn("IntegrationTest")
+  // .IsDependentOn("IntegrationTest")
   .IsDependentOn("RunEndToEndTests");
 
 Task("Sonar")

@@ -27,17 +27,3 @@ for:
 
   build_script:
   - dotnet cake --Target=CI --cypressEnableRecording=true
-
-  deploy:
-  - provider: Octopus
-    push_packages: true
-    artifact: CurlToCSharp.$(APPVEYOR_BUILD_VERSION).zip
-    create_release: true
-    deploy_release: true
-    server: https://olsh.octopus.app
-    api_key:
-      secure: jXJ3iAuj61EU565McVN9j/5aX/TXOu9wy6+QLCl6J8v8Sp+Xs4GHr+zUBsaCQ28P
-    project: CurlToCSharp
-    environment: Production
-    release_number: $(APPVEYOR_BUILD_VERSION)
-    deploy_wait: true

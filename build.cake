@@ -131,7 +131,7 @@ Task("DockerPush")
     DockerLogin(EnvironmentVariable("docker_login"), EnvironmentVariable("docker_password"));
 
     StartProcess("docker", new ProcessSettings { Arguments = $"buildx create --use --name {dockerBuildContainerName}" });
-    var dockerBuildArguments = $"buildx build {tempPublishDirectory} -f Dockerfile --push --platform linux/amd64,windows/amd64 -t {dockerImageTag} --progress plain";
+    var dockerBuildArguments = $"buildx build {tempPublishDirectory} -f Dockerfile --push --platform linux/amd64 -t {dockerImageTag} --progress plain";
     StartProcess("docker", new ProcessSettings{ Arguments = dockerBuildArguments });
   });
 

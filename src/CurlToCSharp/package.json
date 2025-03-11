@@ -13,6 +13,6 @@
   "dependencies": {
     "bootstrap": "^5.3.3",
     "jquery": "^3.7.1",
-    "prismjs": "^1.29.0"
+    "prismjs": "^1.30.0"
   }
 }
